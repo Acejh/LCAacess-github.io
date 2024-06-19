@@ -1,0 +1,36 @@
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 8px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+th {
+  background-color: #f4f4f4;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+button {
+  padding: 8px 16px;
+  margin: 4px;
+  border: 1px solid #ddd;
+  background-color: #f4f4f4;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #e4e4e4;
+  cursor: not-allowed;
+}
+
+select {
+  padding: 8px;
+  margin-left: 8px;
+}
