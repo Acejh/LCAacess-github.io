@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import UseCompany, { Company } from '../../ComponentBox/UseCompany';
+import numeral from 'numeral';
 import {
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
   ColumnDef,
   flexRender,
+  Updater,
+  PaginationState,
 } from '@tanstack/react-table';
 import {
   Table,
@@ -18,201 +23,358 @@ import {
   Select,
   MenuItem,
   Typography,
-  TextField,
-  Modal,
-  Box,
-  Grid,
   InputLabel,
   FormControl,
   SelectChangeEvent,
+  CircularProgress,
+  TextField,
 } from '@mui/material';
+import * as XLSX from 'xlsx';
 
-type Member = {
+type Supply = {
   id: number;
-  RECC_NO: string;
-  RECC_DATE: string;
-  RECC_COM_RNO: string;
-  RECC_COM_NO: string;
-  RECC_COM_NM: string;
-  RECC_SUPPLY_NO: string;
-  SUPPLY_COM_NM: string;
-  SUPPLY_ETC: string;
-  partner_biz_no: string;
-  partner_name: string;
-  SUPPLY_ITEM: string;
-  WEIGHT: string;
+  reccNo: string;
+  reccDate: string;
+  reccComBizno: string;
+  reccComNo: string;
+  reccComName: string;
+  reccSupplyNo: string;
+  supplyComName: string;
+  supplyEtc: string;
+  clientBizno: string;
+  clientName: string;
+  carNo: string;
+  item1: string;
+  item2: string;
+  item3: string;
+  weight: string;
+  ecoasWeight: string;
 };
 
-const columns: ColumnDef<Member>[] = [
-  { accessorKey: 'RECC_NO', header: '관리표 번호' },
-  { accessorKey: 'RECC_DATE', header: '일시' },
-  { accessorKey: 'RECC_COM_RNO', header: '사업자등록번호' },
-  { accessorKey: 'RECC_COM_NO', header: 'EcoAS코드' },
-  { accessorKey: 'RECC_COM_NM', header: '사업회원명' },
-  { accessorKey: 'RECC_SUPPLY_NO', header: '번호' },
-  { accessorKey: 'SUPPLY_COM_NM', header: '거래처명' },
-  { accessorKey: 'SUPPLY_ETC', header: '비고' },
-  { accessorKey: 'partner_biz_no', header: '거래처 사업자등록번호' },
-  { accessorKey: 'partner_name', header: '거래처 명' },
-  { accessorKey: 'SUPPLY_ITEM', header: '공급품목' },
-  { accessorKey: 'WEIGHT', header: '중량' },
+const columns: ColumnDef<Supply>[] = [
+  { accessorKey: 'reccNo', header: '관리표 번호' },
+  { accessorKey: 'reccDate', header: '일시' },
+  { accessorKey: 'reccComBizno', header: '사업자등록번호' },
+  { accessorKey: 'reccComNo', header: () => <div style={{ textAlign: 'center' }}>EcoAS코드</div>},
+  { accessorKey: 'reccComName', header: '사업회원명' },
+  { accessorKey: 'reccSupplyNo', header: () => <div style={{ textAlign: 'center' }}>번호</div>},
+  { accessorKey: 'supplyComName', header: '거래처명' },
+  { accessorKey: 'supplyEtc', header: '비고' },
+  { accessorKey: 'clientBizno', header: '거래처 사업자등록번호' },
+  { accessorKey: 'clientName', header: '거래처 명' },
+  { accessorKey: 'carNo', header: '차량번호' },
+  { accessorKey: 'item1', header: '품목군' },
+  { accessorKey: 'item2', header: '제품군' },
+  { accessorKey: 'item3', header: '제품분류' },
+  { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>중량</div> , cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: 'ecoasWeight', header: () => <div style={{ textAlign: 'center' }}>EcoAS중량</div> , cell: info => numeral(info.getValue()).format('0,0')  },
 ];
 
-const modalStyle = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-};
-
 export function SupplyTable() {
-  const [data, setData] = useState<Member[]>([]);
+  const [data, setData] = useState<Supply[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [labelShrink, setLabelShrink] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [originalData, setOriginalData] = useState<Member[]>([]);
-  const [open, setOpen] = useState(false);
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [totalCount, setTotalCount] = useState(0);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+  const [searchParams, setSearchParams] = useState({
+    query: '',
+    year: '',
+    month: '',
+    company: null as Company | null,
+  });
+
+  const fetchData = useCallback(async (pageIndex: number, pageSize: number, searchQuery = '') => {
+    if (!searchParams.company) {
+      setData([]);
+      setTotalCount(0);
+      setLoading(false);
+      return;
+    }
+  
+    setLoading(true);
+    try {
+      let url = `https://lcaapi.acess.co.kr/EcoasRecc/Supply?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      if (searchQuery) {
+        url += `&reccNo=${searchQuery}`;
+      }
+      if (searchParams.company) {
+        url += `&companyCode=${searchParams.company.code}`;
+      }
+      if (searchParams.year) {
+        url += `&year=${searchParams.year}`;
+      }
+      if (searchParams.month) {
+        url += `&month=${searchParams.month}`;
+      }
+  
+      const response = await axios.get(url);
+      const { list, totalCount } = response.data;
+      setData(list);
+      setTotalCount(totalCount);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setLoading(false);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
-    fetch('/supply_management.json')
-      .then((response) => response.json())
-      .then((data) => {
-        setData(data);
-        setOriginalData(data); 
-      });
-  }, []);
+    fetchData(pageIndex, pageSize, searchParams.query);
+  }, [pageIndex, pageSize, fetchData, searchParams]);
 
-  const handleSearch = () => {
-    const filteredData = originalData.filter((item) =>
-      Object.values(item).some((value) =>
-        value !== null && value !== undefined && value.toString().toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    );
-    setData(filteredData);
-    setPageIndex(0); // 검색 시 페이지를 처음으로 초기화
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  // 엑셀 다운로드
+  const handleDownloadExcel = () => {
+    const tableData = table.getRowModel().rows.map(row => row.original);
+    const worksheet = XLSX.utils.json_to_sheet(tableData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    XLSX.writeFile(workbook, '공급 관리표.xlsx');
   };
 
-  const table = useReactTable({
+  //검색
+  const handleSearch = () => {
+    setSearchParams({
+      query: searchQuery,
+      company: selectedCompany,
+      year,
+      month,
+    });
+    setPageIndex(0);
+    setHasSearched(true);  
+  };
+
+  const handleSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handlePaginationChange = (updater: Updater<PaginationState>) => {
+    if (typeof updater === 'function') {
+      const newState = updater({ pageIndex, pageSize });
+      setPageIndex(newState.pageIndex);
+      setPageSize(newState.pageSize);
+      fetchData(newState.pageIndex, newState.pageSize); 
+    } else {
+      const newPageIndex = updater.pageIndex ?? pageIndex;
+      const newPageSize = updater.pageSize ?? pageSize;
+      setPageIndex(newPageIndex);
+      setPageSize(newPageSize);
+      fetchData(newPageIndex, newPageSize); 
+    }
+  };
+
+  const table = useReactTable<Supply>({
     data,
     columns,
-    pageCount: Math.ceil(data.length / pageSize),
+    pageCount: totalPages,
     state: {
       pagination: {
         pageIndex,
         pageSize,
       },
     },
-    onPaginationChange: (updater) => {
-      if (typeof updater === 'function') {
-        const newState = updater({ pageIndex, pageSize });
-        setPageIndex(newState.pageIndex);
-        setPageSize(newState.pageSize);
-      } else {
-        const { pageIndex, pageSize } = updater;
-        setPageIndex(pageIndex);
-        setPageSize(pageSize);
-      }
-    },
+    manualPagination: true,
+    onPaginationChange: handlePaginationChange,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: false,
   });
 
   const renderPageNumbers = () => {
-    const totalPages = table.getPageCount();
     const startPage = Math.floor(pageIndex / 5) * 5;
     const endPage = Math.min(startPage + 5, totalPages);
-
+  
     return Array.from({ length: endPage - startPage }, (_, i) => startPage + i).map((number) => (
       <Button
         key={number}
-        variant={table.getState().pagination.pageIndex === number ? 'contained' : 'outlined'}
+        variant={pageIndex === number ? 'contained' : 'outlined'}
         color="primary"
         style={{ marginRight: '5px', minWidth: '30px', padding: '5px' }}
-        onClick={() => setPageIndex(number)}
+        onClick={() => {
+          table.setPageIndex(number);
+        }}
       >
         {number + 1}
       </Button>
     ));
   };
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
   const handleYearChange = (event: SelectChangeEvent<string>) => {
-    setYear(event.target.value as string);
+    const selectedYear = event.target.value as string;
+    // console.log(`Selected year: ${selectedYear}`); // 선택한 연도 로그
+    setYear(selectedYear);
   };
   
   const handleMonthChange = (event: SelectChangeEvent<string>) => {
-    setMonth(event.target.value as string);
+    const selectedMonth = event.target.value as string;
+    // console.log(`Selected month: ${selectedMonth}`); // 선택한 월 로그
+    setMonth(selectedMonth);
   };
 
   return (
     <div style={{ margin: '0 30px' }}>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         공급 관리표
       </Typography>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-        <TextField
-          label="Search"
-          variant="outlined"
-          style={{ width: '250px' }}
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          InputProps={{ style: { height: '40px', padding: '0 14px' } }}
-          InputLabelProps={{
-            shrink: labelShrink,
-            style: {
-              transform: labelShrink ? 'translate(14px, -9px) scale(0.75)' : 'translate(14px, 12px) scale(1)',
-              transition: 'transform 0.2s ease-in-out',
-            },
-          }}
-          onFocus={() => setLabelShrink(true)}
-          onBlur={(e) => setLabelShrink(e.target.value !== '')}
-        />
+      <Button
+        variant="contained"
+        color="secondary"
+        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px', display: 'none' }}
+        onClick={handleDownloadExcel}
+      >
+        엑셀 다운로드
+      </Button>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+        <UseCompany onCompanyChange={setSelectedCompany} />
+        <FormControl style={{ marginRight: '10px' }}>
+          <InputLabel id="year-label">연도</InputLabel>
+          <Select
+            labelId="year-label"
+            id="year-select"
+            value={year}
+            label="연도"
+            onChange={handleYearChange}
+            style={{ width: '100px' }}
+            sx={{ height: '45px' }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 120,
+                },
+              },
+            }}
+          >
+            <MenuItem value="">전체</MenuItem>
+            {Array.from({ length: 5 }, (_, i) => (new Date().getFullYear() - i).toString()).map(year => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl style={{ marginRight: '10px' }}>
+          <InputLabel id="month-label">월</InputLabel>
+          <Select
+            labelId="month-label"
+            id="month-select"
+            value={month}
+            label="월"
+            onChange={handleMonthChange}
+            style={{ width: '100px' }}
+            sx={{ height: '45px' }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 120, 
+                },
+              },
+            }}
+          >
+            <MenuItem value="">전체</MenuItem>
+            {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
+              <MenuItem key={month} value={String(month)}>
+                {month}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl style={{ marginRight: '10px' }}>
+          <TextField
+            id="search-query-input"
+            label="관리표 번호 조회"
+            value={searchQuery}
+            onChange={handleSearchQueryChange}
+            style={{ width: '200px' }}
+            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+          />
+        </FormControl>
         <Button
           variant="contained"
           color="primary"
-          style={{ width: '30px', height: '35px', marginLeft: '10px', fontSize: '12px' }}
-          onClick={handleSearch} // 검색 버튼 클릭 시 handleSearch 함수 호출
+          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px'}}
+          onClick={handleSearch}
         >
-          검색
-        </Button>
-        <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '10px', fontSize: '12px' }} onClick={handleOpen}>
-          관리표 조회
+          조회
         </Button>
       </div>
       <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
         <Table>
-          <TableHead>
-            {table.getHeaderGroups().map(headerGroup => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
-                  <TableCell key={header.id}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableCell>
-                ))}
+          {loading ? (
+            <TableBody>
+              <TableRow>
+                <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                  <CircularProgress />
+                </TableCell>
               </TableRow>
-            ))}
-          </TableHead>
-          <TableBody>
-            {table.getRowModel().rows.map(row => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+            </TableBody>
+          ) : (
+            <>
+              <TableHead>
+              {table.getHeaderGroups().map(headerGroup => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map(header => (
+                      <TableCell 
+                        key={header.id} 
+                        style={{ 
+                          whiteSpace: 'nowrap', 
+                          overflow: 'hidden', 
+                          textOverflow: 'ellipsis', 
+                          position: 'sticky', 
+                          top: 0, 
+                          backgroundColor: '#cfcfcf', 
+                          zIndex: 1 
+                        }}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
                 ))}
-              </TableRow>
-            ))}
-          </TableBody>
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={19} style={{ textAlign: 'center' }}>
+                      <CircularProgress />
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  <>
+                    {!hasSearched ? (
+                      <TableRow>
+                        <TableCell colSpan={19} style={{ textAlign: 'center', color: 'red' }}>
+                          사업회원을 선택하여 조회하십시오.
+                        </TableCell>
+                      </TableRow>
+                    ) : table.getRowModel().rows.length > 0 ? (
+                      table.getRowModel().rows.map(row => (
+                        <TableRow key={row.id}>
+                          {row.getVisibleCells().map(cell => (
+                            <TableCell key={cell.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                              textAlign: ['reccComNo', 'reccSupplyNo', 'weight', 'ecoasWeight'].includes(cell.column.id) ? 'right' : 'left', }}>
+                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                            </TableCell>
+                          ))}
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={19} style={{ textAlign: 'center', color: 'red' }}>
+                          데이터가 없습니다.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </>
+                )}
+              </TableBody>
+            </>
+          )}
         </Table>
       </TableContainer>
       <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -225,7 +387,7 @@ export function SupplyTable() {
           </Button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-          <Button onClick={() => table.setPageIndex(0)} disabled={pageIndex === 0} variant="contained" color="primary" style={{ marginRight: '10px', minWidth: '30px', padding: '5px', width: 50}}>
+          <Button onClick={() => table.setPageIndex(0)} disabled={pageIndex === 0} variant="contained" color="primary" style={{ marginRight: '10px', minWidth: '30px', padding: '5px', width: 50 }}>
             처음
           </Button>
           <Button onClick={() => table.setPageIndex(Math.max(0, pageIndex - 5))} disabled={pageIndex < 5} variant="contained" color="warning" style={{ marginRight: '15px', minWidth: '30px', padding: '5px' }}>
@@ -236,18 +398,18 @@ export function SupplyTable() {
             +5
           </Button>
           <Button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={pageIndex === table.getPageCount() - 1} variant="contained" color="primary" style={{ marginLeft: '10px', minWidth: '30px', padding: '5px', width: 50 }}>
-            맨끝
+            끝
           </Button>
         </div>
         <div>
           <Typography variant="body1" component="span" style={{ marginRight: '10px' }}>
-            페이지 {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+            Page {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
           </Typography>
           <Select
             value={table.getState().pagination.pageSize}
             onChange={e => table.setPageSize(Number(e.target.value))}
           >
-            {[10, 20, 30, 40, 50].map(pageSize => (
+            {[5, 10, 20, 30, 40, 50].map(pageSize => (
               <MenuItem key={pageSize} value={pageSize}>
                 Show {pageSize}
               </MenuItem>
@@ -255,71 +417,6 @@ export function SupplyTable() {
           </Select>
         </div>
       </div>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-      >
-        <Box sx={modalStyle}>
-          <Typography id="modal-title" variant="h6" component="h2">
-            연도 및 월 선택
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <FormControl fullWidth>
-                <InputLabel id="year-label">연도</InputLabel>
-                <Select
-                  labelId="year-label"
-                  id="year-select"
-                  value={year}
-                  label="연도"
-                  onChange={handleYearChange}
-                >
-                  {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map(year => (
-                    <MenuItem key={year} value={year}>
-                      {year}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid item xs={6}>
-              <FormControl fullWidth>
-                <InputLabel id="month-label">월</InputLabel>
-                <Select
-                  labelId="month-label"
-                  id="month-select"
-                  value={month}
-                  label="월"
-                  onChange={handleMonthChange}
-                  MenuProps={{
-                    PaperProps: {
-                      style: {
-                        maxHeight: 170, 
-                      },
-                    },
-                  }}
-                >
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                    <MenuItem key={month} value={month}>
-                      {month}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
-          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
-            <Button variant="contained" color="secondary" onClick={handleClose} style={{ marginRight: '10px' }}>
-              취소
-            </Button>
-            <Button variant="contained" color="primary" onClick={() => { /* 연도 및 월 선택 후 처리할 로직 추가 */ handleClose(); }}>
-              조회
-            </Button>
-          </div>
-        </Box>
-      </Modal>
     </div>
   );
 }

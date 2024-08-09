@@ -47,6 +47,7 @@ html[data-bs-theme='dark'] .page-loading .splash-screen {
 
 .splash-screen .light-logo {
   display: block;
+  scale: 0.1;
 }
 
 html[data-bs-theme='dark'] .splash-screen .light-logo {

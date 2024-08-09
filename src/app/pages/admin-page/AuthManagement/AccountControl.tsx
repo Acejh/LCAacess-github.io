@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect , useCallback} from 'react';
+import axios from 'axios';
+import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import {
   useReactTable,
   getCoreRowModel,
   getPaginationRowModel,
   ColumnDef,
   flexRender,
+  Updater,
+  PaginationState,
 } from '@tanstack/react-table';
 import {
   Table,
@@ -22,71 +26,33 @@ import {
   Modal,
   Box,
   Grid,
+  CircularProgress,
 } from '@mui/material';
 
-type Member = {
+type User = {
   id: number;
-  userName: string;
-  passwordHash: string;
   name: string;
-  email: string;
+  role: string;
+  companyCode: string;
+  companyName: string;
+  userName: string;
+  password?: string; 
   phoneNumber: string;
+  email: string;
   createdBy: string;
   createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
+  updatedBy: string | null;
+  updatedAt: string | null;
 };
 
-const data: Member[] = [
-  { id: 1, userName: 'jhjh6836', passwordHash: '12345678910', name: '최재호', email: 'jhjh6836@acess.co.kr', phoneNumber: '010-5197-2588', createdBy: '2024-6-13', createdAt: '2024-06-14', updatedBy: '2024-06-15', updatedAt: '2024-06-16' },
-  { id: 2, userName: '나', passwordHash: '2', name: '나', email: 'b', phoneNumber: '1', createdBy: '2024-6-13', createdAt: '2024-06-14', updatedBy: '2024-06-15', updatedAt: '2024-06-16' },
-  { id: 3, userName: '다', passwordHash: '3', name: '다', email: 'c', phoneNumber: '1', createdBy: '2024-6-13', createdAt: '2024-06-14', updatedBy: '2024-06-15', updatedAt: '2024-06-16' },
-  { id: 4, userName: '라', passwordHash: '4', name: '라', email: 'd', phoneNumber: '1', createdBy: '2024-6-13', createdAt: '2024-06-14', updatedBy: '2024-06-15', updatedAt: '2024-06-16' },
-  { id: 5, userName: '마', passwordHash: '5', name: '마', email: 'e', phoneNumber: '1', createdBy: '2024-6-13', createdAt: '2024-06-14', updatedBy: '2024-06-15', updatedAt: '2024-06-16' },
-  { id: 6, userName: '바', passwordHash: '6', name: '바', email: 'f', phoneNumber: '1', createdBy: '2024-6-13', createdAt: '2024-06-14', updatedBy: '2024-06-15', updatedAt: '2024-06-16' },
-  { id: 7, userName: '사', passwordHash: '7', name: '사', email: 'g', phoneNumber: '1', createdBy: '2024-6-13', createdAt: '2024-06-14', updatedBy: '2024-06-15', updatedAt: '2024-06-16' },
-  { id: 8, userName: '아', passwordHash: '8', name: '아', email: 'h', phoneNumber: '1', createdBy: '2024-6-13', createdAt: '2024-06-14', updatedBy: '2024-06-15', updatedAt: '2024-06-16' },
-  { id: 9, userName: '자', passwordHash: '9', name: '자', email: 'i', phoneNumber: '1', createdBy: '2024-6-13', createdAt: '2024-06-14', updatedBy: '2024-06-15', updatedAt: '2024-06-16' },
-  { id: 10, userName: '차', passwordHash: '10', name: '차', email: 'j', phoneNumber: '1', createdBy: '2024-6-13', createdAt: '2024-06-14', updatedBy: '2024-06-15', updatedAt: '2024-06-16' },
-];
-
-const columns: ColumnDef<Member>[] = [
-  {
-    accessorKey: 'userName',
-    header: '아이디',
-  },
-  {
-    accessorKey: 'passwordHash',
-    header: '비밀번호',
-  },
-  {
-    accessorKey: 'name',
-    header: '이름',
-  },
-  {
-    accessorKey: 'email',
-    header: '이메일',
-  },
-  {
-    accessorKey: 'phoneNumber',
-    header: '연락처',
-  },
-  {
-    accessorKey: 'createdBy',
-    header: '등록id',
-  },
-  {
-    accessorKey: 'createdAt',
-    header: '등록 일시',
-  },
-  {
-    accessorKey: 'updatedBy',
-    header: '수정id',
-  },
-  {
-    accessorKey: 'updatedAt',
-    header: '수정일시',
-  },
+const columns: ColumnDef<User>[] = [
+  { accessorKey: 'companyCode', header: '사업회원', },
+  { accessorKey: 'name', header: '사용자명', },
+  { accessorKey: 'role', header: '역할', },
+  { accessorKey: 'userName', header: '사용자 ID', },
+  { accessorKey: 'phoneNumber', header: () => <div style={{ textAlign: 'center' }}>전화번호</div> },
+  { accessorKey: 'email', header: '이메일', },
+  { accessorKey: 'createdAt', header: () => <div style={{ textAlign: 'center' }}>생성일</div>},
 ];
 
 const modalStyle = {
@@ -94,7 +60,7 @@ const modalStyle = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: 600,
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
@@ -104,129 +70,283 @@ const modalStyle = {
 export function UserControl() {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [labelShrink, setLabelShrink] = useState(false);
+  const [data, setData] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isFormValid, setIsFormValid] = useState(false);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [newMember, setNewMember] = useState<Omit<Member, 'id' | 'createdBy' | 'createdAt' | 'updatedBy' | 'updatedAt'>>({
-    userName: '',
-    passwordHash: '',
-    name: '',
-    email: '',
-    phoneNumber: '',
-  });
-  const [editMember, setEditMember] = useState<Omit<Member, 'id' | 'createdBy' | 'createdAt' | 'updatedBy' | 'updatedAt'>>({
-    userName: '',
-    passwordHash: '',
-    name: '',
-    email: '',
-    phoneNumber: '',
-  });
-  const [editIndex, setEditIndex] = useState<number | null>(null);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  const [deleteMemberName, setDeleteMemberName] = useState<string>('');
+  const [totalCount, setTotalCount] = useState(0);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [searchParams, setSearchParams] = useState<{
+    company: Company | null;
+  }>({
+    company: null,
+  });
+  const [newAccount, setNewAccount] = useState<{
+    companyCode: string;
+    userName: string;
+    password: string;
+    name: string;
+    role: string;
+    phoneNumber: string;
+    email: string;
+  }>({
+    companyCode: '',
+    userName: '',
+    password: '',
+    name: '',
+    role: '',
+    phoneNumber: '',
+    email: ''
+  });
+  const [editAccount, setEditAccount] = useState<{
+    id: number;
+    name: string;
+    role: string;
+    phoneNumber: string;
+    email: string;
+  }>({
+    id: 0,
+    name: '',
+    role: '',
+    phoneNumber: '',
+    email: ''
+  });
+  
+  const [editIndex, setEditIndex] = useState<number | null>(null);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  //수정 
+  const fetchData = useCallback(async (pageIndex: number, pageSize: number) => {
+    setLoading(true);
+    try {
+      let url = `https://lcaapi.acess.co.kr/Users?&page=${pageIndex + 1}&pageSize=${pageSize}`;
+      if (searchParams.company) {
+        url += `&companyCode=${searchParams.company.code}`;
+      }
+  
+      // console.log('Fetching data with URL:', url);
+  
+      const response = await axios.get(url);
+      const { list, totalCount } = response.data;
+      // console.log('Response data:', response.data); 
+  
+      // 데이터 변환
+      const transformedData = list.map((user: User) => {
+        const company = companies.find(c => c.code === user.companyCode);
+        return {
+          ...user,
+          companyCode: company ? company.name : user.companyCode,
+          createdAt: new Date(user.createdAt).toLocaleDateString(), 
+        };
+      });
+  
+      setData(transformedData);
+      setTotalCount(totalCount);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setLoading(false);
+    }
+  }, [searchParams, companies]);
+
+  useEffect(() => {
+    fetchData(pageIndex, pageSize);
+  }, [pageIndex, pageSize, fetchData, searchParams]);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  //사업회원 데이터 변환
+  useEffect(() => {
+    axios.get('https://lcaapi.acess.co.kr/Companies')
+      .then(response => {
+        const sortedCompanies = response.data.list.sort((a: Company, b: Company) =>
+          a.name.localeCompare(b.name)
+        );
+        setCompanies(sortedCompanies);
+      })
+      .catch(error => {
+        console.error('There was an error fetching the data!', error);
+      });
+  }, []);
+
+  //데이터 추가
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewAccount(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditAccount(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = () => {
+    const newAccountData = {
+      ...newAccount,
+    };  
+  
+    // console.log("등록할 정보:", newAccountData); 
+  
+    axios.post('https://lcaapi.acess.co.kr/Users', newAccountData)
+      .then(() => {
+        // console.log('Data posted successfully:', response.data);
+        fetchData(pageIndex, pageSize);
+      })
+      .catch(error => {
+        console.error('Error posting data:', error.response ? error.response.data : error.message);
+      });
+  
+    handleClose();
+  };
+
+  //데이터 검사
+  useEffect(() => {
+    const isValid = !!newAccount.companyCode && !!newAccount.userName && !!newAccount.password && !!newAccount.name && !!newAccount.role && !!newAccount.phoneNumber && !!newAccount.email;
+    setIsFormValid(isValid);
+  }, [newAccount]);
+
+  //데이터 수정 
   const handleEditOpen = (index: number) => {
-    const member = data[index];
-    setEditMember({
-      userName: member.userName,
-      passwordHash: member.passwordHash,
+    const row = table.getRowModel().rows[index];
+    const member = row.original;
+  
+    setEditAccount({
+      id: member.id,
       name: member.name,
-      email: member.email,
+      role: member.role,
       phoneNumber: member.phoneNumber,
+      email: member.email
     });
     setEditIndex(index);
     setEditOpen(true);
   };
 
   const handleEditClose = () => setEditOpen(false);
-  //삭제
-  const handleDeleteOpen = (index: number) => {
-    setDeleteIndex(index);
-    setDeleteOpen(true);
-  };
 
-  const handleDeleteClose = () => setDeleteOpen(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setNewMember(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-    setEditMember(prev => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-  //추가
-  const handleSubmit = () => {
-    const existingData = JSON.parse(localStorage.getItem('AccountCT') || '[]');
-    const updatedData = [...existingData, newMember];
-    localStorage.setItem('AccountCT', JSON.stringify(updatedData));
-    
-    handleClose();
-  };
-  //수정
   const handleEditSubmit = () => {
     if (editIndex !== null) {
-      const existingData = JSON.parse(localStorage.getItem('AccountCT') || '[]');
-      existingData[editIndex] = { ...existingData[editIndex], ...editMember };
-      localStorage.setItem('AccountCT', JSON.stringify(existingData));
+      const updatedAccountData = {
+        ...editAccount
+      };
+  
+      const url = `https://lcaapi.acess.co.kr/Users/${editAccount.id}`;
+      // console.log("PUT URL:", url); 
+  
+      axios.put(url, updatedAccountData)
+        .then(() => {
+          // console.log('Data updated successfully:', response.data);
+          fetchData(pageIndex, pageSize);  
+        })
+        .catch(error => {
+          console.error('Error updating data:', error);
+        });
+  
       setEditOpen(false);
     }
   };
-  //삭제
-  const handleDeleteSubmit = () => {
+
+  //데이터 삭제
+  const handleDeleteOpen = (index: number) => {
+    const row = table.getRowModel().rows[index];
+    const memberToDelete = row.original;
+  
+    if (memberToDelete) {
+      setDeleteIndex(memberToDelete.id);
+      setDeleteMemberName(memberToDelete.name);
+      setDeleteOpen(true);
+    } else {
+      console.error(`No member found to delete at index: ${index}`);
+    }
+  };
+  
+  const handleDeleteClose = () => setDeleteOpen(false);
+  
+  const handleDeleteSubmit = () => {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
     if (deleteIndex !== null) {
-      const existingData = JSON.parse(localStorage.getItem('AccountCT') || '[]');
-      existingData.splice(deleteIndex, 1);
-      localStorage.setItem('AccountCT', JSON.stringify(existingData));
-      setDeleteOpen(false);
+      const url = `https://lcaapi.acess.co.kr/Users/${deleteIndex}`;
+      // console.log("DELETE URL:", url); 
+  
+      axios.delete(url)
+        .then(() => {
+          // console.log('Data deleted successfully:', response.data);
+          fetchData(pageIndex, pageSize); 
+        })
+        .catch(error => {
+          console.error('Error deleting data:', error);
+        });
+  
+      handleDeleteClose();
     }
   };
 
-  const table = useReactTable({
+  const handleSearch = () => {
+    // console.log('Search parameters:', {
+    //   company: selectedCompany,
+    // });
+    setSearchParams({
+      company: selectedCompany,
+    });
+    setPageIndex(0);  
+  };
+
+  const handlePaginationChange = (updater: Updater<PaginationState>) => {
+    if (typeof updater === 'function') {
+      const newState = updater({ pageIndex, pageSize });
+      setPageIndex(newState.pageIndex);
+      setPageSize(newState.pageSize);
+      fetchData(newState.pageIndex, newState.pageSize); 
+    } else {
+      const newPageIndex = updater.pageIndex ?? pageIndex;
+      const newPageSize = updater.pageSize ?? pageSize;
+      setPageIndex(newPageIndex);
+      setPageSize(newPageSize);
+      fetchData(newPageIndex, newPageSize); 
+    }
+  };
+
+  const table = useReactTable<User>({
     data,
     columns,
-    pageCount: Math.ceil(data.length / pageSize),
+    pageCount: totalPages,
     state: {
       pagination: {
         pageIndex,
         pageSize,
       },
     },
-    onPaginationChange: (updater) => {
-      if (typeof updater === 'function') {
-        const newState = updater({ pageIndex, pageSize });
-        setPageIndex(newState.pageIndex);
-        setPageSize(newState.pageSize);
-      } else {
-        const { pageIndex, pageSize } = updater;
-        setPageIndex(pageIndex);
-        setPageSize(pageSize);
-      }
-    },
+    manualPagination: true,
+    onPaginationChange: handlePaginationChange,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: false,
   });
 
   // 페이지네이션
   const renderPageNumbers = () => {
-    const totalPages = table.getPageCount();
     const startPage = Math.floor(pageIndex / 5) * 5;
     const endPage = Math.min(startPage + 5, totalPages);
-
+  
     return Array.from({ length: endPage - startPage }, (_, i) => startPage + i).map((number) => (
       <Button
         key={number}
-        variant={table.getState().pagination.pageIndex === number ? 'contained' : 'outlined'}
+        variant={pageIndex === number ? 'contained' : 'outlined'}
         color="primary"
         style={{ marginRight: '5px', minWidth: '30px', padding: '5px' }}
-        onClick={() => setPageIndex(number)}
+        onClick={() => {
+          table.setPageIndex(number);
+        }}
       >
         {number + 1}
       </Button>
@@ -235,69 +355,81 @@ export function UserControl() {
 
   return (
     <div style={{ margin: '0 30px' }}>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h5" gutterBottom style={{marginBottom: '20px'}}>
         계정 관리
       </Typography>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-        <TextField
-          label="Search"
-          variant="outlined"
-          style={{ width: '250px' }}
-          InputProps={{ style: { height: '40px', padding: '0 14px' } }}
-          InputLabelProps={{
-            shrink: labelShrink,
-            style: {
-              transform: labelShrink ? 'translate(14px, -9px) scale(0.75)' : 'translate(14px, 12px) scale(1)',
-              transition: 'transform 0.2s ease-in-out',
-            },
-          }}
-          onFocus={() => setLabelShrink(true)}
-          onBlur={(e) => setLabelShrink(e.target.value !== '')}
-        />
-        <Button variant="contained" color="primary" style={{ width: '30px', height: '35px', marginLeft: '10px', fontSize: '12px' }}>
-          검색
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          style={{ height: '35px', marginLeft: '50px', fontSize: '12px' }}
-          onClick={handleOpen}
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+        <UseCompany onCompanyChange={setSelectedCompany} onCompanyListChange={setCompanies} />
+        <Button 
+          variant="contained" 
+          color="primary" 
+          style={{ width: '30px', height: '35px', marginLeft: '10px', fontSize: '12px' }}
+          onClick={handleSearch}
         >
+          조회
+        </Button>
+        <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '50px', fontSize: '12px' }} onClick={handleOpen}>
           계정 등록
         </Button>
       </div>
       <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
-        <Table>
-          <TableHead>
+        <Table stickyHeader>
+          <TableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
-                  <TableCell key={header.id}>
+                  <TableCell key={header.id} style={{ backgroundColor: '#cfcfcf' }}>
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableCell>
                 ))}
-                <TableCell>수정</TableCell>
+                <TableCell style={{ backgroundColor: '#cfcfcf' }}>수정</TableCell>
               </TableRow>
             ))}
           </TableHead>
           <TableBody>
-            {table.getRowModel().rows.map((row, index) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-                <TableCell>
-                  <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)}>
-                    수정
-                  </Button>
-                  <Button variant="contained" color="secondary" onClick={() => handleDeleteOpen(index)} style={{ marginLeft: '10px' }}>
-                    삭제
-                  </Button>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                  <CircularProgress />
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              <>
+                {table.getRowModel().rows.length > 0 ? (
+                  table.getRowModel().rows.map((row, index) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell
+                          key={cell.id}
+                          style={{
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            textAlign: ['phoneNumber', 'createdAt'].includes(cell.column.id) ? 'right' : 'left',
+                          }}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                      <TableCell>
+                        <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)} style={{ padding: '2px' }}>
+                          수정
+                        </Button>
+                        <Button variant="contained" color="secondary" onClick={() => handleDeleteOpen(index)} style={{ marginLeft: '10px', padding: '2px' }}>
+                          삭제
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                      데이터가 없습니다.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
@@ -311,18 +443,18 @@ export function UserControl() {
           </Button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-          <Button onClick={() => table.setPageIndex(0)} disabled={pageIndex === 0} variant="contained" color="primary" style={{ marginRight: '5px', minWidth: '30px', padding: '5px' }}>
+          <Button onClick={() => table.setPageIndex(0)} disabled={pageIndex === 0} variant="contained" color="primary" style={{ marginRight: '10px', minWidth: '30px', padding: '5px', width: 50 }}>
             처음
           </Button>
-          <Button onClick={() => table.setPageIndex(Math.max(0, pageIndex - 5))} disabled={pageIndex < 5} variant="contained" color="warning" style={{ marginRight: '5px', minWidth: '30px', padding: '5px' }}>
-            이전
+          <Button onClick={() => table.setPageIndex(Math.max(0, pageIndex - 5))} disabled={pageIndex < 5} variant="contained" color="warning" style={{ marginRight: '15px', minWidth: '30px', padding: '5px' }}>
+            -5
           </Button>
           {renderPageNumbers()}
-          <Button onClick={() => table.setPageIndex(Math.min(table.getPageCount() - 1, pageIndex + 5))} disabled={pageIndex >= table.getPageCount() - 5} variant="contained" color="warning" style={{ marginLeft: '5px', minWidth: '30px', padding: '5px' }}>
-            다음
+          <Button onClick={() => table.setPageIndex(Math.min(table.getPageCount() - 1, pageIndex + 5))} disabled={pageIndex >= table.getPageCount() - 5} variant="contained" color="warning" style={{ marginLeft: '10px', minWidth: '30px', padding: '5px' }}>
+            +5
           </Button>
-          <Button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={pageIndex === table.getPageCount() - 1} variant="contained" color="primary" style={{ marginLeft: '5px', minWidth: '30px', padding: '5px' }}>
-            맨끝
+          <Button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={pageIndex === table.getPageCount() - 1} variant="contained" color="primary" style={{ marginLeft: '10px', minWidth: '30px', padding: '5px', width: 50 }}>
+            끝
           </Button>
         </div>
         <div>
@@ -333,7 +465,7 @@ export function UserControl() {
             value={table.getState().pagination.pageSize}
             onChange={e => table.setPageSize(Number(e.target.value))}
           >
-            {[10, 20, 30, 40, 50].map(pageSize => (
+            {[1, 5 ,10, 20, 30, 40, 50].map(pageSize => (
               <MenuItem key={pageSize} value={pageSize}>
                 Show {pageSize}
               </MenuItem>
@@ -348,38 +480,72 @@ export function UserControl() {
         aria-describedby="modal-description"
       >
         <Box sx={modalStyle}>
-          <Typography id="modal-title" variant="h6" component="h2">
+          <Typography id="modal-title" variant="h5" component="h2" style={{ marginBottom: 20}}>
             계정 등록
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12}>
+              <UseCompany 
+                onCompanyChange={(company) => setNewAccount(prev => ({ ...prev, companyCode: company ? company.code : '' }))}
+                sx={{ width: '530px', marginRight: '10px' }}
+                selectSx={{ height: '51px', }}
+                showAllOption={false}
+              />
+            </Grid>
+            <Grid item xs={12}>
               <TextField
                 name="userName"
-                label="아이디"
+                label="사용자 ID"
                 variant="outlined"
                 fullWidth
-                value={newMember.userName}
+                value={newAccount.userName}
                 onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="passwordHash"
+                name="password"
                 label="비밀번호"
+                type="password"
                 variant="outlined"
                 fullWidth
-                type="password"
-                value={newMember.passwordHash}
+                value={newAccount.password}
                 onChange={handleChange}
               />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 name="name"
-                label="이름"
+                label="사용자명"
                 variant="outlined"
                 fullWidth
-                value={newMember.name}
+                value={newAccount.name}
+                onChange={handleChange}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Select
+                name="role"
+                variant="outlined"
+                fullWidth
+                value={newAccount.role}
+                onChange={(e) => setNewAccount(prev => ({ ...prev, role: e.target.value }))}
+                displayEmpty
+              >
+                <MenuItem value="">
+                  <em>역할 선택</em>
+                </MenuItem>
+                <MenuItem value="Admin">관리자</MenuItem>
+                <MenuItem value="User">사용자</MenuItem>
+              </Select>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="phoneNumber"
+                label="전화번호"
+                variant="outlined"
+                fullWidth
+                value={newAccount.phoneNumber}
                 onChange={handleChange}
               />
             </Grid>
@@ -389,17 +555,7 @@ export function UserControl() {
                 label="이메일"
                 variant="outlined"
                 fullWidth
-                value={newMember.email}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="phoneNumber"
-                label="연락처"
-                variant="outlined"
-                fullWidth
-                value={newMember.phoneNumber}
+                value={newAccount.email}
                 onChange={handleChange}
               />
             </Grid>
@@ -408,7 +564,7 @@ export function UserControl() {
             <Button variant="contained" color="secondary" onClick={handleClose} style={{ marginRight: '10px' }}>
               취소
             </Button>
-            <Button variant="contained" color="primary" onClick={handleSubmit}>
+            <Button variant="contained" color="primary" onClick={handleSubmit} disabled={!isFormValid}>
               등록
             </Button>
           </div>
@@ -421,39 +577,44 @@ export function UserControl() {
         aria-describedby="edit-modal-description"
       >
         <Box sx={modalStyle}>
-          <Typography id="edit-modal-title" variant="h6" component="h2">
+          <Typography id="edit-modal-title" variant="h5" component="h2" style={{ marginBottom: 20}}>
             계정 수정
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField
-                name="userName"
-                label="아이디"
-                variant="outlined"
-                fullWidth
-                value={editMember.userName}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="passwordHash"
-                label="비밀번호"
-                variant="outlined"
-                fullWidth
-                type="password"
-                value={editMember.passwordHash}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
                 name="name"
-                label="이름"
+                label="사용자명"
                 variant="outlined"
                 fullWidth
-                value={editMember.name}
-                onChange={handleChange}
+                value={editAccount.name}
+                onChange={handleEditChange}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Select
+                name="role"
+                variant="outlined"
+                fullWidth
+                value={editAccount.role}
+                onChange={(e) => setEditAccount(prev => ({ ...prev, role: e.target.value }))}
+                displayEmpty
+              >
+                <MenuItem value="">
+                  <em>역할 선택</em>
+                </MenuItem>
+                <MenuItem value="Admin">관리자</MenuItem>
+                <MenuItem value="User">사용자</MenuItem>
+              </Select>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="phoneNumber"
+                label="전화번호"
+                variant="outlined"
+                fullWidth
+                value={editAccount.phoneNumber}
+                onChange={handleEditChange}
               />
             </Grid>
             <Grid item xs={12}>
@@ -462,18 +623,8 @@ export function UserControl() {
                 label="이메일"
                 variant="outlined"
                 fullWidth
-                value={editMember.email}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                name="phoneNumber"
-                label="연락처"
-                variant="outlined"
-                fullWidth
-                value={editMember.phoneNumber}
-                onChange={handleChange}
+                value={editAccount.email}
+                onChange={handleEditChange}
               />
             </Grid>
           </Grid>
@@ -497,8 +648,11 @@ export function UserControl() {
           <Typography id="delete-modal-title" variant="h6" component="h2">
             정말 삭제하시겠습니까?
           </Typography>
-          <Typography id="delete-modal-description" style={{ fontSize: 12}}>
-            되돌릴 수 없습니다.
+          <Typography id="delete-modal-title" variant="h6" component="h2" style={{ fontSize: 12 }}>
+            계정 명: {deleteMemberName}
+          </Typography>
+          <Typography id="delete-modal-title" variant="h6" component="h2" style={{ fontSize: 12 }}>
+            되돌릴수 없습니다.
           </Typography>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
             <Button variant="contained" color="secondary" onClick={handleDeleteClose} style={{ marginRight: '10px' }}>

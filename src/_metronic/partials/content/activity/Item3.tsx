@@ -29,7 +29,7 @@ const Item3: FC = () => {
               data-bs-placement='top'
               title='Jan Hummer'
             >
-              <img src={toAbsoluteUrl('media/avatars/300-23.jpg')} alt='img' />
+              <img src={toAbsoluteUrl('media/avatars/blank.png')} alt='img' />
             </div>
           </div>
         </div>
@@ -37,7 +37,7 @@ const Item3: FC = () => {
         <div className='overflow-auto pb-5'>
           <div className='d-flex align-items-center border border-dashed border-gray-300 rounded min-w-700px p-5'>
             <div className='d-flex flex-aligns-center pe-10 pe-lg-20'>
-              <img alt='' className='w-30px me-3' src={toAbsoluteUrl('media/svg/files/pdf.svg')} />
+              {/* <img alt='' className='w-30px me-3' src={toAbsoluteUrl('media/svg/files/pdf.svg')} /> */}
 
               <div className='ms-1 fw-bold'>
                 <a href='#' className='fs-6 text-hover-primary fw-bolder'>
@@ -49,7 +49,7 @@ const Item3: FC = () => {
             </div>
 
             <div className='d-flex flex-aligns-center pe-10 pe-lg-20'>
-              <img alt='' className='w-30px me-3' src={toAbsoluteUrl('media/svg/files/doc.svg')} />
+              {/* <img alt='' className='w-30px me-3' src={toAbsoluteUrl('media/svg/files/doc.svg')} /> */}
 
               <div className='ms-1 fw-bold'>
                 <a href='#' className='fs-6 text-hover-primary fw-bolder'>
@@ -61,7 +61,7 @@ const Item3: FC = () => {
             </div>
 
             <div className='d-flex flex-aligns-center'>
-              <img alt='' className='w-30px me-3' src={toAbsoluteUrl('media/svg/files/css.svg')} />
+              {/* <img alt='' className='w-30px me-3' src={toAbsoluteUrl('media/svg/files/css.svg')} /> */}
 
               <div className='ms-1 fw-bold'>
                 <a href='#' className='fs-6 text-hover-primary fw-bolder'>

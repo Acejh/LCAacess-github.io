@@ -18,7 +18,7 @@ const FeedsWidget6: React.FC<Props> = ({className}) => {
           <div className='d-flex align-items-center flex-grow-1'>
             {/* begin::Avatar */}
             <div className='symbol symbol-45px me-5'>
-              <img src={toAbsoluteUrl('media/avatars/300-13.jpg')} alt='' />
+              <img src={toAbsoluteUrl('media/avatars/blank.png')} alt='' />
             </div>
             {/* end::Avatar */}
 

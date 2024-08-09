@@ -27,7 +27,7 @@ const Item7: FC = () => {
               data-bs-placement='top'
               title='Robert Rich'
             >
-              <img src={toAbsoluteUrl('media/avatars/300-4.jpg')} alt='img' />
+              <img src={toAbsoluteUrl('media/avatars/blank.png')} alt='img' />
             </div>
           </div>
         </div>

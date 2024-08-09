@@ -1,17 +1,15 @@
 import axios from "axios";
-import { AuthModel, UserModel } from "./_models";
 
-const API_URL = import.meta.env.VITE_APP_API_URL;
+const API_URL = "https://lcaapi.acess.co.kr"; 
 
-export const GET_USER_BY_ACCESSTOKEN_URL = `${API_URL}/verify_token`;
-export const LOGIN_URL = `${API_URL}/login`;
+export const LOGIN_URL = `${API_URL}/Auth/login`;
 export const REGISTER_URL = `${API_URL}/register`;
 export const REQUEST_PASSWORD_URL = `${API_URL}/forgot_password`;
 
 // Server should return AuthModel
-export function login(email: string, password: string) {
-  return axios.post<AuthModel>(LOGIN_URL, {
-    email,
+export function login(userName: string, password: string) {
+  return axios.post(LOGIN_URL, {
+    userName,
     password,
   });
 }
@@ -39,61 +37,3 @@ export function requestPassword(email: string) {
     email,
   });
 }
-
-export function getUserByToken(token: string) {
-  return axios.post<UserModel>(GET_USER_BY_ACCESSTOKEN_URL, {
-    api_token: token,
-  });
-}
-
-
-// import axios from "axios";
-// import { AuthModel, UserModel } from "./_models";
-
-// const API_URL = import.meta.env.VITE_APP_API_URL;
-
-// export const GET_USER_BY_ACCESSTOKEN_URL = `${API_URL}/verify_token`;
-// export const LOGIN_URL = `${API_URL}/login`;
-// export const REGISTER_URL = `${API_URL}/register`;
-// export const REQUEST_PASSWORD_URL = `${API_URL}/forgot_password`;
-
-// // Server should return AuthModel with a JWT token
-// export function login(email: string, password: string) {
-//   return axios.post<AuthModel>(LOGIN_URL, {
-//     email,
-//     password,
-//   });
-// }
-
-// // Server should return AuthModel with a JWT token
-// export function register(
-//   email: string,
-//   userId: string,
-//   phoneNumber: string,
-//   password: string,
-//   role: string
-// ) {
-//   return axios.post<AuthModel>(REGISTER_URL, {
-//     email,
-//     userId,
-//     phoneNumber,
-//     password,
-//     role,
-//   });
-// }
-
-// // Server should return object => { result: boolean } (Is Email in DB)
-// export function requestPassword(email: string) {
-//   return axios.post<{ result: boolean }>(REQUEST_PASSWORD_URL, {
-//     email,
-//   });
-// }
-
-// // JWT를 사용하여 서버에서 사용자 정보를 가져옵니다.
-// export function getUserByToken(token: string) {
-//   return axios.get<UserModel>(GET_USER_BY_ACCESSTOKEN_URL, {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-// }

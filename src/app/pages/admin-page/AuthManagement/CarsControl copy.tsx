@@ -1,0 +1,646 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import UseCompany, { Company } from '../../ComponentBox/UseCompany';
+import ClientType from '../../ComponentBox/ClientType'; 
+import {
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  ColumnDef,
+  flexRender,
+  Updater,
+  PaginationState,
+} from '@tanstack/react-table';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Button,
+  Select,
+  MenuItem,
+  Typography,
+  FormControl,
+  InputLabel,
+  TextField,
+  Modal,
+  Box,
+  Grid,
+  CircularProgress,
+} from '@mui/material';
+import * as XLSX from 'xlsx';
+
+type Car = {
+  id: number;
+  companyCode: string;
+  inOutType: string; 
+  carNo: string;
+  spec: string;
+};
+
+const columns: ColumnDef<Car>[] = [
+  { accessorKey: 'companyCode', header: '사업회원', },
+  { accessorKey: 'inOutType', header: '입출고 구분', cell: info => info.getValue() === 'IN' ? '입고' : info.getValue() === 'OUT' ? '출고' : ''},
+  { accessorKey: 'carNo', header: '차량번호', },
+  { accessorKey: 'spec', header: '차량규격', },
+];
+
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 600,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
+
+export function CarsControl() {
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
+  const [data, setData] = useState<Car[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  const [deleteCarNo, setDeleteCarNo] = useState<string>('');
+  const [totalCount, setTotalCount] = useState(0);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [selectedTypeInOut, setSelectedTypeInOut] = useState<string>('');
+  const [companies, setCompanies] = useState<Company[]>([]);
+  const [searchParams, setSearchParams] = useState<{
+    company: Company | null;
+    inOutType: 'IN' | 'OUT' | '';
+  }>({
+    company: null,
+    inOutType: '',
+  });
+  const [newCar, setNewCar] = useState<Omit<Car, 'id'>>({
+    companyCode: '',
+    inOutType: '', 
+    carNo: '',
+    spec: '',
+  });
+  const [editCar, setEditCar] = useState<Car>({
+    id: 0,
+    companyCode: '',
+    inOutType: '', 
+    carNo: '',
+    spec: '',
+  });
+
+  const [editIndex, setEditIndex] = useState<number | null>(null);
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  const fetchData = useCallback(async (pageIndex: number, pageSize: number) => {
+    setLoading(true);
+    try {
+      let url = `https://lcaapi.acess.co.kr/Cars?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      if (searchParams.company) {
+        url += `&companyCode=${searchParams.company.code}`;
+      }
+      if (searchParams.inOutType) {
+        url += `&inOutType=${searchParams.inOutType}`;
+      }
+  
+      // console.log('Fetching data with URL:', url);
+  
+      const response = await axios.get(url);
+      const { list, totalCount } = response.data;
+      // console.log('Response data:', response.data);
+  
+      const transformedData = list.map((car: Car) => {
+        const company = companies.find(c => c.code === car.companyCode);
+        return {
+          ...car,
+          inOutType: car.inOutType,  
+          companyCode: company ? company.name : car.companyCode,
+        };
+      });
+  
+      setData(transformedData);
+      setTotalCount(totalCount);
+      setLoading(false);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setLoading(false);
+    }
+  }, [searchParams, companies]);
+
+  useEffect(() => {
+    fetchData(pageIndex, pageSize);
+  }, [pageIndex, pageSize, fetchData, searchParams]);
+
+  const totalPages = Math.ceil(totalCount / pageSize);
+
+  // 사업회원 데이터 변환
+  useEffect(() => {
+    axios.get('https://lcaapi.acess.co.kr/Companies')
+      .then(response => {
+        const sortedCompanies = response.data.list.sort((a: Company, b: Company) =>
+          a.name.localeCompare(b.name)
+        );
+        setCompanies(sortedCompanies);
+      })
+      .catch(error => {
+        console.error('There was an error fetching the data!', error);
+      });
+  }, []);
+
+  // 엑셀 다운로드
+  const handleDownloadExcel = () => {
+    const tableData = table.getRowModel().rows.map(row => row.original);
+    const worksheet = XLSX.utils.json_to_sheet(tableData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    XLSX.writeFile(workbook, '차량관리.xlsx');
+  };
+
+  // 데이터 추가
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewCar(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditCar(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = () => {
+    const newCarData = {
+      ...newCar,
+    };
+
+    // console.log("등록할 정보:", newCarData);
+
+    axios.post('https://lcaapi.acess.co.kr/Cars', newCarData)
+      .then(() => {
+        // console.log('Data posted successfully:', response.data);
+        fetchData(pageIndex, pageSize);
+      })
+      .catch(error => {
+        console.error('Error posting data:', error.response ? error.response.data : error.message);
+      });
+
+    handleClose();
+  };
+
+  // 데이터 검사
+  useEffect(() => {
+    const isValid = !!newCar.companyCode && !!newCar.carNo && !!newCar.spec;
+    setIsFormValid(isValid);
+  }, [newCar]);
+
+  // 데이터 수정 
+  const handleEditOpen = (index: number) => {
+    const row = table.getRowModel().rows[index];
+    const car = row.original;
+
+    setEditCar({
+      id: car.id,
+      companyCode: car.companyCode,
+      inOutType: car.inOutType,
+      carNo: car.carNo,
+      spec: car.spec,
+    });
+    setEditIndex(index);
+    setEditOpen(true);
+  };
+
+  const handleEditClose = () => setEditOpen(false);
+
+  const handleEditSubmit = () => {
+    if (editIndex !== null) {
+      const updatedCarData = {
+        ...editCar,
+      };
+  
+      // 수정된 데이터 콘솔에 출력
+      // console.log("수정할 데이터:", updatedCarData);
+  
+      const url = `https://lcaapi.acess.co.kr/Cars/${editCar.id}`;
+      // console.log("PUT URL:", url);
+  
+      axios.put(url, updatedCarData)
+        .then(() => {
+          // console.log('Data updated successfully:', response.data);
+          fetchData(pageIndex, pageSize);  // 데이터 갱신
+        })
+        .catch(error => {
+          console.error('Error updating data:', error);
+        });
+  
+      setEditOpen(false);
+    }
+  };
+
+  // 데이터 삭제
+  const handleDeleteOpen = (index: number) => {
+    const row = table.getRowModel().rows[index];
+    const carToDelete = row.original;
+
+    if (carToDelete) {
+      setDeleteIndex(carToDelete.id);
+      setDeleteCarNo(carToDelete.carNo);
+      setDeleteOpen(true);
+    } else {
+      console.error(`No car found to delete at index: ${index}`);
+    }
+  };
+
+  const handleDeleteClose = () => setDeleteOpen(false);
+
+  const handleDeleteSubmit = () => {
+    if (deleteIndex !== null) {
+      const url = `https://lcaapi.acess.co.kr/Cars/${deleteIndex}`;
+      // console.log("DELETE URL:", url);
+
+      axios.delete(url)
+        .then(() => {
+          // console.log('Data deleted successfully:', response.data);
+          fetchData(pageIndex, pageSize);
+        })
+        .catch(error => {
+          console.error('Error deleting data:', error);
+        });
+
+      handleDeleteClose();
+    }
+  };
+
+  const handleSearch = () => {
+    // console.log('Search parameters:', {
+    //   company: selectedCompany,
+    //   inOutType: selectedTypeInOut,
+    // });
+  
+    setSearchParams({
+      company: selectedCompany,
+      inOutType: selectedTypeInOut as 'IN' | 'OUT' | '', 
+    });
+  
+    setPageIndex(0);
+  };
+
+  const handlePaginationChange = (updater: Updater<PaginationState>) => {
+    if (typeof updater === 'function') {
+      const newState = updater({ pageIndex, pageSize });
+      setPageIndex(newState.pageIndex);
+      setPageSize(newState.pageSize);
+      fetchData(newState.pageIndex, newState.pageSize);
+    } else {
+      const newPageIndex = updater.pageIndex ?? pageIndex;
+      const newPageSize = updater.pageSize ?? pageSize;
+      setPageIndex(newPageIndex);
+      setPageSize(newPageSize);
+      fetchData(newPageIndex, newPageSize);
+    }
+  };
+
+  const table = useReactTable<Car>({
+    data,
+    columns,
+    pageCount: totalPages,
+    state: {
+      pagination: {
+        pageIndex,
+        pageSize,
+      },
+    },
+    manualPagination: true,
+    onPaginationChange: handlePaginationChange,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: false,
+  });
+
+  // 페이지네이션
+  const renderPageNumbers = () => {
+    const startPage = Math.floor(pageIndex / 5) * 5;
+    const endPage = Math.min(startPage + 5, totalPages);
+
+    return Array.from({ length: endPage - startPage }, (_, i) => startPage + i).map((number) => (
+      <Button
+        key={number}
+        variant={pageIndex === number ? 'contained' : 'outlined'}
+        color="primary"
+        style={{ marginRight: '5px', minWidth: '30px', padding: '5px' }}
+        onClick={() => {
+          table.setPageIndex(number);
+        }}
+      >
+        {number + 1}
+      </Button>
+    ));
+  };
+
+  return (
+    <div style={{ margin: '0 30px' }}>
+      <Typography variant="h5" gutterBottom style={{ marginBottom: '20px' }}>
+        차량 관리
+      </Typography>
+      <Button
+        variant="contained"
+        color="secondary"
+        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
+        onClick={handleDownloadExcel}
+      >
+        엑셀 다운로드
+      </Button>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+        <UseCompany onCompanyChange={setSelectedCompany} onCompanyListChange={setCompanies} />
+        <ClientType
+          selectedInOutType={selectedTypeInOut}
+          onInOutTypeChange={setSelectedTypeInOut}
+          formControlProps={{ sx: { width: '150px' } }}
+          selectSx={{ height: '45px' }}
+          showClientType={false}
+        />
+        <Button
+          variant="contained"
+          color="primary"
+          style={{ width: '30px', height: '35px', marginLeft: '10px', fontSize: '12px' }}
+          onClick={handleSearch}
+        >
+          검색
+        </Button>
+        <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '50px', fontSize: '12px' }} onClick={handleOpen}>
+          차량 등록
+        </Button>
+      </div>
+      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
+        <Table stickyHeader>
+          <TableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map(header => (
+                  <TableCell key={header.id} style={{ backgroundColor: '#cfcfcf' }}>
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableCell>
+                ))}
+                <TableCell style={{ backgroundColor: '#cfcfcf' }}>수정</TableCell>
+              </TableRow>
+            ))}
+          </TableHead>
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                  <CircularProgress />
+                </TableCell>
+              </TableRow>
+            ) : (
+              <>
+                {table.getRowModel().rows.length > 0 ? (
+                  table.getRowModel().rows.map((row, index) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell key={cell.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                      <TableCell>
+                        <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)} style={{ padding: '2px' }}>
+                          수정
+                        </Button>
+                        <Button variant="contained" color="secondary" onClick={() => handleDeleteOpen(index)} style={{ marginLeft: '10px', padding: '2px' }}>
+                          삭제
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                      데이터가 없습니다.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <Button onClick={() => table.setPageIndex(pageIndex - 1)} disabled={!table.getCanPreviousPage()} variant="contained" color="primary" style={{ marginRight: '10px' }}>
+            이전
+          </Button>
+          <Button onClick={() => table.setPageIndex(pageIndex + 1)} disabled={!table.getCanNextPage()} variant="contained" color="primary">
+            다음
+          </Button>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
+          <Button onClick={() => table.setPageIndex(0)} disabled={pageIndex === 0} variant="contained" color="primary" style={{ marginRight: '10px', minWidth: '30px', padding: '5px', width: 50 }}>
+            처음
+          </Button>
+          <Button onClick={() => table.setPageIndex(Math.max(0, pageIndex - 5))} disabled={pageIndex < 5} variant="contained" color="warning" style={{ marginRight: '15px', minWidth: '30px', padding: '5px' }}>
+            -5
+          </Button>
+          {renderPageNumbers()}
+          <Button onClick={() => table.setPageIndex(Math.min(table.getPageCount() - 1, pageIndex + 5))} disabled={pageIndex >= table.getPageCount() - 5} variant="contained" color="warning" style={{ marginLeft: '10px', minWidth: '30px', padding: '5px' }}>
+            +5
+          </Button>
+          <Button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={pageIndex === table.getPageCount() - 1} variant="contained" color="primary" style={{ marginLeft: '10px', minWidth: '30px', padding: '5px', width: 50 }}>
+            끝
+          </Button>
+        </div>
+        <div>
+          <Typography variant="body1" component="span" style={{ marginRight: '10px' }}>
+            페이지 {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+          </Typography>
+          <Select
+            value={table.getState().pagination.pageSize}
+            onChange={e => table.setPageSize(Number(e.target.value))}
+          >
+            {[1, 5, 10, 20, 30, 40, 50].map(pageSize => (
+              <MenuItem key={pageSize} value={pageSize}>
+                Show {pageSize}
+              </MenuItem>
+            ))}
+          </Select>
+        </div>
+      </div>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-title"
+        aria-describedby="modal-description"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="modal-title" variant="h5" component="h2" style={{ marginBottom: 20 }}>
+            차량 등록
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <UseCompany
+                onCompanyChange={(company) => setNewCar(prev => ({ ...prev, companyCode: company ? company.code : '' }))}
+                sx={{ width: '260px', marginRight: '10px' }}
+                selectSx={{ height: '51px', }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth>
+                <InputLabel id="new-inout-type-label">입출고 구분</InputLabel>
+                <Select
+                  label="입출고 구분"
+                  labelId="new-inout-type-label"
+                  value={newCar.inOutType}
+                  onChange={(e) => setNewCar(prev => ({ ...prev, inOutType: e.target.value }))}
+                >
+                  <MenuItem value="" disabled>입출고 구분</MenuItem>
+                  <MenuItem value="IN">입고</MenuItem>
+                  <MenuItem value="OUT">출고</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="carNo"
+                label="차량번호"
+                variant="outlined"
+                fullWidth
+                value={newCar.carNo}
+                onChange={handleChange}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="spec"
+                label="차량규격"
+                variant="outlined"
+                fullWidth
+                value={newCar.spec}
+                onChange={handleChange}
+              />
+            </Grid>
+          </Grid>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+            <Button variant="contained" color="secondary" onClick={handleClose} style={{ marginRight: '10px' }}>
+              취소
+            </Button>
+            <Button variant="contained" color="primary" onClick={handleSubmit} disabled={!isFormValid}>
+              등록
+            </Button>
+          </div>
+        </Box>
+      </Modal>
+      <Modal
+        open={editOpen}
+        onClose={handleEditClose}
+        aria-labelledby="edit-modal-title"
+        aria-describedby="edit-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="edit-modal-title" variant="h5" component="h2" style={{ marginBottom: 20 }}>
+            차량 수정
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <TextField
+                name="companyCode"
+                label="사업회원"
+                variant="outlined"
+                fullWidth
+                value={editCar.companyCode}
+                InputProps={{
+                  readOnly: true,
+                  style: {
+                    backgroundColor: '#f0f0f0',
+                    pointerEvents: 'none',
+                    textDecoration: 'none',
+                  },
+                }}
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth>
+                <InputLabel id="edit-inout-type-label">입출고 구분</InputLabel>
+                <Select
+                  label="입출고 구분"
+                  labelId="edit-inout-type-label"
+                  value={editCar.inOutType}
+                  onChange={(e) => setEditCar(prev => ({ ...prev, inOutType: e.target.value }))}
+                >
+                  <MenuItem value="" disabled>입출고 구분</MenuItem>
+                  <MenuItem value="IN">입고</MenuItem>
+                  <MenuItem value="OUT">출고</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="carNo"
+                label="차량번호"
+                variant="outlined"
+                fullWidth
+                value={editCar.carNo}
+                onChange={handleEditChange}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                name="spec"
+                label="차량규격"
+                variant="outlined"
+                fullWidth
+                value={editCar.spec}
+                onChange={handleEditChange}
+              />
+            </Grid>
+          </Grid>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+            <Button variant="contained" color="secondary" onClick={handleEditClose} style={{ marginRight: '10px' }}>
+              취소
+            </Button>
+            <Button variant="contained" color="primary" onClick={handleEditSubmit}>
+              수정
+            </Button>
+          </div>
+        </Box>
+      </Modal>
+      <Modal
+        open={deleteOpen}
+        onClose={handleDeleteClose}
+        aria-labelledby="delete-modal-title"
+        aria-describedby="delete-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="delete-modal-title" variant="h6" component="h2">
+            정말 삭제하시겠습니까?
+          </Typography>
+          <Typography id="delete-modal-title" variant="h6" component="h2" style={{ fontSize: 12 }}>
+            차량 번호: {deleteCarNo}
+          </Typography>
+          <Typography id="delete-modal-title" variant="h6" component="h2" style={{ fontSize: 12 }}>
+            되돌릴 수 없습니다.
+          </Typography>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+            <Button variant="contained" color="secondary" onClick={handleDeleteClose} style={{ marginRight: '10px' }}>
+              아니오
+            </Button>
+            <Button variant="contained" color="primary" onClick={handleDeleteSubmit}>
+              예
+            </Button>
+          </div>
+        </Box>
+      </Modal>
+    </div>
+  );
+}

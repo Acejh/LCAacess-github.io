@@ -20,9 +20,9 @@ const items: Array<{
   {name: 'Alan Warden', initials: 'A', state: 'warning'},
   {name: 'Michael Eberon', src: toAbsoluteUrl('media/avatars/300-11.jpg')},
   {name: 'Susan Redwood', initials: 'S', state: 'primary'},
-  {name: 'Melody Macy', src: toAbsoluteUrl('media/avatars/300-2.jpg')},
+  {name: 'Melody Macy', src: toAbsoluteUrl('media/avatars/blank.png')},
   {name: 'Perry Matthew', initials: 'P', state: 'danger'},
-  {name: 'Barry Walter', src: toAbsoluteUrl('media/avatars/300-12.jpg')},
+  {name: 'Barry Walter', src: toAbsoluteUrl('media/avatars/blank.png')},
 ]
 
 const CardsWidget7 = ({className, description, stats, labelColor, textColor}: Props) => (

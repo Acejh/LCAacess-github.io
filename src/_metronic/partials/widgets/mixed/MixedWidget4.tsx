@@ -84,7 +84,7 @@ const MixedWidget4: React.FC<Props> = ({className, color, image, title, date, pr
               data-bs-toggle='tooltip'
               title='Ana Stone'
             >
-              <img src={toAbsoluteUrl('media/avatars/300-6.jpg')} alt='' />
+              <img src={toAbsoluteUrl('media/avatars/blank.png')} alt='' />
             </a>
 
             <a
@@ -102,7 +102,7 @@ const MixedWidget4: React.FC<Props> = ({className, color, image, title, date, pr
               data-bs-toggle='tooltip'
               title='Sam Harris'
             >
-              <img src={toAbsoluteUrl('media/avatars/300-9.jpg')} alt='' />
+              <img src={toAbsoluteUrl('media/avatars/blank.png')} alt='' />
             </a>
 
             <a href='#' className='symbol symbol-35px' data-bs-toggle='tooltip' title='Alice Micto'>

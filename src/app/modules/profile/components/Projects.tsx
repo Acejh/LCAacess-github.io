@@ -232,8 +232,8 @@ export function Projects() {
 }
 
 const users1: Array<IconUserModel> = [
-  {name: 'Emma Smith', avatar: 'media/avatars/300-6.jpg'},
-  {name: 'Rudy Stone', avatar: 'media/avatars/300-1.jpg'},
+  {name: 'Emma Smith', avatar: 'media/avatars/blank.png'},
+  {name: 'Rudy Stone', avatar: 'media/avatars/blank.png'},
   {name: 'Susan Redwood', initials: 'S', color: 'primary'},
 ]
 
@@ -243,8 +243,8 @@ const users2 = [
 ]
 
 const users3 = [
-  {name: 'Mad Masy', avatar: 'media/avatars/300-6.jpg'},
-  {name: 'Cris Willson', avatar: 'media/avatars/300-1.jpg'},
+  {name: 'Mad Masy', avatar: 'media/avatars/blank.png'},
+  {name: 'Cris Willson', avatar: 'media/avatars/blank.png'},
   {name: 'Mike Garcie', initials: 'M', color: 'info'},
 ]
 
@@ -260,23 +260,23 @@ const users5 = [
 ]
 
 const users6 = [
-  {name: 'Emma Smith', avatar: 'media/avatars/300-6.jpg'},
-  {name: 'Rudy Stone', avatar: 'media/avatars/300-1.jpg'},
+  {name: 'Emma Smith', avatar: 'media/avatars/blank.png'},
+  {name: 'Rudy Stone', avatar: 'media/avatars/blank.png'},
   {name: 'Susan Redwood', initials: 'S', color: 'primary'},
 ]
 
 const users7 = [
-  {name: 'Meloday Macy', avatar: 'media/avatars/300-2.jpg'},
+  {name: 'Meloday Macy', avatar: 'media/avatars/blank.png'},
   {name: 'Rabbin Watterman', initials: 'S', color: 'success'},
 ]
 
 const users8 = [
-  {name: 'Emma Smith', avatar: 'media/avatars/300-6.jpg'},
-  {name: 'Rudy Stone', avatar: 'media/avatars/300-1.jpg'},
+  {name: 'Emma Smith', avatar: 'media/avatars/blank.png'},
+  {name: 'Rudy Stone', avatar: 'media/avatars/blank.png'},
   {name: 'Susan Redwood', initials: 'S', color: 'primary'},
 ]
 
 const users9 = [
-  {name: 'Meloday Macy', avatar: 'media/avatars/300-2.jpg'},
+  {name: 'Meloday Macy', avatar: 'media/avatars/blank.png'},
   {name: 'Rabbin Watterman', initials: 'S', color: 'danger'},
 ]

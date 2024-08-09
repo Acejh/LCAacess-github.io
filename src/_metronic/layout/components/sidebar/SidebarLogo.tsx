@@ -4,6 +4,7 @@ import {KTIcon, toAbsoluteUrl} from '../../../helpers'
 import {useLayout} from '../../core'
 import {MutableRefObject, useEffect, useRef} from 'react'
 import {ToggleComponent} from '../../../assets/ts/components'
+import './Sidebar.css'
 
 type PropsType = {
   sidebarRef: MutableRefObject<HTMLDivElement | null>
@@ -53,28 +54,28 @@ const SidebarLogo = (props: PropsType) => {
         {config.layoutType === 'dark-sidebar' ? (
           <img
             alt='Logo'
-            src={toAbsoluteUrl('media/logos/default-dark1.svg')}
-            className='h-25px app-sidebar-logo-default'
+            src={toAbsoluteUrl('media/logos/E_Logo.svg')}
+            className='h-20px app-sidebar-logo-default'
           />
         ) : (
           <>
             <img
               alt='Logo'
-              src={toAbsoluteUrl('media/logos/default.svg')}
-              className='h-25px app-sidebar-logo-default theme-light-show'
+              src={toAbsoluteUrl('media/logos/E_Logo.svg')}
+              className='h-20px app-sidebar-logo-default theme-light-show Sidebar-E-Logo'
             />
             <img
               alt='Logo'
-              src={toAbsoluteUrl('media/logos/default-dark.svg')}
-              className='h-25px app-sidebar-logo-default theme-dark-show'
+              src={toAbsoluteUrl('media/logos/E_Logo.svg')}
+              className='h-20px app-sidebar-logo-default theme-dark-show'
             />
           </>
         )}
 
         <img
           alt='Logo'
-          src={toAbsoluteUrl('media/logos/default-small.svg')}
-          className='h-20px app-sidebar-logo-minimize'
+          src={toAbsoluteUrl('media/logos/E_LogoSmall.svg')}
+          className='h-20px px app-sidebar-logo-minimize Sidebar-E-LogoSmall'
         />
       </Link>
 

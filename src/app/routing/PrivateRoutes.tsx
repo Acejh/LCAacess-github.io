@@ -3,7 +3,6 @@ import {Route, Routes, Navigate} from 'react-router-dom'
 import {MasterLayout} from '../../_metronic/layout/MasterLayout'
 import TopBarProgress from 'react-topbar-progress-indicator'
 import {DashboardWrapper} from '../pages/dashboard/DashboardWrapper'
-import {MenuTestPage} from '../pages/MenuTestPage'
 import {getCSSVariableValue} from '../../_metronic/assets/ts/_utils'
 import {WithChildren} from '../../_metronic/helpers'
 import {InputInfo} from '../pages/user-page/KeyIn/Input'
@@ -14,7 +13,7 @@ import { MaterialPos } from '../pages/user-page/Inquiry/MaterialPos'
 import { MaterialPosTrade } from '../pages/user-page/Inquiry/MaterialPosTrade'
 import { Waste } from '../pages/user-page/Inquiry/Waste'
 import { WasteTrade } from '../pages/user-page/Inquiry/WasteTrade'
-import { ManageCustomer } from '../pages/user-page/Management/ManageCustomer'
+import { ManageClient } from '../pages/user-page/Management/ManageClient'
 import { ManageFacility } from '../pages/user-page/Management/ManageFacility'
 import { ManageVehicle } from '../pages/user-page/Management/ManageVehicle'
 import { ComProducts } from '../pages/admin-page/Management/ComProducts'
@@ -23,13 +22,26 @@ import { Mapping } from '../pages/admin-page/Management/Mapping'
 import { TotalInfo } from '../pages/admin-page/Management/TotalInfo'
 import { UserControl } from '../pages/admin-page/AuthManagement/AccountControl'
 import { MemberControl } from '../pages/admin-page/AuthManagement/MemberControl'
-import { ScrapTable } from '../pages/admin-page/EcoASManagement/ScrapTable'
+import { DisposalTable } from '../pages/admin-page/EcoASManagement/DisposalTable'
 import { SupplyTable } from '../pages/admin-page/EcoASManagement/SupplyTable'
 import { CTMDetail } from '../pages/admin-page/EcoASManagement/CTMDetail'
 import { CTMWeight } from '../pages/admin-page/EcoASManagement/CTMWeight'
 import { Registration } from '../modules/auth/components/Registration'
 import { Login } from '../modules/auth/components/Login'
 import { ForgotPassword } from '../modules/auth/components/ForgotPassword'
+import { CTMBasic } from '../pages/admin-page/EcoASManagement/CTMBasic'
+import { AdminClient } from '../pages/admin-page/AuthManagement/AdminClient'
+import { CarsControl } from '../pages/admin-page/AuthManagement/CarsControl'
+import { CTMScale } from '../pages/admin-page/EcoASManagement/CTMScale'
+import { Ad_Effluent } from '../pages/admin-page/InputManagement/KeyIn/Ad_Effluent'
+import { Ad_Facility } from '../pages/admin-page/InputManagement/KeyIn/Ad_Facility'
+import { Ad_Input } from '../pages/admin-page/InputManagement/KeyIn/Ad_Input'
+import { Ad_UseFacility } from '../pages/admin-page/InputManagement/KeyIn/Ad_UseFacility'
+import { Ad_Waste } from '../pages/admin-page/InputManagement/KeyIn/Ad_Waste'
+import { CTMapping } from '../pages/admin-page/ProStatus/CTMapping'
+import { DataStatus } from '../pages/admin-page/ProStatus/DataStatus'
+import { SupMapping } from '../pages/admin-page/ProStatus/SupMapping'
+import { DisMapping } from '../pages/admin-page/ProStatus/DisMapping'
 
 const PrivateRoutes = () => {
   const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
@@ -57,7 +69,7 @@ const PrivateRoutes = () => {
         <Route path="/Waste" element={<Waste />} />
         <Route path="/TradeWaste" element={<WasteTrade />} />
         {/* 유저 관리 */}
-        <Route path="/ManageCustomer" element={<ManageCustomer />} />
+        <Route path="/ManageClient" element={<ManageClient />} />
         <Route path="/ManageFacility" element={<ManageFacility/>} />
         <Route path="/ManageVehicle" element={<ManageVehicle />} />
         {/* 관리자 관리기능 */}
@@ -67,14 +79,28 @@ const PrivateRoutes = () => {
         <Route path='/TotalInfo' element={<TotalInfo />} />
         <Route path='/UserControl' element={<UserControl/>} />
         <Route path='/MemberControl' element={<MemberControl/>} />
+        <Route path='/AdminClient' element={<AdminClient/>} />
+        <Route path='/CarsControl' element={<CarsControl/>} />
         {/* 관리자 관리표*/}
-        <Route path='/ScrapTable' element={<ScrapTable/>} />
+        <Route path='/DisposalTable' element={<DisposalTable/>} />
         <Route path='/SupplyTable' element={<SupplyTable/>} />
+        <Route path='/CTMBasic' element={<CTMBasic/>} />
         <Route path='/CTMDetail' element={<CTMDetail/>} />
         <Route path='/CTMWeight' element={<CTMWeight/>} />
-        
+        <Route path='/CTMScale' element={<CTMScale/>} />
+        {/* 관리자 사업회원 데이터 관리*/}
+        <Route path='/Ad_Effluent' element={<Ad_Effluent/>} />
+        <Route path='/Ad_Facility' element={<Ad_Facility/>} />
+        <Route path='/Ad_UseFacility' element={<Ad_UseFacility/>} />
+        <Route path='/Ad_Input' element={<Ad_Input/>} />
+        <Route path='/Ad_Waste' element={<Ad_Waste/>} />
+        {/* 데이터 처리 */}
+        <Route path='/DataStatus' element={<DataStatus/>} />
+        <Route path='/CTMapping' element={<CTMapping/>} />
+        <Route path='/SupMapping' element={<SupMapping/>} />
+        <Route path='/DisMapping' element={<DisMapping/>} />
+        {/* 공통*/}
         <Route path='dashboard' element={<DashboardWrapper />} />
-        <Route path='menu-test' element={<MenuTestPage />} />
         {/* Lazy Modules */}
         <Route
           path='crafted/pages/profile/*'

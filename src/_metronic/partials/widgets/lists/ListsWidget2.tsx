@@ -35,7 +35,7 @@ const ListsWidget2: React.FC<Props> = ({className}) => {
         <div className='d-flex align-items-center mb-7'>
           {/* begin::Avatar */}
           <div className='symbol symbol-50px me-5'>
-            <img src={toAbsoluteUrl('media/avatars/300-6.jpg')} className='' alt='' />
+            <img src={toAbsoluteUrl('media/avatars/blank.png')} className='' alt='' />
           </div>
           {/* end::Avatar */}
           {/* begin::Text */}
@@ -86,7 +86,7 @@ const ListsWidget2: React.FC<Props> = ({className}) => {
         <div className='d-flex align-items-center mb-7'>
           {/* begin::Avatar */}
           <div className='symbol symbol-50px me-5'>
-            <img src={toAbsoluteUrl('media/avatars/300-9.jpg')} className='' alt='' />
+            <img src={toAbsoluteUrl('media/avatars/blank.png')} className='' alt='' />
           </div>
           {/* end::Avatar */}
           {/* begin::Text */}
@@ -103,7 +103,7 @@ const ListsWidget2: React.FC<Props> = ({className}) => {
         <div className='d-flex align-items-center'>
           {/* begin::Avatar */}
           <div className='symbol symbol-50px me-5'>
-            <img src={toAbsoluteUrl('media/avatars/300-23.jpg')} className='' alt='' />
+            <img src={toAbsoluteUrl('media/avatars/blank.png')} className='' alt='' />
           </div>
           {/* end::Avatar */}
           {/* begin::Text */}

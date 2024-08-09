@@ -1,29 +1,29 @@
 
-import {useState, FC} from 'react'
-import {KTIcon} from '../../../../../../_metronic/helpers'
-import {deactivateAccount, IDeactivateAccount} from '../SettingsModel'
-import * as Yup from 'yup'
-import {useFormik} from 'formik'
+import {FC} from 'react'
+// import {KTIcon} from '../../../../../../_metronic/helpers'
+// import {deactivateAccount, IDeactivateAccount} from '../SettingsModel'
+// import * as Yup from 'yup'
+// import {useFormik} from 'formik'
 
-const deactivateAccountSchema = Yup.object().shape({
-  confirm: Yup.boolean().oneOf([true], 'Please check the box to deactivate your account'),
-})
+// const deactivateAccountSchema = Yup.object().shape({
+//   confirm: Yup.boolean().oneOf([true], 'Please check the box to deactivate your account'),
+// })
 
 const DeactivateAccount: FC = () => {
-  const [loading, setLoading] = useState(false)
-  const formik = useFormik<IDeactivateAccount>({
-    initialValues: {
-      ...deactivateAccount,
-    },
-    validationSchema: deactivateAccountSchema,
-    onSubmit: () => {
-      setLoading(true)
-      setTimeout(() => {
-        setLoading(false)
-      }, 1000)
-      alert('Account has been successfully deleted!')
-    },
-  })
+  // const [loading, setLoading] = useState(false)
+  // const formik = useFormik<IDeactivateAccount>({
+  //   initialValues: {
+  //     ...deactivateAccount,
+  //   },
+  //   validationSchema: deactivateAccountSchema,
+  //   onSubmit: () => {
+  //     // setLoading(true)
+  //     setTimeout(() => {
+  //       // setLoading(false)
+  //     }, 1000)
+  //     alert('Account has been successfully deleted!')
+  //   },
+  // })
 
   return (
     <div className='card'>
@@ -36,11 +36,11 @@ const DeactivateAccount: FC = () => {
         aria-controls='kt_account_deactivate'
       >
         <div className='card-title m-0'>
-          <h3 className='fw-bolder m-0'>Deactivate Account</h3>
+          <h3 className='fw-bolder m-0'>계정삭제는 관리자에게 문의해주세요.</h3>
         </div>
       </div>
 
-      <div id='kt_account_deactivate' className='collapse show'>
+      {/* <div id='kt_account_deactivate' className='collapse show'>
         <form onSubmit={formik.handleSubmit} id='kt_account_deactivate_form' className='form'>
           <div className='card-body border-top p-9'>
             <div className='notice d-flex bg-light-warning rounded border-warning border border-dashed mb-9 p-6'>
@@ -76,9 +76,9 @@ const DeactivateAccount: FC = () => {
                 <div className='fv-help-block'>{formik.errors.confirm}</div>
               </div>
             )}
-          </div>
+          </div> */}
 
-          <div className='card-footer d-flex justify-content-end py-6 px-9'>
+          {/* <div className='card-footer d-flex justify-content-end py-6 px-9'>
             <button
               id='kt_account_deactivate_account_submit'
               type='submit'
@@ -92,9 +92,9 @@ const DeactivateAccount: FC = () => {
                 </span>
               )}
             </button>
-          </div>
-        </form>
-      </div>
+          </div> */}
+        {/* </form> */}
+      {/* </div> */}
     </div>
   )
 }

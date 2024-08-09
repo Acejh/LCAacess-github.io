@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
   useReactTable,
   getCoreRowModel,
@@ -16,17 +17,43 @@ import {
   Paper,
   Button,
   Select,
+  FormControl,
   MenuItem,
   Typography,
   TextField,
   Modal,
   Box,
   Grid,
+  CircularProgress,
 } from '@mui/material';
+import * as XLSX from 'xlsx';
+
+type DaumPostcodeData = {
+  roadAddress: string;
+  jibunAddress: string;
+  zonecode: string;
+  bname: string;
+  buildingName: string;
+  apartment: string;
+  autoRoadAddress?: string;
+  autoJibunAddress?: string;
+};
+
+declare global {
+  interface Window {
+    daum: {
+      Postcode: new (options: { oncomplete: (data: DaumPostcodeData) => void }) => Postcode;
+    };
+  }
+}
+
+interface Postcode {
+  open: () => void;
+}
 
 type Member = {
   id: number;
-  cord: string;
+  code: number;
   name: string;
   bizNo: string;
   ecoasCode: string;
@@ -37,56 +64,16 @@ type Member = {
   tel: string;
 };
 
-const data: Member[] = [
-  { id: 1, cord: '1498411', name: '주식회사 에이서스', bizNo: '6888600804', ecoasCode: '1598878', zipCode: '11628', address: '경기도 하남시 미사대로 540', addressDetail: 'A동 511호', managerName: '최재호', tel: '010-5197-2588' },
-  { id: 2, cord: '2', name: '나', bizNo: '2', ecoasCode: '2', zipCode: '1', address: '하남시', addressDetail: '미사대로', managerName: '나', tel: '1' },
-  { id: 3, cord: '3', name: '다', bizNo: '3', ecoasCode: '3', zipCode: '1', address: '하남시', addressDetail: '미사대로', managerName: '다', tel: '1' },
-  { id: 4, cord: '4', name: '라', bizNo: '4', ecoasCode: '4', zipCode: '1', address: '하남시', addressDetail: '미사대로', managerName: '라', tel: '1' },
-  { id: 5, cord: '5', name: '마', bizNo: '5', ecoasCode: '5', zipCode: '1', address: '하남시', addressDetail: '미사대로', managerName: '마', tel: '1' },
-  { id: 6, cord: '6', name: '바', bizNo: '6', ecoasCode: '6', zipCode: '1', address: '하남시', addressDetail: '미사대로', managerName: '바', tel: '1' },
-  { id: 7, cord: '7', name: '사', bizNo: '7', ecoasCode: '7', zipCode: '1', address: '하남시', addressDetail: '미사대로', managerName: '사', tel: '1' },
-  { id: 8, cord: '8', name: '아', bizNo: '8', ecoasCode: '8', zipCode: '1', address: '하남시', addressDetail: '미사대로', managerName: '아', tel: '1' },
-  { id: 9, cord: '9', name: '아', bizNo: '8', ecoasCode: '8', zipCode: '1', address: '하남시', addressDetail: '미사대로', managerName: '아', tel: '1' },
-  { id: 10, cord: '10', name: '아', bizNo: '8', ecoasCode: '8', zipCode: '1', address: '하남시', addressDetail: '미사대로', managerName: '아', tel: '1' },
-];
-
 const columns: ColumnDef<Member>[] = [
-  {
-    accessorKey: 'cord',
-    header: '사업회원 코드',
-  },
-  {
-    accessorKey: 'name',
-    header: '사업회원 명',
-  },
-  {
-    accessorKey: 'bizNo',
-    header: '사업자등록번호',
-  },
-  {
-    accessorKey: 'ecoasCode',
-    header: 'EcoAS코드',
-  },
-  {
-    accessorKey: 'zipCode',
-    header: '우편번호',
-  },
-  {
-    accessorKey: 'address',
-    header: '주소',
-  },
-  {
-    accessorKey: 'addressDetail',
-    header: '주소 상세',
-  },
-  {
-    accessorKey: 'managerName',
-    header: '담당자 명',
-  },
-  {
-    accessorKey: 'tel',
-    header: '연락처',
-  },
+  { accessorKey: 'code', header: '사업회원 코드', },
+  { accessorKey: 'name', header: '사업회원 명', },
+  { accessorKey: 'bizNo', header: '사업자등록번호'},
+  { accessorKey: 'ecoasCode', header: () => <div style={{ textAlign: 'center' }}>EcoAS코드</div>},
+  { accessorKey: 'zipCode', header: () => <div style={{ textAlign: 'center' }}>우편번호</div>},
+  { accessorKey: 'address', header: '주소', },
+  { accessorKey: 'addressDetail', header: '상세 주소', },
+  { accessorKey: 'managerName', header: '담당자 명', },
+  { accessorKey: 'tel', header: () => <div style={{ textAlign: 'center' }}>연락처</div>},
 ];
 
 const modalStyle = {
@@ -104,23 +91,31 @@ const modalStyle = {
 export function MemberControl() {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [labelShrink, setLabelShrink] = useState(false);
+  const [data, setData] = useState<Member[]>([]);
+  const [filteredData, setFilteredData] = useState<Member[]>([]); 
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState(''); 
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
-  const [newMember, setNewMember] = useState<Omit<Member, 'id' | 'cord' | 'ecoasCode'>>({
+  const [deleteMemberName, setDeleteMemberName] = useState<string>('');
+  const [newMember, setNewMember] = useState<Omit<Member, 'id' | 'code' >>({
     name: '',
     bizNo: '',
+    ecoasCode: '',
     zipCode: '',
     address: '',
     addressDetail: '',
     managerName: '',
     tel: '',
   });
-  const [editMember, setEditMember] = useState<Omit<Member, 'id' | 'cord' | 'ecoasCode'>>({
+  const [editMember, setEditMember] = useState<Member>({
+    id: 0,
+    code: 0,
     name: '',
     bizNo: '',
+    ecoasCode: '',
     zipCode: '',
     address: '',
     addressDetail: '',
@@ -131,6 +126,64 @@ export function MemberControl() {
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
+  //데이터 쿼리
+  useEffect(() => {
+    axios.get('https://lcaapi.acess.co.kr/Companies')
+      .then(response => {
+        setData(response.data.list);
+        setFilteredData(response.data.list); 
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error);
+        setLoading(false);
+      });
+  }, []);
+
+  // 엑셀 다운로드
+  const handleDownloadExcel = () => {
+    const tableData = table.getRowModel().rows.map(row => row.original);
+    const worksheet = XLSX.utils.json_to_sheet(tableData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
+    XLSX.writeFile(workbook, '사업회원관리.xlsx');
+  };
+
+  //주소검색
+  const handleDaumPostCode = () => {
+    const postcode = new window.daum.Postcode({
+      oncomplete: function(data: DaumPostcodeData) {
+        // console.log(data); 
+  
+        const roadAddr = data.roadAddress; 
+        let extraRoadAddr = '';
+  
+        if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
+          extraRoadAddr += data.bname;
+        }
+        if (data.buildingName !== '' && data.apartment === 'Y') {
+          extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+        }
+        if (extraRoadAddr !== '') {
+          extraRoadAddr = ' (' + extraRoadAddr + ')';
+        }
+  
+        setNewMember(prev => ({
+          ...prev,
+          zipCode: data.zonecode,
+          address: roadAddr + extraRoadAddr,
+        }));
+  
+        setEditMember(prev => ({
+          ...prev,
+          zipCode: data.zonecode,
+          address: roadAddr + extraRoadAddr,
+        }));
+      }
+    });
+    postcode.open();
+  };
 
   // DB 연계
   // useEffect(() => {
@@ -157,19 +210,41 @@ export function MemberControl() {
   };
 
   const handleSubmit = () => {
-    const existingData = JSON.parse(localStorage.getItem('MemberCT') || '[]');
-    const updatedData = [...existingData, newMember];
-    localStorage.setItem('MemberCT', JSON.stringify(updatedData));
-    
+    const newMemberData = {
+      ...newMember,
+    };
+
+    axios.post('https://lcaapi.acess.co.kr/Companies', newMemberData)
+      .then(() => {
+        axios.get('https://lcaapi.acess.co.kr/Companies')
+          .then(response => {
+            setData(response.data.list);
+            setFilteredData(response.data.list); 
+            setLoading(false);
+          })
+          .catch(error => {
+            console.error('Error fetching data:', error);
+            setLoading(false);
+          });
+      })
+      .catch(error => {
+        console.error('Error posting data:', error);
+      });
+
     handleClose();
   };
 
   //데이터 수정 
   const handleEditOpen = (index: number) => {
-    const member = data[index];
+    const row = table.getRowModel().rows[index];
+    const member = row.original;
+  
     setEditMember({
+      id: member.id,
+      code: member.code,
       name: member.name,
       bizNo: member.bizNo,
+      ecoasCode: member.ecoasCode,
       zipCode: member.zipCode,
       address: member.address,
       addressDetail: member.addressDetail,
@@ -179,20 +254,45 @@ export function MemberControl() {
     setEditIndex(index);
     setEditOpen(true);
   };
+
   const handleEditClose = () => setEditOpen(false);
 
   const handleEditSubmit = () => {
     if (editIndex !== null) {
-      const existingData = JSON.parse(localStorage.getItem('MemberCT') || '[]');
-      existingData[editIndex] = { ...existingData[editIndex], ...editMember };
-      localStorage.setItem('MemberCT', JSON.stringify(existingData));
+      const updatedMemberData = {
+        ...editMember,
+      };
+
+      const url = `https://lcaapi.acess.co.kr/Companies/${editMember.code}`;
+      // console.log("PUT URL:", url);
+
+      axios.put(url, updatedMemberData)
+        .then(() => {
+          axios.get('https://lcaapi.acess.co.kr/Companies')
+            .then(response => {
+              setData(response.data.list);
+              setFilteredData(response.data.list); 
+              setLoading(false);
+            })
+            .catch(error => {
+              console.error('Error fetching data:', error);
+              setLoading(false);
+            });
+        })
+        .catch(error => {
+          console.error('Error updating data:', error);
+        });
+
+      setEditOpen(false);
     }
-    setEditOpen(false);
   };
 
   //데이터 삭제
   const handleDeleteOpen = (index: number) => {
-    setDeleteIndex(index);
+    const globalIndex = pageIndex * pageSize + index; 
+    const memberToDelete = data[globalIndex];
+    setDeleteIndex(globalIndex);
+    setDeleteMemberName(memberToDelete.name); 
     setDeleteOpen(true);
   };
   
@@ -200,17 +300,54 @@ export function MemberControl() {
   
   const handleDeleteSubmit = () => {
     if (deleteIndex !== null) {
-      const existingData = JSON.parse(localStorage.getItem('MemberCT') || '[]');
-      existingData.splice(deleteIndex, 1); 
-      localStorage.setItem('MemberCT', JSON.stringify(existingData));
+      const memberToDelete = data[deleteIndex];
+      const url = `https://lcaapi.acess.co.kr/Companies/${memberToDelete.code}`;
+      // console.log("DELETE URL:", url);
+
+      axios.delete(url)
+        .then(() => {
+          axios.get('https://lcaapi.acess.co.kr/Companies')
+            .then(response => {
+              setData(response.data.list);
+              setFilteredData(response.data.list);
+              setLoading(false);
+            })
+            .catch(error => {
+              console.error('Error fetching data:', error);
+              setLoading(false);
+            });
+        })
+        .catch(error => {
+          console.error('Error deleting data:', error);
+        });
+
       handleDeleteClose();
     }
   };
 
+  const handleSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const handleSearch = () => {
+    const filtered = data.filter(member => 
+      (member.name && member.name.includes(searchQuery)) ||
+      (member.bizNo && member.bizNo.includes(searchQuery)) ||
+      (member.ecoasCode && member.ecoasCode.includes(searchQuery)) ||
+      (member.zipCode && member.zipCode.includes(searchQuery)) ||
+      (member.address && member.address.includes(searchQuery)) ||
+      (member.addressDetail && member.addressDetail.includes(searchQuery)) ||
+      (member.managerName && member.managerName.includes(searchQuery)) ||
+      (member.tel && member.tel.includes(searchQuery))
+    );
+    setFilteredData(filtered);
+    setPageIndex(0); // 검색 후 페이지를 첫 페이지로 초기화
+  };
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
-    pageCount: Math.ceil(data.length / pageSize),
+    pageCount: Math.ceil(filteredData.length / pageSize),
     state: {
       pagination: {
         pageIndex,
@@ -253,71 +390,103 @@ export function MemberControl() {
 
   return (
     <div style={{ margin: '0 30px' }}>
-      <Typography variant="h5" gutterBottom>
+      <Typography variant="h5" gutterBottom style={{marginBottom: '20px'}}>
         사업회원관리
       </Typography>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-        <TextField
-          label="Search"
-          variant="outlined"
-          style={{ width: '250px' }}
-          InputProps={{
-            style: { height: '40px', padding: '0 14px' },
-          }}
-          InputLabelProps={{
-            shrink: labelShrink,
-            style: {
-              transform: labelShrink ? 'translate(14px, -9px) scale(0.75)' : 'translate(14px, 12px) scale(1)',
-              transition: 'transform 0.2s ease-in-out',
-            },
-          }}
-          onFocus={() => setLabelShrink(true)}
-          onBlur={(e) => setLabelShrink(e.target.value !== '')}
-        />
-        <Button variant="contained" color="primary" style={{ width: '30px', height: '35px', marginLeft: '10px', fontSize: '12px' }}>
-          검색
+      <Button
+        variant="contained"
+        color="secondary"
+        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px', display: 'none' }}
+        onClick={handleDownloadExcel}
+      >
+        엑셀 다운로드
+      </Button>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+        <FormControl style={{ marginRight: '10px' }}>
+          <TextField
+            id="search-query-input"
+            label="검색"
+            value={searchQuery}
+            onChange={handleSearchQueryChange}
+            style={{ width: '200px' }}
+            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+          />
+        </FormControl>
+        <Button 
+          variant="contained" 
+          color="primary" 
+          style={{ width: '30px', height: '35px', marginLeft: '10px', fontSize: '12px' }}
+          onClick={handleSearch}
+        >
+          조회
         </Button>
         <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '50px', fontSize: '12px' }} onClick={handleOpen}>
           사업회원 등록
         </Button>
       </div>
       <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
-        <Table>
-          <TableHead>
+        <Table stickyHeader>
+          <TableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
-                  <TableCell key={header.id}>
+                  <TableCell key={header.id} style={{ backgroundColor: '#cfcfcf' }}>
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableCell>
                 ))}
-                <TableCell>수정</TableCell>
+                <TableCell style={{ backgroundColor: '#cfcfcf' }} >수정</TableCell>
               </TableRow>
             ))}
           </TableHead>
           <TableBody>
-            {table.getRowModel().rows.map((row, index) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map(cell => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-                <TableCell>
-                  <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)}>
-                    수정
-                  </Button>
-                  <Button variant="contained" color="secondary" onClick={() => handleDeleteOpen(index)} style={{ marginLeft: '10px' }}>
-                    삭제
-                  </Button>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                  <CircularProgress />
                 </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              <>
+                {table.getRowModel().rows.length > 0 ? (
+                  table.getRowModel().rows.map((row, index) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell
+                          key={cell.id}
+                          style={{
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            textAlign: ['ecoasCode', 'zipCode', 'tel'].includes(cell.column.id) ? 'right' : 'left',
+                          }}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                      <TableCell>
+                        <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)} style={{ padding: '2px' }}>
+                          수정
+                        </Button>
+                        <Button variant="contained" color="secondary" onClick={() => handleDeleteOpen(index)} style={{ marginLeft: '10px', padding: '2px' }}>
+                          삭제
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                      데이터가 없습니다.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
+            )}
           </TableBody>
         </Table>
       </TableContainer>
       <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <div>
+        <div>
           <Button onClick={() => table.setPageIndex(pageIndex - 1)} disabled={!table.getCanPreviousPage()} variant="contained" color="primary" style={{ marginRight: '10px' }}>
             이전
           </Button>
@@ -326,18 +495,18 @@ export function MemberControl() {
           </Button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-          <Button onClick={() => table.setPageIndex(0)} disabled={pageIndex === 0} variant="contained" color="primary" style={{ marginRight: '5px', minWidth: '30px', padding: '5px' }}>
+          <Button onClick={() => table.setPageIndex(0)} disabled={pageIndex === 0} variant="contained" color="primary" style={{ marginRight: '10px', minWidth: '30px', padding: '5px', width: 50 }}>
             처음
           </Button>
-          <Button onClick={() => table.setPageIndex(Math.max(0, pageIndex - 5))} disabled={pageIndex < 5} variant="contained" color="warning" style={{ marginRight: '5px', minWidth: '30px', padding: '5px' }}>
-            이전
+          <Button onClick={() => table.setPageIndex(Math.max(0, pageIndex - 5))} disabled={pageIndex < 5} variant="contained" color="warning" style={{ marginRight: '15px', minWidth: '30px', padding: '5px' }}>
+            -5
           </Button>
           {renderPageNumbers()}
-          <Button onClick={() => table.setPageIndex(Math.min(table.getPageCount() - 1, pageIndex + 5))} disabled={pageIndex >= table.getPageCount() - 5} variant="contained" color="warning" style={{ marginLeft: '5px', minWidth: '30px', padding: '5px' }}>
-            다음
+          <Button onClick={() => table.setPageIndex(Math.min(table.getPageCount() - 1, pageIndex + 5))} disabled={pageIndex >= table.getPageCount() - 5} variant="contained" color="warning" style={{ marginLeft: '10px', minWidth: '30px', padding: '5px' }}>
+            +5
           </Button>
-          <Button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={pageIndex === table.getPageCount() - 1} variant="contained" color="primary" style={{ marginLeft: '5px', minWidth: '30px', padding: '5px' }}>
-            맨끝
+          <Button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={pageIndex === table.getPageCount() - 1} variant="contained" color="primary" style={{ marginLeft: '10px', minWidth: '30px', padding: '5px', width: 50 }}>
+            끝
           </Button>
         </div>
         <div>
@@ -348,7 +517,7 @@ export function MemberControl() {
             value={table.getState().pagination.pageSize}
             onChange={e => table.setPageSize(Number(e.target.value))}
           >
-            {[10, 20, 30, 40, 50].map(pageSize => (
+            {[5 ,10, 20, 30, 40, 50].map(pageSize => (
               <MenuItem key={pageSize} value={pageSize}>
                 Show {pageSize}
               </MenuItem>
@@ -388,30 +557,58 @@ export function MemberControl() {
               />
             </Grid>
             <Grid item xs={12}>
+              <TextField
+                name="ecoasCode"
+                label="EcoAS코드"
+                variant="outlined"
+                fullWidth
+                value={newMember.ecoasCode}
+                onChange={handleChange}
+              />
+            </Grid>
+            <Grid item xs={8}>
             <TextField
               name="zipCode"
               label="우편번호"
               variant="outlined"
               fullWidth
               value={newMember.zipCode}
-              onChange={handleChange}
-              InputProps={{ inputProps: { style: { MozAppearance: 'textfield' } }, style: { WebkitAppearance: 'none', margin: 0 } }}
+              InputProps={{ 
+                readOnly: true, 
+                style: { 
+                  backgroundColor: '#f0f0f0', 
+                  pointerEvents: 'none',
+                  textDecoration: 'none',
+                }
+              }}
+            />
+            </Grid>
+            <Grid item xs={4}>
+              <Button variant="contained" color="primary" onClick={handleDaumPostCode} style={{ height: '100%', fontSize: '12px' }}>
+                주소 검색
+              </Button>
+            </Grid>
+            <Grid item xs={12}>
+            <TextField
+              name="address"
+              label="주소"
+              variant="outlined"
+              fullWidth
+              value={newMember.address}
+              InputProps={{ 
+                readOnly: true, 
+                style: { 
+                  backgroundColor: '#f0f0f0', 
+                  pointerEvents: 'none',
+                  textDecoration: 'none',
+                }
+              }}
             />
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="address"
-                label="주소"
-                variant="outlined"
-                fullWidth
-                value={newMember.address}
-                onChange={handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
                 name="addressDetail"
-                label="주소 상세"
+                label="상세 주소"
                 variant="outlined"
                 fullWidth
                 value={newMember.addressDetail}
@@ -482,29 +679,57 @@ export function MemberControl() {
             </Grid>
             <Grid item xs={12}>
               <TextField
-                name="zipCode"
-                label="우편번호"
+                name="ecoasCode"
+                label="EcoAS코드"
                 variant="outlined"
                 fullWidth
-                value={editMember.zipCode}
+                value={editMember.ecoasCode}
                 onChange={handleChange}
-                InputProps={{ inputProps: { style: { MozAppearance: 'textfield' } }, style: { WebkitAppearance: 'none', margin: 0 } }}
               />
             </Grid>
+            <Grid item xs={8}>
+            <TextField
+              name="zipCode"
+              label="우편번호"
+              variant="outlined"
+              fullWidth
+              value={newMember.zipCode}
+              InputProps={{ 
+                readOnly: true, 
+                style: { 
+                  backgroundColor: '#f0f0f0', 
+                  pointerEvents: 'none',
+                  textDecoration: 'none',
+                }
+              }}
+            />
+            </Grid>
+            <Grid item xs={4}>
+              <Button variant="contained" color="primary" onClick={handleDaumPostCode} style={{ height: '100%' }}>
+                주소 검색
+              </Button>
+            </Grid>
             <Grid item xs={12}>
-              <TextField
-                name="address"
-                label="주소"
-                variant="outlined"
-                fullWidth
-                value={editMember.address}
-                onChange={handleChange}
-              />
+            <TextField
+              name="address"
+              label="주소"
+              variant="outlined"
+              fullWidth
+              value={newMember.address}
+              InputProps={{ 
+                readOnly: true, 
+                style: { 
+                  backgroundColor: '#f0f0f0', 
+                  pointerEvents: 'none',
+                  textDecoration: 'none',
+                }
+              }}
+            />
             </Grid>
             <Grid item xs={12}>
               <TextField
                 name="addressDetail"
-                label="주소 상세"
+                label="상세 주소"
                 variant="outlined"
                 fullWidth
                 value={editMember.addressDetail}
@@ -552,7 +777,10 @@ export function MemberControl() {
           <Typography id="delete-modal-title" variant="h6" component="h2">
             정말 삭제하시겠습니까?
           </Typography>
-          <Typography id="delete-modal-title" variant="h6" component="h2" style={{ fontSize: 12}}>
+          <Typography id="delete-modal-title" variant="h6" component="h2" style={{ fontSize: 12 }}>
+            사업회원 명: {deleteMemberName}
+          </Typography>
+          <Typography id="delete-modal-title" variant="h6" component="h2" style={{ fontSize: 12 }}>
             되돌릴수 없습니다.
           </Typography>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>

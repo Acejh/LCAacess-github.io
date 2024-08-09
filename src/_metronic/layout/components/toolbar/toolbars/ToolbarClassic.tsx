@@ -2,7 +2,7 @@
 import clsx from 'clsx'
 import {useState} from 'react'
 import {KTIcon} from '../../../../helpers'
-import {CreateAppModal, Dropdown1} from '../../../../partials'
+import {CreateAppModal, } from '../../../../partials'
 import {useLayout} from '../../../core'
 
 const ToolbarClassic = () => {
@@ -14,7 +14,7 @@ const ToolbarClassic = () => {
 
   return (
     <div className='d-flex align-items-center gap-2 gap-lg-3'>
-      {config.app?.toolbar?.filterButton && (
+      {/* {config.app?.toolbar?.filterButton && (
         <div className='m-0'>
           <a
             href='#'
@@ -27,7 +27,7 @@ const ToolbarClassic = () => {
           </a>
           <Dropdown1 />
         </div>
-      )}
+      )} */}
 
       {config.app?.toolbar?.daterangepickerButton && (
         <div
@@ -43,13 +43,13 @@ const ToolbarClassic = () => {
         </div>
       )}
 
-      {config.app?.toolbar?.secondaryButton && (
+      {/* {config.app?.toolbar?.secondaryButton && (
         <a href='#' className='btn btn-sm btn-flex btn-light fw-bold'>
           Filter
         </a>
-      )}
+      )} */}
 
-      {config.app?.toolbar?.primaryButton && (
+      {/* {config.app?.toolbar?.primaryButton && (
         <a
           href='#'
           onClick={() => setShowCreateAppModal(true)}
@@ -57,7 +57,7 @@ const ToolbarClassic = () => {
         >
           Create
         </a>
-      )}
+      )} */}
       <CreateAppModal show={showCreateAppModal} handleClose={() => setShowCreateAppModal(false)} />
     </div>
   )

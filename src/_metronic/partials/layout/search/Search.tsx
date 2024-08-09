@@ -161,7 +161,7 @@ const Search: FC = () => {
                   className='d-flex text-gray-900 text-hover-primary align-items-center mb-5'
                 >
                   <div className='symbol symbol-40px me-4'>
-                    <img src={toAbsoluteUrl('media/avatars/300-6.jpg')} alt='' />
+                    <img src={toAbsoluteUrl('media/avatars/blank.png')} alt='' />
                   </div>
 
                   <div className='d-flex flex-column justify-content-start fw-bold'>
@@ -175,7 +175,7 @@ const Search: FC = () => {
                   className='d-flex text-gray-900 text-hover-primary align-items-center mb-5'
                 >
                   <div className='symbol symbol-40px me-4'>
-                    <img src={toAbsoluteUrl('media/avatars/300-2.jpg')} alt='' />
+                    <img src={toAbsoluteUrl('media/avatars/blank.png')} alt='' />
                   </div>
 
                   <div className='d-flex flex-column justify-content-start fw-bold'>
@@ -189,7 +189,7 @@ const Search: FC = () => {
                   className='d-flex text-gray-900 text-hover-primary align-items-center mb-5'
                 >
                   <div className='symbol symbol-40px me-4'>
-                    <img src={toAbsoluteUrl('media/avatars/300-9.jpg')} alt='' />
+                    <img src={toAbsoluteUrl('media/avatars/blank.png')} alt='' />
                   </div>
 
                   <div className='d-flex flex-column justify-content-start fw-bold'>
@@ -203,7 +203,7 @@ const Search: FC = () => {
                   className='d-flex text-gray-900 text-hover-primary align-items-center mb-5'
                 >
                   <div className='symbol symbol-40px me-4'>
-                    <img src={toAbsoluteUrl('media/avatars/300-14.jpg')} alt='' />
+                    <img src={toAbsoluteUrl('media/avatars/blank.png')} alt='' />
                   </div>
 
                   <div className='d-flex flex-column justify-content-start fw-bold'>
@@ -217,7 +217,7 @@ const Search: FC = () => {
                   className='d-flex text-gray-900 text-hover-primary align-items-center mb-5'
                 >
                   <div className='symbol symbol-40px me-4'>
-                    <img src={toAbsoluteUrl('media/avatars/300-11.jpg')} alt='' />
+                    <img src={toAbsoluteUrl('media/avatars/blank.png')} alt='' />
                   </div>
 
                   <div className='d-flex flex-column justify-content-start fw-bold'>

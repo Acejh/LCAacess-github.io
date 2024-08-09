@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import clsx from 'clsx'
-import { getUserByToken, register } from '../core/_requests'
+import { register } from '../core/_requests'
 import { Link } from 'react-router-dom'
 import { PasswordMeterComponent } from '../../../../_metronic/assets/ts/components'
 import { useAuth } from '../core/Auth'
@@ -60,8 +60,7 @@ export function Registration() {
           values.role
         )
         saveAuth(auth)
-        const { data: user } = await getUserByToken(auth.api_token)
-        setCurrentUser(user)
+        setCurrentUser(auth.userInfo)
       } catch (error) {
         console.error(error)
         saveAuth(undefined)

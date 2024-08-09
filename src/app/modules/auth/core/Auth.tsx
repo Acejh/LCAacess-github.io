@@ -1,91 +1,84 @@
 /* eslint-disable react-refresh/only-export-components */
-import { FC, useState, useEffect, createContext, useContext, Dispatch, SetStateAction } from 'react'
-import { LayoutSplashScreen } from '../../../../_metronic/layout/core'
-import { AuthModel, UserModel } from './_models'
-import * as authHelper from './AuthHelpers'
-import { getUserByToken } from './_requests'
-import { WithChildren } from '../../../../_metronic/helpers'
+
+import React, { FC, useState, useEffect, createContext, useContext, Dispatch, SetStateAction } from 'react';
+import { LayoutSplashScreen } from '../../../../_metronic/layout/core';
+import { AuthModel, UserModel } from './_models';
+import { getAuth, setAuth, removeAuth } from './AuthHelpers';
+import { WithChildren } from '../../../../_metronic/helpers';
 
 type AuthContextProps = {
-  auth: AuthModel | undefined
-  saveAuth: (auth: AuthModel | undefined) => void
-  currentUser: UserModel | undefined
-  setCurrentUser: Dispatch<SetStateAction<UserModel | undefined>>
-  logout: () => void
-}
+  auth: AuthModel | undefined;
+  saveAuth: (auth: AuthModel | undefined) => void;
+  currentUser: UserModel | undefined;
+  setCurrentUser: Dispatch<SetStateAction<UserModel | undefined>>;
+  logout: () => void;
+};
 
 const initAuthContextPropsState = {
-  auth: authHelper.getAuth(),
+  auth: getAuth(),
   saveAuth: () => {},
   currentUser: undefined,
   setCurrentUser: () => {},
   logout: () => {},
-}
+};
 
-const AuthContext = createContext<AuthContextProps>(initAuthContextPropsState)
+const AuthContext = createContext<AuthContextProps>(initAuthContextPropsState);
 
 const useAuth = () => {
-  return useContext(AuthContext)
-}
+  return useContext(AuthContext);
+};
 
 const AuthProvider: FC<WithChildren> = ({ children }) => {
-  const [auth, setAuth] = useState<AuthModel | undefined>(authHelper.getAuth())
-  const [currentUser, setCurrentUser] = useState<UserModel | undefined>()
-  const saveAuth = (auth: AuthModel | undefined) => {
-    setAuth(auth)
-    if (auth) {
-      authHelper.setAuth(auth)
-    } else {
-      authHelper.removeAuth()
+  const [auth, setAuthState] = useState<AuthModel | undefined>(getAuth());
+  const [currentUser, setCurrentUser] = useState<UserModel | undefined>();
+
+  useEffect(() => {
+    const storedAuth = getAuth();
+    if (storedAuth) {
+      setAuthState(storedAuth);
+      setCurrentUser(storedAuth.userInfo);
     }
-  }
+  }, []);
+
+  const saveAuth = (auth: AuthModel | undefined) => {
+    setAuthState(auth);
+    if (auth) {
+      setAuth(auth);
+      setCurrentUser(auth.userInfo);
+    } else {
+      removeAuth();
+      setCurrentUser(undefined);
+    }
+  };
 
   const logout = () => {
-    saveAuth(undefined)
-    setCurrentUser(undefined)
-    authHelper.removeAuth()
-  }
+    saveAuth(undefined);
+    setCurrentUser(undefined);
+    removeAuth();
+  };
 
   return (
     <AuthContext.Provider value={{ auth, saveAuth, currentUser, setCurrentUser, logout }}>
       {children}
     </AuthContext.Provider>
-  )
-}
+  );
+};
 
 const AuthInit: FC<WithChildren> = ({ children }) => {
-  const { auth, currentUser, logout, setCurrentUser } = useAuth()
-  const [showSplashScreen, setShowSplashScreen] = useState(true)
+  const { auth, logout, setCurrentUser } = useAuth();
+  const [showSplashScreen, setShowSplashScreen] = useState(true);
 
   useEffect(() => {
-    const requestUser = async (token: string) => {
-      try {
-        if (!currentUser) {
-          const { data } = await getUserByToken(token)
-          if (data) {
-            setCurrentUser(data)
-          }
-        }
-      } catch (error) {
-        console.error(error)
-        if (currentUser) {
-          logout()
-        }
-      } finally {
-        setShowSplashScreen(false)
-      }
-    }
-
-    if (auth && auth.api_token) { 
-      requestUser(auth.api_token)
+    if (auth && auth.accessToken) {
+      setCurrentUser(auth.userInfo);
     } else {
-      logout()
-      setShowSplashScreen(false)
+      logout();
+      setShowSplashScreen(false);
     }
-    // eslint-disable-next-line
-  }, [])
+    setShowSplashScreen(false);
+  }, [auth, logout, setCurrentUser]);
 
-  return showSplashScreen ? <LayoutSplashScreen /> : <>{children}</>
-}
+  return showSplashScreen ? <LayoutSplashScreen /> : <>{children}</>;
+};
 
-export { AuthProvider, AuthInit, useAuth }
+export { AuthProvider, AuthInit, useAuth };

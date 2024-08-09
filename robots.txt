@@ -1,0 +1,17 @@
+User-agent: *
+Disallow: /MemberControl/
+Disallow: /UserControl/
+Disallow: /AdminClient/
+Disallow: /CarsControl/
+Disallow: /CTMBasic/
+Disallow: /CTMDetail/
+Disallow: /CTMWeight/
+Disallow: /SupplyTable/
+Disallow: /DisposalTable/
+Disallow: /CTMScale/
+Disallow: /Ad_Input/
+Disallow: /Ad_Facility/
+Disallow: /Ad_UseFacility/
+Disallow: /Ad_Products/
+Disallow: /Ad_Effluent/
+
