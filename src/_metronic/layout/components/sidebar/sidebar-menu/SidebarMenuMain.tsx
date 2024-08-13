@@ -57,6 +57,8 @@ const SidebarMenuMain = () => {
             <SidebarMenuItem to='/SupplyTable' title='공급 관리표' hasBullet={true} />
             <SidebarMenuItem to='/DisposalTable' title='폐기 관리표' hasBullet={true} />
             <SidebarMenuItem to='/CTMScale' title='수집운반 보정중량' hasBullet={true} />
+            <SidebarMenuItem to='/NonTargetWeights' title='비대상품목 입고량' hasBullet={true} />
+            <SidebarMenuItem to='/ProductsScale' title='품목별 보정중량' hasBullet={true} />
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub
@@ -114,6 +116,8 @@ const SidebarMenuMain = () => {
             <SidebarMenuItem to='/SupplyTable' title='공급 관리표' hasBullet={true} />
             <SidebarMenuItem to='/DisposalTable' title='폐기 관리표' hasBullet={true} />
             <SidebarMenuItem to='/CTMScale' title='수집운반 보정중량' hasBullet={true} />
+            <SidebarMenuItem to='/NonTargetWeights' title='비대상품목 입고량' hasBullet={true} />
+            <SidebarMenuItem to='/ProductsScale' title='품목별 보정중량' hasBullet={true} />
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub
