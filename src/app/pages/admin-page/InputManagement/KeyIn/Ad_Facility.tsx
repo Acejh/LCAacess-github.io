@@ -366,15 +366,18 @@ export function Ad_Facility() {
       <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
         <Table stickyHeader>
           <TableHead>
+            {/* 첫 번째 헤더 줄: 설비 용량 */}
             <TableRow>
-              <TableCell colSpan={2} style={{ ...stickyHeaderStyle2(), textAlign: 'center' }}>설비용량(Kw) →</TableCell>
+              <TableCell colSpan={2} style={{ ...stickyHeaderStyle2(), textAlign: 'center', left: 0, zIndex: 3 }}>설비용량(Kw) →</TableCell>
               {facilities.map(facility => (
                 <TableCell key={facility.id} colSpan={1} style={{ ...stickyHeaderStyle2(), textAlign: 'right' }}>{numeral(facility.capacity).format('0.0')}</TableCell> 
               ))}
             </TableRow>
+
+            {/* 두 번째 헤더 줄: 품목군, 제품명, 설비명 */}
             <TableRow>
-              <TableCell style={stickyHeaderStyle()}>품목군</TableCell>
-              <TableCell style={stickyHeaderStyle()}>제품명</TableCell>
+              <TableCell style={{ ...stickyHeaderStyle(), left: 0, zIndex: 3 }}>품목군</TableCell>
+              <TableCell style={{ ...stickyHeaderStyle(), left: '130px', zIndex: 3 }}>제품명</TableCell>
               {facilities.map(facility => (
                 <TableCell key={facility.id} style={stickyHeaderStyle()}>{facility.name}</TableCell>
               ))}
@@ -399,19 +402,26 @@ export function Ad_Facility() {
                   const uniqueKey = `${row.id}-${row.original.itemCode}-${row.original.itemName}`;
                   return (
                     <TableRow key={uniqueKey}>
-                      {row.getVisibleCells().map(cell => (
-                        <TableCell
-                          key={cell.id}
-                          style={{
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            textAlign: ['categoryName', 'itemName'].includes(cell.column.id) ? 'left' : 'center',
-                          }}
-                        >
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
+                      {row.getVisibleCells().map((cell) => {
+                        const isCategoryOrProduct = ['categoryName', 'itemName'].includes(cell.column.id);
+                        return (
+                          <TableCell
+                            key={cell.id}
+                            style={{
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              textAlign: isCategoryOrProduct ? 'left' : 'center',
+                              position: isCategoryOrProduct ? 'sticky' : 'static',
+                              left: cell.column.id === 'categoryName' ? 0 : cell.column.id === 'itemName' ? '130px' : undefined,
+                              zIndex: isCategoryOrProduct ? 2 : 1,
+                              backgroundColor: isCategoryOrProduct ? '#ffffff' : undefined,
+                            }}
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        );
+                      })}
                     </TableRow>
                   );
                 })

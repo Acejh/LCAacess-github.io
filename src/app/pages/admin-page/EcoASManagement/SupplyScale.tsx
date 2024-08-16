@@ -27,17 +27,18 @@ import {
 } from '@mui/material';
 import * as XLSX from 'xlsx';
 
-type WeightData = {
-  categoryName: string;
-  midItemName: string;
-  itemName: string;
+type ValuableData = {
+  item1: string;
+  item2: string;
+  item3: string;
   monthlyWeights: number[];
+  total: number;
 };
 
-const columns: ColumnDef<WeightData>[] = [
-  { accessorKey: 'categoryName', header: '품목군' },
-  { accessorKey: 'midItemName', header: '제품군' },
-  { accessorKey: 'itemName', header: '제품 분류' },
+const columns: ColumnDef<ValuableData>[] = [
+  { accessorKey: 'item1', header: '품목군' },
+  { accessorKey: 'item2', header: '제품군' },
+  { accessorKey: 'item3', header: '제품 분류' },
   ...Array.from({ length: 12 }, (_, i) => ({
     accessorKey: `month_${i + 1}`,
     header: () => (
@@ -45,12 +46,17 @@ const columns: ColumnDef<WeightData>[] = [
         {i + 1}월
       </div>
     ),
-    cell: (info: CellContext<WeightData, unknown>) => numeral(info.getValue()).format('0,0.00000'),
+    cell: (info: CellContext<ValuableData, unknown>) => numeral(info.getValue()).format('0,0.00000'),
   })),
+  {
+    accessorKey: 'total',
+    header: '총합',
+    cell: (info: CellContext<ValuableData, unknown>) => numeral(info.getValue()).format('0,0.00000'),
+  },
 ];
 
-export function ProductsScale() {
-  const [data, setData] = useState<WeightData[]>([]);
+export function SupplyScale() {
+  const [data, setData] = useState<ValuableData[]>([]);
   const [year, setYear] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
@@ -61,13 +67,13 @@ export function ProductsScale() {
     year: '',
   });
 
-  const categoryNameRef = useRef<HTMLTableCellElement>(null);
-  const midItemNameRef = useRef<HTMLTableCellElement>(null);
-  const itemNameRef = useRef<HTMLTableCellElement>(null);
+  const item1Ref = useRef<HTMLTableCellElement>(null);
+  const item2Ref = useRef<HTMLTableCellElement>(null);
+  const item3Ref = useRef<HTMLTableCellElement>(null);
 
   const [leftOffsets, setLeftOffsets] = useState({
-    midItemName: 0,
-    itemName: 0,
+    item2: 0,
+    item3: 0,
   });
 
   const fetchData = useCallback(async () => {
@@ -80,22 +86,24 @@ export function ProductsScale() {
     setLoading(true);
 
     try {
-        const url = `https://lcaapi.acess.co.kr/MonthlyWeights/scaled?CompanyCode=${searchParams.company.code}&Year=${searchParams.year}`;
+        const url = `https://lcaapi.acess.co.kr/MonthlyWeights/valuables?CompanyCode=${searchParams.company.code}&Year=${searchParams.year}`;
         const response = await axios.get(url);
         const { list } = response.data;
 
         const transformedData = list.map((item: {
-            categoryName: string;
-            midItemName: string;
-            itemName: string;
-            monthlyWeights: number[];
+            item1: string;
+            item2: string;
+            item3: string;
+            weights: number[];
+            total: number;
         }) => {
             const monthlyData: { [key: string]: number | string } = {
-              categoryName: item.categoryName,
-              midItemName: item.midItemName,
-              itemName: item.itemName
+              item1: item.item1,
+              item2: item.item2,
+              item3: item.item3,
+              total: item.total,
             };
-            item.monthlyWeights.forEach((weight: number, index: number) => {
+            item.weights.forEach((weight: number, index: number) => {
                 monthlyData[`month_${index + 1}`] = weight;
             });
             return monthlyData;
@@ -117,11 +125,11 @@ export function ProductsScale() {
 
   useEffect(() => {
     const updateOffsets = () => {
-      const categoryWidth = categoryNameRef.current?.offsetWidth || 0;
-      const midItemWidth = midItemNameRef.current?.offsetWidth || 0;
+      const item1Width = item1Ref.current?.offsetWidth || 0;
+      const item2Width = item2Ref.current?.offsetWidth || 0;
       setLeftOffsets({
-        midItemName: categoryWidth,
-        itemName: categoryWidth + midItemWidth,
+        item2: item1Width,
+        item3: item1Width + item2Width,
       });
     };
     updateOffsets();
@@ -136,7 +144,7 @@ export function ProductsScale() {
     const worksheet = XLSX.utils.json_to_sheet(tableData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    XLSX.writeFile(workbook, 'NonTargetWeights.xlsx');
+    XLSX.writeFile(workbook, 'ValuableWeights.xlsx');
   };
 
   const handleSearch = () => {
@@ -154,7 +162,7 @@ export function ProductsScale() {
     setYear(event.target.value as string);
   };
 
-  const table = useReactTable<WeightData>({
+  const table = useReactTable<ValuableData>({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -164,7 +172,7 @@ export function ProductsScale() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        품목별 보정중량
+        유가물 보정중량
       </Typography>
       <Button
         variant="contained"
@@ -224,12 +232,12 @@ export function ProductsScale() {
                       <TableCell 
                         key={header.id} 
                         ref={
-                          header.column.id === 'categoryName'
-                            ? categoryNameRef
-                            : header.column.id === 'midItemName'
-                            ? midItemNameRef
-                            : header.column.id === 'itemName'
-                            ? itemNameRef
+                          header.column.id === 'item1'
+                            ? item1Ref
+                            : header.column.id === 'item2'
+                            ? item2Ref
+                            : header.column.id === 'item3'
+                            ? item3Ref
                             : undefined
                         }
                         style={{ 
@@ -239,14 +247,14 @@ export function ProductsScale() {
                           position: 'sticky', 
                           top: 0, 
                           left: 
-                            header.column.id === 'categoryName'
+                            header.column.id === 'item1'
                               ? 0
-                              : header.column.id === 'midItemName'
-                              ? `${leftOffsets.midItemName}px` 
-                              : header.column.id === 'itemName'
-                              ? `${leftOffsets.itemName}px`
+                              : header.column.id === 'item2'
+                              ? `${leftOffsets.item2}px` 
+                              : header.column.id === 'item3'
+                              ? `${leftOffsets.item3}px`
                               : undefined,
-                          zIndex: ['categoryName', 'midItemName', 'itemName'].includes(header.column.id) ? 3 : 2,
+                          zIndex: ['item1', 'item2', 'item3'].includes(header.column.id) ? 3 : 2,
                           backgroundColor: '#cfcfcf', 
                         }}
                       >
@@ -279,22 +287,22 @@ export function ProductsScale() {
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            textAlign: ['categoryName', 'midItemName', 'itemName'].includes(cell.column.id)
+                            textAlign: ['item1', 'item2', 'item3'].includes(cell.column.id)
                               ? 'left'
                               : 'right',
-                            position: ['categoryName', 'midItemName', 'itemName'].includes(cell.column.id)
+                            position: ['item1', 'item2', 'item3'].includes(cell.column.id)
                               ? 'sticky'
                               : 'static',
                             left:
-                              cell.column.id === 'categoryName'
+                              cell.column.id === 'item1'
                                 ? 0
-                                : cell.column.id === 'midItemName'
-                                ? `${leftOffsets.midItemName}px`
-                                : cell.column.id === 'itemName'
-                                ? `${leftOffsets.itemName}px` 
+                                : cell.column.id === 'item2'
+                                ? `${leftOffsets.item2}px`
+                                : cell.column.id === 'item3'
+                                ? `${leftOffsets.item3}px` 
                                 : undefined,
-                            zIndex: ['categoryName', 'midItemName', 'itemName'].includes(cell.column.id) ? 2 : 1,
-                            backgroundColor: ['categoryName', 'midItemName', 'itemName'].includes(cell.column.id)
+                            zIndex: ['item1', 'item2', 'item3'].includes(cell.column.id) ? 2 : 1,
+                            backgroundColor: ['item1', 'item2', 'item3'].includes(cell.column.id)
                               ? '#ffffff'
                               : undefined,
                           }}

@@ -44,6 +44,8 @@ import { SupMapping } from '../pages/admin-page/ProStatus/SupMapping'
 import { DisMapping } from '../pages/admin-page/ProStatus/DisMapping'
 import { NonTargetWeights } from '../pages/admin-page/EcoASManagement/NonTargetWeights'
 import { ProductsScale } from '../pages/admin-page/EcoASManagement/ProductsScale'
+import { SupplyScale } from '../pages/admin-page/EcoASManagement/SupplyScale'
+import { DisposalScale } from '../pages/admin-page/EcoASManagement/DisposalScale'
 
 const PrivateRoutes = () => {
   const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
@@ -92,6 +94,8 @@ const PrivateRoutes = () => {
         <Route path='/CTMScale' element={<CTMScale/>} />
         <Route path='/NonTargetWeights' element={<NonTargetWeights/>} />
         <Route path='/ProductsScale' element={<ProductsScale/>} />
+        <Route path='/SupplyScale' element={<SupplyScale/>} />
+        <Route path='/DisposalScale' element={<DisposalScale/>} />
         {/* 관리자 사업회원 데이터 관리*/}
         <Route path='/Ad_Effluent' element={<Ad_Effluent/>} />
         <Route path='/Ad_Facility' element={<Ad_Facility/>} />
