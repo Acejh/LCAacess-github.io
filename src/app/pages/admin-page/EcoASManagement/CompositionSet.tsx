@@ -24,7 +24,6 @@ import {
   FormControl,
   CircularProgress,
 } from '@mui/material';
-import * as XLSX from 'xlsx';
 
 type CompositionData = {
   componentType: string; 
@@ -83,7 +82,7 @@ export function CompositionSet() {
           <div style={{ textAlign: 'center' }}>{product}</div>
         ),
         cell: (info: CellContext<CompositionData, unknown>) =>
-          numeral(info.getValue()).format('0,0.00000') + '%',
+          numeral(info.getValue() as number * 100).format('0,0.00000') + '%',
       }));
 
       // 기존의 구분 및 구성품 컬럼과 동적으로 생성된 컬럼 합침
@@ -140,12 +139,40 @@ export function CompositionSet() {
     };
   }, [data]);
 
-  const handleDownloadExcel = () => {
-    const tableData = table.getRowModel().rows.map(row => row.original);
-    const worksheet = XLSX.utils.json_to_sheet(tableData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    XLSX.writeFile(workbook, 'CompositionWeights.xlsx');
+  const handleDownloadExcel = async () => {
+    try {
+      const response = await axios.get(`https://lcaapi.acess.co.kr/Compositions/export?year=${year}`, {
+        responseType: 'blob', 
+      });
+  
+      // Content-Disposition에서 filename 추출
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = 'download.xlsx'; // 기본 파일 이름
+  
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename\*=UTF-8''(.+?)($|;|\s)/);
+        if (filenameMatch?.[1]) {
+          filename = decodeURIComponent(filenameMatch[1]);
+        } else {
+          const simpleFilenameMatch = contentDisposition.match(/filename="?(.+?)($|;|\s)"/);
+          if (simpleFilenameMatch?.[1]) {
+            filename = simpleFilenameMatch[1];
+          }
+        }
+      }
+  
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a'); 
+      link.href = url;
+    
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+    
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading Excel file:', error);
+    }
   };
 
   const handleSearch = () => {
@@ -174,7 +201,7 @@ export function CompositionSet() {
       <Button
         variant="contained"
         color="secondary"
-        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px', display: 'none' }}
+        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
         onClick={handleDownloadExcel}
       >
         엑셀 다운로드
