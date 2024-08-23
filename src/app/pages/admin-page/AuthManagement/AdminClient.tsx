@@ -77,7 +77,7 @@ const columns: ColumnDef<Client>[] = [
   { accessorKey: 'name', header: '거래처명', },
   { accessorKey: 'bizNo', header: '거래처 사업자번호', },
   { accessorKey: 'address', header: '주소', },
-  { accessorKey: 'distance', header: () => <div style={{ textAlign: 'center' }}>거리(km)</div>, cell: info => numeral(info.getValue()).format('0.0') },
+  { accessorKey: 'distance', header: () => <div style={{ textAlign: 'center' }}>거리(km)</div>, cell: info => numeral(info.getValue()).format('0,0.0') },
 ];
 
 const modalStyle = {

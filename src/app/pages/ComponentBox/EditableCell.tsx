@@ -1,42 +1,56 @@
 import React, { useState } from 'react';
 import { TextField } from '@mui/material';
-import numeral from 'numeral';
 
-type EditableCellProps = {
+interface EditableCellProps {
   value: number;
-  rowIndex: number;
-  columnId: string;
-  updateData: (rowIndex: number, columnId: string, value: number) => void;
-};
+  facilityId: number;
+  month: string;
+  year: number;
+  onSave: (newValue: number) => void;
+}
 
-const EditableCell: React.FC<EditableCellProps> = ({ value, rowIndex, columnId, updateData }) => {
+const EditableCell: React.FC<EditableCellProps> = ({ value, onSave }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [cellValue, setCellValue] = useState(value);
+  const [editValue, setEditValue] = useState(value);
 
   const handleDoubleClick = () => {
     setIsEditing(true);
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setCellValue(parseFloat(event.target.value));
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEditValue(parseFloat(e.target.value));
   };
 
   const handleBlur = () => {
     setIsEditing(false);
-    updateData(rowIndex, columnId, cellValue);
+    if (editValue !== value) {
+      onSave(editValue);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setIsEditing(false);
+      if (editValue !== value) {
+        onSave(editValue);
+      }
+    }
   };
 
   return isEditing ? (
     <TextField
-      value={cellValue}
+      value={editValue}
       onChange={handleChange}
       onBlur={handleBlur}
-      autoFocus
-      inputProps={{ style: { textAlign: 'right' } }}
+      onKeyDown={handleKeyDown}
+      fullWidth
+      InputProps={{
+        endAdornment: <span style={{ marginLeft: '5px' }}>시간/월</span>,
+      }}
     />
   ) : (
-    <div onDoubleClick={handleDoubleClick}>
-      {numeral(value).format('0,0.00000')}
+    <div onDoubleClick={handleDoubleClick} style={{ cursor: 'pointer' }}>
+      {editValue} 시간/월
     </div>
   );
 };

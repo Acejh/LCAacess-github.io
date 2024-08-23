@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
-import UseProduct, { Product } from '../../../ComponentBox/UseProduct';
+import UseProduct from '../../../ComponentBox/UseProduct';
 import numeral from 'numeral';
 import {
   useReactTable,
@@ -24,7 +24,7 @@ import {
   Box,
   TextField,
   Grid,
-  Chip,
+  // Chip,
   IconButton,
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
@@ -89,6 +89,18 @@ const modalStyle = {
   p: 4,
 };
 
+const modalStyle2 = {
+  position: 'absolute' as const,
+  top: '50%' as const,
+  left: '50%' as const,
+  transform: 'translate(-50%, -50%)',
+  width: 1400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
+
 export function Ad_Facility() {
   const [data, setData] = useState<TableData[]>([]);
   const [facilities, setFacilities] = useState<Facl[]>([]);
@@ -104,7 +116,6 @@ export function Ad_Facility() {
   const [deleteFacilityId, setDeleteFacilityId] = useState<number | null>(null);
   const [newFacility, setNewFacility] = useState({ name: '', capacity: '', companyCode: '', items: [] as string[] });
   const [editFacility, setEditFacility] = useState({ id: '', name: '', capacity: '', companyCode: '', items: [] as string[] });
-  const [products, setProducts] = useState<Product[]>([]);
 
   const fetchData = useCallback(async (companyCode: string) => {
     setLoading(true);
@@ -159,17 +170,17 @@ export function Ad_Facility() {
     }
   };
 
-  const handleProductChange = (product: Product | null) => {
-    if (product && !newFacility.items.includes(product.itemCode)) {
-      setNewFacility(prev => ({ ...prev, items: [...prev.items, product.itemCode] }));
-    }
-  };
+  // const handleProductChange = (product: Product | null) => {
+  //   if (product && !newFacility.items.includes(product.itemCode)) {
+  //     setNewFacility(prev => ({ ...prev, items: [...prev.items, product.itemCode] }));
+  //   }
+  // };
 
-  const handleEditProductChange = (product: Product | null) => {
-    if (product && !editFacility.items.includes(product.itemCode)) {
-      setEditFacility(prev => ({ ...prev, items: [...prev.items, product.itemCode] }));
-    }
-  };
+  // const handleEditProductChange = (product: Product | null) => {
+  //   if (product && !editFacility.items.includes(product.itemCode)) {
+  //     setEditFacility(prev => ({ ...prev, items: [...prev.items, product.itemCode] }));
+  //   }
+  // };
 
   const handleOpen = () => {
     if (selectedCompany) {
@@ -236,13 +247,13 @@ export function Ad_Facility() {
     setEditFacility(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleRemoveItem = (itemCode: string) => {
-    setNewFacility(prev => ({ ...prev, items: prev.items.filter(code => code !== itemCode) }));
-  };
+  // const handleRemoveItem = (itemCode: string) => {
+  //   setNewFacility(prev => ({ ...prev, items: prev.items.filter(code => code !== itemCode) }));
+  // };
 
-  const handleRemoveEditItem = (itemCode: string) => {
-    setEditFacility(prev => ({ ...prev, items: prev.items.filter(code => code !== itemCode) }));
-  };
+  // const handleRemoveEditItem = (itemCode: string) => {
+  //   setEditFacility(prev => ({ ...prev, items: prev.items.filter(code => code !== itemCode) }));
+  // };
 
   const handleSubmit = async () => {
     try {
@@ -480,7 +491,7 @@ export function Ad_Facility() {
         </Box>
       </Modal>
       <Modal open={open} onClose={handleClose} aria-labelledby="modal-title" aria-describedby="modal-description">
-        <Box sx={modalStyle}>
+        <Box sx={modalStyle2}>
           <Typography id="modal-title" variant="h6" component="h2" style={{ marginBottom: 20 }}>
             설비 등록
           </Typography>
@@ -523,20 +534,12 @@ export function Ad_Facility() {
               />
             </Grid>
             <Grid item xs={12}>
-              <UseProduct onProductChange={handleProductChange} onProductListChange={setProducts} />
-            </Grid>
-            <Grid item xs={12}>
-              {newFacility.items.map(itemCode => {
-                const product = products.find(prod => prod.itemCode === itemCode);
-                return (
-                  <Chip
-                    key={itemCode}
-                    label={product ? product.itemName : itemCode}
-                    onDelete={() => handleRemoveItem(itemCode)}
-                    style={{ marginRight: '5px', marginBottom: '5px' }}
-                  />
-                );
-              })}
+              <UseProduct
+                onProductChange={(updatedSelectedProducts) => {
+                  setNewFacility(prev => ({ ...prev, items: updatedSelectedProducts }));
+                }}
+                selectedProducts={newFacility.items}
+              />
             </Grid>
           </Grid>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
@@ -550,7 +553,7 @@ export function Ad_Facility() {
         </Box>
       </Modal>
       <Modal open={editModalOpen} onClose={handleEditModalClose} aria-labelledby="edit-modal-title" aria-describedby="edit-modal-description">
-        <Box sx={modalStyle}>
+        <Box sx={modalStyle2}>
           <Typography id="edit-modal-title" variant="h6" component="h2" style={{ marginBottom: 20 }}>
             설비 수정
           </Typography>
@@ -593,20 +596,12 @@ export function Ad_Facility() {
               />
             </Grid>
             <Grid item xs={12}>
-              <UseProduct onProductChange={handleEditProductChange} onProductListChange={setProducts} />
-            </Grid>
-            <Grid item xs={12}>
-              {editFacility.items.map(itemCode => {
-                const product = products.find(prod => prod.itemCode === itemCode);
-                return (
-                  <Chip
-                    key={itemCode}
-                    label={product ? product.itemName : itemCode}
-                    onDelete={() => handleRemoveEditItem(itemCode)}
-                    style={{ marginRight: '5px', marginBottom: '5px' }}
-                  />
-                );
-              })}
+              <UseProduct
+                onProductChange={(updatedSelectedProducts) => {
+                  setEditFacility(prev => ({ ...prev, items: updatedSelectedProducts }));
+                }}
+                selectedProducts={editFacility.items}
+              />
             </Grid>
           </Grid>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>

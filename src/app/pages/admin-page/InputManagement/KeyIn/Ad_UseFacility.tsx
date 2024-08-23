@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
-import numeral from 'numeral';
+import EditableCell from '../../../ComponentBox/EditableCell';
+// import numeral from 'numeral';
 import {
   useReactTable,
   getCoreRowModel,
   ColumnDef,
   flexRender,
+  CellContext,
 } from '@tanstack/react-table';
 import {
   Table,
@@ -41,8 +43,8 @@ type FacilityOpTime = {
 };
 
 type Facility = {
-  id: number; 
-  name: string; 
+  id: number;
+  name: string;
   capacity: number;
 };
 
@@ -64,24 +66,6 @@ type Input = {
   '11월': number;
   '12월': number;
 };
-
-const columns: ColumnDef<Input>[] = [
-  { accessorKey: 'facilityName', header: '설비명' },
-  { accessorKey: 'capacity', header: '용량(Kw)' },
-  { accessorKey: 'year', header: '연도' },
-  { accessorKey: '1월', header: '1월', cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '2월', header: '2월', cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '3월', header: '3월', cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '4월', header: '4월', cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '5월', header: '5월', cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '6월', header: '6월', cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '7월', header: '7월', cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '8월', header: '8월', cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '9월', header: '9월', cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '10월', header: '10월', cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '11월', header: '11월', cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '12월', header: '12월', cell: info => numeral(info.getValue()).format('0,0') },
-];
 
 const style = {
   position: 'absolute',
@@ -116,7 +100,6 @@ export function Ad_UseFacility() {
 
   const fetchFacilities = async (companyCode: string): Promise<Facility[]> => {
     const response = await axios.get(`https://lcaapi.acess.co.kr/Facilities?companyCode=${companyCode}`);
-    // console.log('설비 데이터:', response.data.facilities); 
     return response.data.facilities;
   };
   
@@ -137,8 +120,7 @@ export function Ad_UseFacility() {
     setLoading(true);
     try {
       const facilities = await fetchFacilities(company.code);
-      setFacilities(facilities); // 설비 목록을 상태에 저장
-      // console.log('설비 목록:', facilities); 
+      setFacilities(facilities); 
   
       let url = `https://lcaapi.acess.co.kr/FacilityOpTimes?companyCode=${company.code}`;
       if (year) {
@@ -147,11 +129,9 @@ export function Ad_UseFacility() {
   
       const response = await axios.get(url);
       const apiResponse: FacilityOpTime[] = response.data;
-      // console.log('가동 시간 데이터:', apiResponse); 
   
       const formattedData: Input[] = apiResponse.map((item) => {
         const facility = facilities.find((f) => f.id === item.facilityId);
-        // console.log(`facilityId: ${item.facilityId}, 매핑된 설비:`, facility); 
         return {
           facilityId: item.facilityId,
           facilityName: item.facilityName,
@@ -235,31 +215,39 @@ export function Ad_UseFacility() {
     }));
   };
 
+  const handleSave = async (facilityId: number, year: number, month: string, newValue: number) => {
+    try {
+      const monthIndex = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].indexOf(month) + 1;
+      const response = await axios.put(`https://lcaapi.acess.co.kr/FacilityOpTimes/${facilityId}`, {
+        year,
+        month: monthIndex,
+        opTime: newValue,
+      });
+      console.log('Update successful:', response.data);
+      if (selectedCompany && selectedYear) {
+        fetchData(selectedCompany, selectedYear); 
+      }
+    } catch (error) {
+      console.error('Error saving data:', error);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       const { facilityId, year, month, opTime } = newInput;
   
-      // 데이터 존재 여부 확인
       const checkUrl = `https://lcaapi.acess.co.kr/FacilityOpTimes/Exist?facilityId=${facilityId}&year=${year}&month=${month}`;
-      // console.log(`데이터 존재 여부 확인 URL: ${checkUrl}`);
-      
       const checkResponse = await axios.get(checkUrl);
       const exists = checkResponse.data.isExist;
   
-      // console.log('데이터 존재 여부 확인 결과:', checkResponse.data);
-  
       if (exists) {
-        // console.log('기존 데이터가 존재, OpTimes 값을 덮어씌움.');
         const updateUrl = `https://lcaapi.acess.co.kr/FacilityOpTimes/${checkResponse.data.facilityOpTime.id}`;
         const updatePayload = {
           opTime: Number(opTime),
         };
-        // console.log('업데이트 URL:', updateUrl);
-        // console.log('업데이트 Payload:', updatePayload);
         const updateResponse = await axios.put(updateUrl, updatePayload);
         console.log('업데이트 응답:', updateResponse.data);
       } else {
-        // console.log('기존 데이터 없음, 새로운 데이터를 등록');
         const createUrl = 'https://lcaapi.acess.co.kr/FacilityOpTimes';
         const createPayload = {
           facilityId: Number(facilityId),
@@ -267,31 +255,45 @@ export function Ad_UseFacility() {
           month: Number(month),
           opTime: Number(opTime),
         };
-        // console.log('생성 URL:', createUrl);
-        // console.log('생성 Payload:', createPayload);
         const createResponse = await axios.post(createUrl, createPayload);
         console.log('생성 응답:', createResponse.data);
       }
   
       handleClose();
-      // console.log('모달 닫기');
   
       if (selectedCompany && selectedYear) {
         fetchData(selectedCompany, selectedYear);
       }
-      // console.log('데이터 재조회');
     } catch (error) {
       console.error('데이터 등록 중 오류 발생:', error);
     }
   };
 
-  // 엑셀 다운로드
   const handleDownloadExcel = () => {
     const worksheet = XLSX.utils.json_to_sheet(data);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
     XLSX.writeFile(workbook, '설비가동시간.xlsx');
   };
+
+  const columns: ColumnDef<Input>[] = [
+    { accessorKey: 'facilityName', header: '설비명' },
+    { accessorKey: 'capacity', header: () => <div style={{ textAlign: 'center' }}>용량(Kw)</div> },
+    { accessorKey: 'year', header: () => <div style={{ textAlign: 'center' }}>연도</div>},
+    ...['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].map((month) => ({
+      accessorKey: month,
+      header: () => <div style={{ textAlign: 'center' }}>{month}</div>,
+      cell: (info: CellContext<Input, number>) => (
+        <EditableCell
+          value={info.getValue() as number}
+          facilityId={info.row.original.facilityId}
+          month={month}
+          year={info.row.original.year as number}
+          onSave={(newValue) => handleSave(info.row.original.facilityId, info.row.original.year as number, month, newValue)}
+        />
+      ),
+    })),
+  ];
 
   const table = useReactTable<Input>({
     data,

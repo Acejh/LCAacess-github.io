@@ -123,7 +123,7 @@ export function CompositionSet() {
     if (hasSearched) {
       fetchData();
     }
-  }, [fetchData, hasSearched]);
+  }, [hasSearched, fetchData]); 
 
   useEffect(() => {
     const updateOffsets = () => {
@@ -179,7 +179,7 @@ export function CompositionSet() {
     setYear(selectedYear);  
     setHasSearched(true);
     setInitialLoad(false);
-    setLoading(true);
+    fetchData(); 
   };
 
   const handleYearChange = (event: SelectChangeEvent<string>) => {

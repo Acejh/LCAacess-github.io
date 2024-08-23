@@ -39,13 +39,15 @@ type Car = {
   inOutType: string; 
   carNo: string;
   spec: string;
+  year: number; 
 };
 
 const columns: ColumnDef<Car>[] = [
-  { accessorKey: 'companyCode', header: '사업회원', },
+  { accessorKey: 'companyCode', header: '사업회원' },
+  { accessorKey: 'year', header: '연도' },
   { accessorKey: 'inOutType', header: '입출고 구분', cell: info => info.getValue() === 'IN' ? '입고' : info.getValue() === 'OUT' ? '출고' : ''},
-  { accessorKey: 'carNo', header: '차량번호', },
-  { accessorKey: 'spec', header: () => <div style={{ textAlign: 'center' }}>차량 규격</div> },
+  { accessorKey: 'carNo', header: '차량번호' },
+  { accessorKey: 'spec', header: () => <div style={{ textAlign: 'center' }}>차량 규격 (ton)</div> },
 ];
 
 const modalStyle = {
@@ -74,6 +76,7 @@ export function CarsControl() {
   const [totalCount, setTotalCount] = useState(0);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [selectedTypeInOut, setSelectedTypeInOut] = useState<string>('');
+  const [selectedYear, setSelectedYear] = useState<number | null>(null); 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [searchCarNo, setSearchCarNo] = useState('');
@@ -81,16 +84,19 @@ export function CarsControl() {
     company: Company | null;
     inOutType: 'IN' | 'OUT' | '';
     carNo: string;
+    year: number | null;  
   }>({
     company: null,
     inOutType: '',
     carNo: '',
-  })
+    year: null,
+  });
   const [newCar, setNewCar] = useState<Omit<Car, 'id'>>({
     companyCode: '',
     inOutType: '', 
     carNo: '',
     spec: '',
+    year: new Date().getFullYear(),  
   });
   const [editCar, setEditCar] = useState<Car>({
     id: 0,
@@ -98,9 +104,12 @@ export function CarsControl() {
     inOutType: '', 
     carNo: '',
     spec: '',
+    year: new Date().getFullYear(),  
   });
 
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 6 }, (_, i) => currentYear - i);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -124,6 +133,9 @@ export function CarsControl() {
       }
       if (searchParams.carNo) {
         url += `&carNo=${searchParams.carNo}`;
+      }
+      if (searchParams.year) {  
+        url += `&year=${searchParams.year}`;
       }
   
       // console.log('Fetching data with URL:', url);
@@ -232,6 +244,7 @@ export function CarsControl() {
       inOutType: car.inOutType === 'IN' ? '입고' : car.inOutType === 'OUT' ? '출고' : '',
       carNo: car.carNo,
       spec: car.spec,
+      year: car.year,
     });
     setEditIndex(index);
     setEditOpen(true);
@@ -312,6 +325,7 @@ export function CarsControl() {
       company: selectedCompany,
       inOutType: selectedTypeInOut as 'IN' | 'OUT' | '',
       carNo: searchCarNo,
+      year: selectedYear,
     });
     
     setPageIndex(0);
@@ -385,6 +399,22 @@ export function CarsControl() {
       </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} onCompanyListChange={setCompanies} />
+        <FormControl style={{ marginRight: '10px' }}>
+          <InputLabel id="year-select-label">연도</InputLabel>
+          <Select
+            labelId="year-select-label"
+            value={selectedYear ?? ''}  
+            onChange={(e) => setSelectedYear(e.target.value ? Number(e.target.value) : null)}
+            style={{ height: '45px' , width: '100px' }}
+          >
+            <MenuItem value="">전체</MenuItem> 
+            {years.map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <ClientType
           selectedInOutType={selectedTypeInOut}
           onInOutTypeChange={setSelectedTypeInOut}
@@ -547,6 +577,22 @@ export function CarsControl() {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel id="new-year-label">연도</InputLabel>
+                <Select
+                  labelId="new-year-label"
+                  value={newCar.year}
+                  onChange={(e) => setNewCar(prev => ({ ...prev, year: Number(e.target.value) }))}
+                >
+                  {years.map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12}>
               <TextField
                 name="carNo"
                 label="차량번호"
@@ -621,6 +667,22 @@ export function CarsControl() {
                   },
                 }}
               />
+            </Grid>
+            <Grid item xs={6}>
+              <FormControl fullWidth>
+                <InputLabel id="edit-year-label">연도</InputLabel>
+                <Select
+                  labelId="edit-year-label"
+                  value={editCar.year}
+                  onChange={(e) => setEditCar(prev => ({ ...prev, year: Number(e.target.value) }))}
+                >
+                  {years.map((year) => (
+                    <MenuItem key={year} value={year}>
+                      {year}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
             <Grid item xs={12}>
               <TextField

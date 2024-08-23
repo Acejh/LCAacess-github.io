@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
-import UseProduct, { Product } from '../../../ComponentBox/UseProduct';
-// import numeral from 'numeral';
+import UseProduct from '../../../ComponentBox/UseProduct';
 import {
   useReactTable,
   getCoreRowModel,
@@ -24,7 +23,6 @@ import {
   Box,
   TextField,
   Grid,
-  Chip,
   IconButton,
   Autocomplete,
 } from '@mui/material';
@@ -95,6 +93,18 @@ const modalStyle = {
   p: 4,
 };
 
+const modalStyle2 = {
+  position: 'absolute' as const,
+  top: '50%' as const,
+  left: '50%' as const,
+  transform: 'translate(-50%, -50%)',
+  width: 1400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
+};
+
 export function Ad_Waste() {
   const [data, setData] = useState<TableData[]>([]);
   const [wasteCategories, setWasteCategories] = useState<WasteCategory[]>([]);
@@ -110,7 +120,6 @@ export function Ad_Waste() {
   const [deleteWasteId, setDeleteWasteId] = useState<number | null>(null);
   const [newWaste, setNewWaste] = useState({ name: '', wasteGroup: '', companyCode: '', items: [] as string[] });
   const [editWaste, setEditWaste] = useState({ id: '', name: '', wasteGroup: '', companyCode: '', items: [] as string[] });
-  const [products, setProducts] = useState<Product[]>([]);
   const [wastes, setWastes] = useState<Waste[]>([]);
   const [selectedWasteId, setSelectedWasteId] = useState<number | null>(null);
 
@@ -182,16 +191,12 @@ export function Ad_Waste() {
     }
   };
 
-  const handleProductChange = (product: Product | null) => {
-    if (product && !newWaste.items.includes(product.itemCode)) {
-      setNewWaste(prev => ({ ...prev, items: [...prev.items, product.itemCode] }));
-    }
+  const handleProductChange = (updatedSelectedProducts: string[]) => {
+    setNewWaste(prev => ({ ...prev, items: updatedSelectedProducts }));
   };
 
-  const handleEditProductChange = (product: Product | null) => {
-    if (product && !editWaste.items.includes(product.itemCode)) {
-      setEditWaste(prev => ({ ...prev, items: [...prev.items, product.itemCode] }));
-    }
+  const handleEditProductChange = (updatedSelectedProducts: string[]) => {
+    setEditWaste(prev => ({ ...prev, items: updatedSelectedProducts }));
   };
 
   const handleOpen = () => {
@@ -260,14 +265,6 @@ export function Ad_Waste() {
     setEditWaste(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleRemoveItem = (itemCode: string) => {
-    setNewWaste(prev => ({ ...prev, items: prev.items.filter(code => code !== itemCode) }));
-  };
-
-  const handleRemoveEditItem = (itemCode: string) => {
-    setEditWaste(prev => ({ ...prev, items: prev.items.filter(code => code !== itemCode) }));
-  };
-
   const handleSubmit = async () => {
     try {
       const payload = {
@@ -276,7 +273,6 @@ export function Ad_Waste() {
         name: newWaste.name,
         items: newWaste.items.map((itemCode) => itemCode),
       };
-      // console.log('보내는 데이터:', payload); 
       await axios.post('https://lcaapi.acess.co.kr/WasteItems', payload); 
       setOpen(false);
       if (selectedCompany) {
@@ -298,7 +294,6 @@ export function Ad_Waste() {
         name: editWaste.name,
         items: editWaste.items.map((itemCode) => itemCode),
       };
-      // console.log('수정 데이터:', payload); 
       await axios.put(`https://lcaapi.acess.co.kr/WasteItems/${editWaste.id}`, payload);
       setEditModalOpen(false);
       if (selectedCompany) {
@@ -484,7 +479,7 @@ export function Ad_Waste() {
         </Box>
       </Modal>
       <Modal open={open} onClose={handleClose} aria-labelledby="modal-title" aria-describedby="modal-description">
-        <Box sx={modalStyle}>
+        <Box sx={modalStyle2}>
           <Typography id="modal-title" variant="h6" component="h2" style={{ marginBottom: 20 }}>
             폐기물 등록
           </Typography>
@@ -527,20 +522,10 @@ export function Ad_Waste() {
               />
             </Grid>
             <Grid item xs={12}>
-              <UseProduct onProductChange={handleProductChange} onProductListChange={setProducts} />
-            </Grid>
-            <Grid item xs={12}>
-              {newWaste.items.map((itemCode) => {
-                const product = products.find((prod) => prod.itemCode === itemCode);
-                return (
-                  <Chip
-                    key={itemCode}
-                    label={product ? product.itemName : itemCode}
-                    onDelete={() => handleRemoveItem(itemCode)}
-                    style={{ marginRight: '5px', marginBottom: '5px' }}
-                  />
-                );
-              })}
+              <UseProduct
+                onProductChange={handleProductChange}
+                selectedProducts={newWaste.items}
+              />
             </Grid>
           </Grid>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
@@ -554,7 +539,7 @@ export function Ad_Waste() {
         </Box>
       </Modal>
       <Modal open={editModalOpen} onClose={handleEditModalClose} aria-labelledby="edit-modal-title" aria-describedby="edit-modal-description">
-        <Box sx={modalStyle}>
+        <Box sx={modalStyle2}>
           <Typography id="edit-modal-title" variant="h6" component="h2" style={{ marginBottom: 20 }}>
             폐기물 수정
           </Typography>
@@ -598,20 +583,10 @@ export function Ad_Waste() {
               />
             </Grid>
             <Grid item xs={12}>
-              <UseProduct onProductChange={handleEditProductChange} onProductListChange={setProducts} />
-            </Grid>
-            <Grid item xs={12}>
-              {editWaste.items.map((itemCode) => {
-                const product = products.find((prod) => prod.itemCode === itemCode);
-                return (
-                  <Chip
-                    key={itemCode}
-                    label={product ? product.itemName : itemCode}
-                    onDelete={() => handleRemoveEditItem(itemCode)}
-                    style={{ marginRight: '5px', marginBottom: '5px' }}
-                  />
-                );
-              })}
+              <UseProduct
+                onProductChange={handleEditProductChange}
+                selectedProducts={editWaste.items}
+              />
             </Grid>
           </Grid>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
