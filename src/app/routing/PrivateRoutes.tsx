@@ -1,14 +1,16 @@
-import {lazy, FC, Suspense} from 'react'
-import {Route, Routes, Navigate} from 'react-router-dom'
-import {MasterLayout} from '../../_metronic/layout/MasterLayout'
+import { lazy, FC, Suspense } from 'react'
+import { Route, Routes, Navigate } from 'react-router-dom'
+import { MasterLayout } from '../../_metronic/layout/MasterLayout'
 import TopBarProgress from 'react-topbar-progress-indicator'
-import {DashboardWrapper} from '../pages/dashboard/DashboardWrapper'
-import {getCSSVariableValue} from '../../_metronic/assets/ts/_utils'
-import {WithChildren} from '../../_metronic/helpers'
-import {InputInfo} from '../pages/user-page/KeyIn/Input'
+import { getCSSVariableValue } from '../../_metronic/assets/ts/_utils'
+import { WithChildren } from '../../_metronic/helpers'
+import { useAuth } from '../modules/auth' // useAuth 추가
+
+// 기존 페이지 import들
+import { InputInfo } from '../pages/user-page/KeyIn/Input'
 import { Effluent } from '../pages/user-page/KeyIn/Effluent'
 import { ProFacility } from '../pages/user-page/KeyIn/ProFacility'
-import { ProProducts } from '../pages/user-page/KeyIn/ProProducts'  
+import { ProProducts } from '../pages/user-page/KeyIn/ProProducts'
 import { MaterialPos } from '../pages/user-page/Inquiry/MaterialPos'
 import { MaterialPosTrade } from '../pages/user-page/Inquiry/MaterialPosTrade'
 import { Waste } from '../pages/user-page/Inquiry/Waste'
@@ -26,9 +28,6 @@ import { DisposalTable } from '../pages/admin-page/EcoASManagement/DisposalTable
 import { SupplyTable } from '../pages/admin-page/EcoASManagement/SupplyTable'
 import { CTMDetail } from '../pages/admin-page/EcoASManagement/CTMDetail'
 import { CTMWeight } from '../pages/admin-page/EcoASManagement/CTMWeight'
-import { Registration } from '../modules/auth/components/Registration'
-import { Login } from '../modules/auth/components/Login'
-import { ForgotPassword } from '../modules/auth/components/ForgotPassword'
 import { CTMBasic } from '../pages/admin-page/EcoASManagement/CTMBasic'
 import { AdminClient } from '../pages/admin-page/AuthManagement/AdminClient'
 import { CarsControl } from '../pages/admin-page/AuthManagement/CarsControl'
@@ -47,70 +46,88 @@ import { ProductsScale } from '../pages/admin-page/EcoASManagement/ProductsScale
 import { SupplyScale } from '../pages/admin-page/EcoASManagement/SupplyScale'
 import { DisposalScale } from '../pages/admin-page/EcoASManagement/DisposalScale'
 import { CompositionSet } from '../pages/admin-page/EcoASManagement/CompositionSet'
+import { Ad_Dashboard } from '../pages/admin-page/Management/Ad_Dashboard'
+import { Login } from '../modules/auth/components/Login'
+import { ForgotPassword } from '../modules/auth/components/ForgotPassword'
+import { Registration } from '../modules/auth/components/Registration'
+import { NoticeControl } from '../pages/admin-page/AuthManagement/NoticeControl'
 
 const PrivateRoutes = () => {
-  const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
-  const AccountPage = lazy(() => import('../modules/accounts/AccountPage'))
-  const WidgetsPage = lazy(() => import('../modules/widgets/WidgetsPage'))
-  const UsersPage = lazy(() => import('../modules/apps/user-management/UsersPage'))
+    const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
+    const AccountPage = lazy(() => import('../modules/accounts/AccountPage'))
+    const WidgetsPage = lazy(() => import('../modules/widgets/WidgetsPage'))
+    const UsersPage = lazy(() => import('../modules/apps/user-management/UsersPage'))
+  const { currentUser } = useAuth();
+  console.log("Current User:", currentUser);
 
   return (
     <Routes>
       <Route element={<MasterLayout />}>
-        {/* 로그인,회원가입 성공후 대쉬보드로 이동 */}
-        <Route path='auth/*' element={<Navigate to='/dashboard' />} />
-        {/* 기본 */}
+        {/* 로그인, 회원가입 경로 */}
         <Route path="/Login" element={<Login />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
         <Route path="/Registration" element={<Registration />} />
-        {/* 유저 */} 
+
+        {/* 권한 기반 대시보드 라우팅 */}
+        {currentUser?.role === 'Admin' ? (
+          <Route path="/Dashboard" element={<Ad_Dashboard />} />
+        ) : (
+          <Route path="/Dashboard" element={<Dashboard />} />
+        )}
+
+        {/* 유저 기능 */}
         <Route path="/Input-Info" element={<InputInfo />} />
         <Route path="/Effluent" element={<Effluent />} />
         <Route path="/Pro-Facility" element={<ProFacility />} />
         <Route path="/Pro-Products" element={<ProProducts />} />
+
         {/* 유저 조회 */}
         <Route path="/MaterialPos" element={<MaterialPos />} />
-        <Route path="/TradeMaterialPos" element={<MaterialPosTrade/>} />
+        <Route path="/TradeMaterialPos" element={<MaterialPosTrade />} />
         <Route path="/Waste" element={<Waste />} />
         <Route path="/TradeWaste" element={<WasteTrade />} />
+
         {/* 유저 관리 */}
         <Route path="/ManageClient" element={<ManageClient />} />
-        <Route path="/ManageFacility" element={<ManageFacility/>} />
+        <Route path="/ManageFacility" element={<ManageFacility />} />
         <Route path="/ManageVehicle" element={<ManageVehicle />} />
-        {/* 관리자 관리기능 */}
+
+        {/* 관리자 관리 기능 */}
         <Route path='/ComProducts' element={<ComProducts />} />
-        <Route path='/Dashboard' element={<Dashboard />} />
         <Route path='/Mapping' element={<Mapping />} />
         <Route path='/TotalInfo' element={<TotalInfo />} />
-        <Route path='/UserControl' element={<UserControl/>} />
-        <Route path='/MemberControl' element={<MemberControl/>} />
-        <Route path='/AdminClient' element={<AdminClient/>} />
-        <Route path='/CarsControl' element={<CarsControl/>} />
-        {/* 관리자 관리표*/}
-        <Route path='/DisposalTable' element={<DisposalTable/>} />
-        <Route path='/SupplyTable' element={<SupplyTable/>} />
-        <Route path='/CTMBasic' element={<CTMBasic/>} />
-        <Route path='/CTMDetail' element={<CTMDetail/>} />
-        <Route path='/CTMWeight' element={<CTMWeight/>} />
-        <Route path='/CTMScale' element={<CTMScale/>} />
-        <Route path='/NonTargetWeights' element={<NonTargetWeights/>} />
-        <Route path='/ProductsScale' element={<ProductsScale/>} />
-        <Route path='/SupplyScale' element={<SupplyScale/>} />
-        <Route path='/DisposalScale' element={<DisposalScale/>} />
-        <Route path='/CompositionSet' element={<CompositionSet/>} />
-        {/* 관리자 사업회원 데이터 관리*/}
-        <Route path='/Ad_Effluent' element={<Ad_Effluent/>} />
-        <Route path='/Ad_Facility' element={<Ad_Facility/>} />
-        <Route path='/Ad_UseFacility' element={<Ad_UseFacility/>} />
-        <Route path='/Ad_Input' element={<Ad_Input/>} />
-        <Route path='/Ad_Waste' element={<Ad_Waste/>} />
+        <Route path='/UserControl' element={<UserControl />} />
+        <Route path='/MemberControl' element={<MemberControl />} />
+        <Route path='/AdminClient' element={<AdminClient />} />
+        <Route path='/CarsControl' element={<CarsControl />} />
+        <Route path='/NoticeControl' element={<NoticeControl />} />
+
+        {/* 관리자 관리표 */}
+        <Route path='/DisposalTable' element={<DisposalTable />} />
+        <Route path='/SupplyTable' element={<SupplyTable />} />
+        <Route path='/CTMBasic' element={<CTMBasic />} />
+        <Route path='/CTMDetail' element={<CTMDetail />} />
+        <Route path='/CTMWeight' element={<CTMWeight />} />
+        <Route path='/CTMScale' element={<CTMScale />} />
+        <Route path='/NonTargetWeights' element={<NonTargetWeights />} />
+        <Route path='/ProductsScale' element={<ProductsScale />} />
+        <Route path='/SupplyScale' element={<SupplyScale />} />
+        <Route path='/DisposalScale' element={<DisposalScale />} />
+        <Route path='/CompositionSet' element={<CompositionSet />} />
+
+        {/* 관리자 사업회원 데이터 관리 */}
+        <Route path='/Ad_Effluent' element={<Ad_Effluent />} />
+        <Route path='/Ad_Facility' element={<Ad_Facility />} />
+        <Route path='/Ad_UseFacility' element={<Ad_UseFacility />} />
+        <Route path='/Ad_Input' element={<Ad_Input />} />
+        <Route path='/Ad_Waste' element={<Ad_Waste />} />
+
         {/* 데이터 처리 */}
-        <Route path='/DataStatus' element={<DataStatus/>} />
-        <Route path='/CTMapping' element={<CTMapping/>} />
-        <Route path='/SupMapping' element={<SupMapping/>} />
-        <Route path='/DisMapping' element={<DisMapping/>} />
-        {/* 공통*/}
-        <Route path='dashboard' element={<DashboardWrapper />} />
+        <Route path='/DataStatus' element={<DataStatus />} />
+        <Route path='/CTMapping' element={<CTMapping />} />
+        <Route path='/SupMapping' element={<SupMapping />} />
+        <Route path='/DisMapping' element={<DisMapping />} />
+
         {/* Lazy Modules */}
         <Route
           path='crafted/pages/profile/*'
@@ -144,6 +161,7 @@ const PrivateRoutes = () => {
             </SuspensedView>
           }
         />
+
         {/* Page Not Found */}
         <Route path='*' element={<Navigate to='/error/404' />} />
       </Route>
@@ -151,7 +169,7 @@ const PrivateRoutes = () => {
   )
 }
 
-const SuspensedView: FC<WithChildren> = ({children}) => {
+const SuspensedView: FC<WithChildren> = ({ children }) => {
   const baseColor = getCSSVariableValue('--bs-primary')
   TopBarProgress.config({
     barColors: {
@@ -163,4 +181,4 @@ const SuspensedView: FC<WithChildren> = ({children}) => {
   return <Suspense fallback={<TopBarProgress />}>{children}</Suspense>
 }
 
-export {PrivateRoutes}
+export { PrivateRoutes }

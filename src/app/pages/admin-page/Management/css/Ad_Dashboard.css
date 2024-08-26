@@ -1,0 +1,102 @@
+/* Ad_Dashboard.css */
+.dashboard-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto auto;
+  gap: 20px;
+  padding: 20px;
+}
+
+.graph-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.graph-box {
+  border: 1px solid #ccc;
+  padding: 20px;
+  background-color: #f9f9f9;
+}
+
+.info-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.notification-section,
+.announcement-section {
+  border: 1px solid #ccc;
+  padding: 20px;
+  background-color: #f9f9f9;
+  height: 300px;
+  overflow-y: auto;
+}
+
+/* 고정된 헤더 설정 */
+.sticky-header {
+  height: 60px;
+  position: sticky;
+  top: 0;
+  background-color: #f9f9f9;
+  padding: 10px;
+  z-index: 100;
+  border-bottom: 1px solid #ccc;
+}
+
+/* 여백 조정 */
+.announcement-section {
+  height: calc(100% - 60px); /* 높이 조정 */
+}
+
+.search-container {
+  margin-bottom: 10px;
+}
+
+.search-container input {
+  margin-right: 5px;
+  padding: 5px;
+}
+
+.notice-list {
+  list-style: none;
+  padding: 0;
+}
+
+.notice-list li {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  position: sticky;
+  bottom: 0;
+  background-color: #f9f9f9;
+  padding: 10px 0;
+  z-index: 100;
+  border-top: 1px solid #ccc;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.pagination button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.pagination button:disabled {
+  background-color: #e0e0e0;
+  cursor: not-allowed;
+}
+
