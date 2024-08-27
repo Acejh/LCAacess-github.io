@@ -434,6 +434,7 @@ export function DisMapping() {
     { accessorKey: 'item1', header: '품목군' },
     { accessorKey: 'item2', header: '제품군' },
     { accessorKey: 'item3', header: '제품분류' },
+    { accessorKey: 'etcMethod', header: '처리방법'},
     {
       id: 'valuableMapping',
       header: '폐기물 매핑 확인',

@@ -19,11 +19,7 @@ const AppRoutes: FC = () => {
           {currentUser ? (
             <>
               <Route path='/*' element={<PrivateRoutes />} />
-              {currentUser.role === 'Admin' ? (
-                <Route index element={<Navigate to='/Ad_Dashboard' />} />
-              ) : (
-                <Route index element={<Navigate to='/Dashboard' />} />
-              )}
+              <Route index element={<Navigate to='/Ad_Dashboard' />} />
             </>
           ) : (
             <>

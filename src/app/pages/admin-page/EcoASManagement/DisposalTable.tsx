@@ -65,7 +65,6 @@ const columns: ColumnDef<Disposal>[] = [
   { accessorKey: 'clientBizno', header: '거래처 사업자등록번호' },
   { accessorKey: 'clientName', header: '거래처명' },
   { accessorKey: 'etcFlag', header: '구분' },
-  { accessorKey: 'etcGubun', header: '구분s' },
   { accessorKey: 'etcName', header: '폐기물 명' },
   { accessorKey: 'etcMethod', header: '처리방법' },
   { accessorKey: 'carNo', header: '차량번호' },

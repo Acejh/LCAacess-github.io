@@ -4,7 +4,6 @@ import { MasterLayout } from '../../_metronic/layout/MasterLayout'
 import TopBarProgress from 'react-topbar-progress-indicator'
 import { getCSSVariableValue } from '../../_metronic/assets/ts/_utils'
 import { WithChildren } from '../../_metronic/helpers'
-import { useAuth } from '../modules/auth' // useAuth 추가
 
 // 기존 페이지 import들
 import { InputInfo } from '../pages/user-page/KeyIn/Input'
@@ -19,7 +18,6 @@ import { ManageClient } from '../pages/user-page/Management/ManageClient'
 import { ManageFacility } from '../pages/user-page/Management/ManageFacility'
 import { ManageVehicle } from '../pages/user-page/Management/ManageVehicle'
 import { ComProducts } from '../pages/admin-page/Management/ComProducts'
-import { Dashboard } from '../pages/admin-page/Management/Dashboard'
 import { Mapping } from '../pages/admin-page/Management/Mapping'
 import { TotalInfo } from '../pages/admin-page/Management/TotalInfo'
 import { UserControl } from '../pages/admin-page/AuthManagement/AccountControl'
@@ -57,8 +55,6 @@ const PrivateRoutes = () => {
     const AccountPage = lazy(() => import('../modules/accounts/AccountPage'))
     const WidgetsPage = lazy(() => import('../modules/widgets/WidgetsPage'))
     const UsersPage = lazy(() => import('../modules/apps/user-management/UsersPage'))
-  const { currentUser } = useAuth();
-  console.log("Current User:", currentUser);
 
   return (
     <Routes>
@@ -67,13 +63,7 @@ const PrivateRoutes = () => {
         <Route path="/Login" element={<Login />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
         <Route path="/Registration" element={<Registration />} />
-
-        {/* 권한 기반 대시보드 라우팅 */}
-        {currentUser?.role === 'Admin' ? (
-          <Route path="/Dashboard" element={<Ad_Dashboard />} />
-        ) : (
-          <Route path="/Dashboard" element={<Dashboard />} />
-        )}
+        <Route path="/Dashboard" element={<Ad_Dashboard />} />
 
         {/* 유저 기능 */}
         <Route path="/Input-Info" element={<InputInfo />} />

@@ -31,6 +31,12 @@ import {
 } from '@mui/material';
 import * as XLSX from 'xlsx';
 
+type Item = {
+  id: number;
+  itemName: string;
+  unit: string;
+};
+
 type Input = {
   ids: number;
   inputType: string;
@@ -58,8 +64,7 @@ type ApiResponse = {
   monthlyAmounts: number[];
 };
 
-const inputTypes = ["전력", "경유", "등유", "상수", "공업용수"];
-const units = ["kWh", "L", "L", "m³", "m³"];
+const inputTypes = ["전력", "경유", "상수", "공업용수"];
 
 const columns: ColumnDef<Input>[] = [
   { accessorKey: 'ids', header: '통합ID' },
@@ -97,6 +102,7 @@ export function Ad_Input() {
   const [loading, setLoading] = useState(true);
   const currentYear = new Date().getFullYear();
   const years = Array.from(new Array(6), (val, index) => currentYear - index);
+  const [items, setItems] = useState<Item[]>([]);
   const [tempSelectedCompany, setTempSelectedCompany] = useState<Company | null>(null); 
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [tempSelectedYear, setTempSelectedYear] = useState<string>('');
@@ -110,6 +116,15 @@ export function Ad_Input() {
     month: 1,
     amount: '',
   });
+
+  const fetchItems = useCallback(async () => {
+    try {
+      const response = await axios.get('https://lcaapi.acess.co.kr/Inputs/items');
+      setItems(response.data);
+    } catch (error) {
+      console.error('Error fetching items:', error);
+    }
+  }, []);
 
   const fetchData = useCallback(async (company: Company | null, year: string) => {
     if (!company) {
@@ -138,29 +153,29 @@ export function Ad_Input() {
   
       const apiResponse: ApiResponse[] = response.data;
   
-      const formattedData: Input[] = inputTypes.map((inputType, index) => {
-        const item = apiResponse.find(apiItem => apiItem.inputType === inputType) || {
+      const formattedData: Input[] = items.map((item) => {
+        const apiItem = apiResponse.find(apiItem => apiItem.inputType === item.itemName) || {
           ids: Array(12).fill(0),
           monthlyAmounts: Array(12).fill(0),
-          year: year || '전체', 
+          year: year || '전체',
         };
         return {
-          ids: item.ids[0], 
-          inputType,
-          unit: units[index],
-          year: item.year,
-          '1월': item.monthlyAmounts[0],
-          '2월': item.monthlyAmounts[1],
-          '3월': item.monthlyAmounts[2],
-          '4월': item.monthlyAmounts[3],
-          '5월': item.monthlyAmounts[4],
-          '6월': item.monthlyAmounts[5],
-          '7월': item.monthlyAmounts[6],
-          '8월': item.monthlyAmounts[7],
-          '9월': item.monthlyAmounts[8],
-          '10월': item.monthlyAmounts[9],
-          '11월': item.monthlyAmounts[10],
-          '12월': item.monthlyAmounts[11],
+          ids: apiItem.ids[0],
+          inputType: item.itemName,
+          unit: item.unit,
+          year: apiItem.year,
+          '1월': apiItem.monthlyAmounts[0],
+          '2월': apiItem.monthlyAmounts[1],
+          '3월': apiItem.monthlyAmounts[2],
+          '4월': apiItem.monthlyAmounts[3],
+          '5월': apiItem.monthlyAmounts[4],
+          '6월': apiItem.monthlyAmounts[5],
+          '7월': apiItem.monthlyAmounts[6],
+          '8월': apiItem.monthlyAmounts[7],
+          '9월': apiItem.monthlyAmounts[8],
+          '10월': apiItem.monthlyAmounts[9],
+          '11월': apiItem.monthlyAmounts[10],
+          '12월': apiItem.monthlyAmounts[11],
         };
       });
   
@@ -177,15 +192,19 @@ export function Ad_Input() {
     } finally {
       setLoading(false); 
     }
-  }, []);
+  }, [items]);
   
   useEffect(() => {
     if (selectedCompany && selectedYear) {
       fetchData(selectedCompany, selectedYear);
     } else {
-      setLoading(false); 
+      setLoading(false);
     }
-  }, [selectedCompany, selectedYear, fetchData]);
+  }, [selectedCompany, selectedYear, fetchData,]);
+
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems]);
 
   const handleFetchData = () => {
     setData([]);

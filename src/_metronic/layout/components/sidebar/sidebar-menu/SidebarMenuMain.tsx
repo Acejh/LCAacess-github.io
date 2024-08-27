@@ -59,8 +59,8 @@ const SidebarMenuMain = () => {
             <SidebarMenuItem to='/CTMScale' title='수집운반 보정중량' hasBullet={true} />
             <SidebarMenuItem to='/NonTargetWeights' title='비대상품목 입고량' hasBullet={true} />
             <SidebarMenuItem to='/ProductsScale' title='품목별 보정중량' hasBullet={true} />
-            <SidebarMenuItem to='/SupplyScale' title='유가물 보정중량' hasBullet={true} />
-            <SidebarMenuItem to='/DisposalScale' title='폐기물 보정중량' hasBullet={true} />
+            <SidebarMenuItem to='/SupplyScale' title='유가물 중량' hasBullet={true} />
+            <SidebarMenuItem to='/DisposalScale' title='폐기물 중량' hasBullet={true} />
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub
@@ -121,8 +121,8 @@ const SidebarMenuMain = () => {
             <SidebarMenuItem to='/CTMScale' title='수집운반 보정중량' hasBullet={true} />
             <SidebarMenuItem to='/NonTargetWeights' title='비대상품목 입고량' hasBullet={true} />
             <SidebarMenuItem to='/ProductsScale' title='품목별 보정중량' hasBullet={true} />
-            <SidebarMenuItem to='/SupplyScale' title='유가물 보정중량' hasBullet={true} />
-            <SidebarMenuItem to='/DisposalScale' title='폐기물 보정중량' hasBullet={true} />
+            <SidebarMenuItem to='/SupplyScale' title='유가물 중량' hasBullet={true} />
+            <SidebarMenuItem to='/DisposalScale' title='폐기물 중량' hasBullet={true} />
             <SidebarMenuItem to='/CompositionSet' title='구성비율 관리' hasBullet={true} />
           </SidebarMenuItemWithSub>
 

@@ -61,13 +61,13 @@ const logout = () => {
 
 const refreshToken = async (accessToken: string, refreshToken: string): Promise<AuthModel | undefined> => {
   try {
-    // console.log('토큰 재발급 요청 중...')
+    console.log('토큰 재발급 요청 중...')
     // console.log('보내는 데이터:', { accessToken, refreshToken })  // 여기서 콘솔에 출력
     const response: AxiosResponse<AuthModel> = await axios.post('https://lcaapi.acess.co.kr/Auth/refresh-token', {
       accessToken,
       refreshToken,
     })
-    // console.log('토큰 재발급 성공:', response.data)
+    console.log('토큰 재발급 성공:', response.data)
     return response.data
   } catch (error) {
     if (axios.isAxiosError(error)) {

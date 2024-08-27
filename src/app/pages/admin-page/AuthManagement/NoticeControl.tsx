@@ -1,13 +1,34 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Editor } from '@tinymce/tinymce-react';
-import Button from '@mui/material/Button';
-import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import TextField from '@mui/material/TextField';
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  CircularProgress,
+  Typography,
+  Select,
+  MenuItem,
+} from '@mui/material';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
+import {
+  useReactTable,
+  getCoreRowModel,
+  getPaginationRowModel,
+  flexRender,
+  ColumnDef,
+  Updater,
+} from '@tanstack/react-table';
 
 interface Notice {
   id: number;
@@ -18,7 +39,7 @@ interface Notice {
   createdAt: string;
   updatedBy?: string | null;
   updatedAt?: string | null;
-  boardFiles?: UploadedFile[]; 
+  boardFiles?: UploadedFile[];
 }
 
 interface UploadedFile {
@@ -33,11 +54,9 @@ export function NoticeControl() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [editorContent, setEditorContent] = useState('');
-  const [viewOpen, setViewOpen] = useState(false);
-  const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(1);
-  const [pageSize] = useState(10);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [open, setOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
@@ -47,15 +66,18 @@ export function NoticeControl() {
 
   const fetchNotices = useCallback(async () => {
     setLoading(true);
+    setNotices([]);
+  
     try {
       const response = await axios.get('https://lcaapi.acess.co.kr/Boards', {
         params: {
           title: searchTitle,
           content: searchContent,
-          page: page,
+          page: pageIndex + 1,
           pageSize: pageSize,
         },
       });
+
       setNotices(response.data.list);
       setTotalCount(response.data.totalCount);
     } catch (error) {
@@ -63,7 +85,7 @@ export function NoticeControl() {
     } finally {
       setLoading(false);
     }
-  }, [searchTitle, searchContent, page, pageSize]);
+  }, [searchTitle, searchContent, pageIndex, pageSize]);
 
   useEffect(() => {
     fetchNotices();
@@ -71,22 +93,22 @@ export function NoticeControl() {
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const uploadFile = async (file: File) => {
-        const formData = new FormData();
-        formData.append('file', file);
+      const formData = new FormData();
+      formData.append('file', file);
 
-        try {
-            const response = await axios.post('https://lcaapi.acess.co.kr/Boards/Files', formData);
-            setUploadedFiles((prevFiles) => [
-                ...prevFiles,
-                { id: response.data.boardFileId, fileName: file.name },
-            ]);
-        } catch (error) {
-            console.error('파일 업로드에 실패했습니다:', error);
-        }
+      try {
+        const response = await axios.post('https://lcaapi.acess.co.kr/Boards/Files', formData);
+        setUploadedFiles((prevFiles) => [
+          ...prevFiles,
+          { id: response.data.boardFileId, fileName: file.name },
+        ]);
+      } catch (error) {
+        console.error('파일 업로드에 실패했습니다:', error);
+      }
     };
 
     acceptedFiles.forEach((file: File) => uploadFile(file));
-}, []);
+  }, []);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
@@ -102,11 +124,11 @@ export function NoticeControl() {
   const handleDownloadFile = async (fileId: number) => {
     try {
       const response = await axios.get(`https://lcaapi.acess.co.kr/Boards/Files/${fileId}`, {
-        responseType: 'blob', 
+        responseType: 'blob',
       });
 
       const contentDisposition = response.headers['content-disposition'];
-      let filename = 'downloaded_file'; 
+      let filename = 'downloaded_file';
 
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename\*=UTF-8''(.+?)($|;|\s)/);
@@ -121,13 +143,13 @@ export function NoticeControl() {
       }
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a'); 
+      const link = document.createElement('a');
       link.href = url;
-    
+
       link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
-    
+
       link.parentNode?.removeChild(link);
     } catch (error) {
       console.error('Error downloading file:', error);
@@ -136,27 +158,27 @@ export function NoticeControl() {
 
   const handleCreateNotice = async () => {
     const newNotice = {
-        title: newTitle,
-        content: editorContent,
-        readCount: 0,
-        createdBy: 'admin',
-        createdAt: new Date().toISOString(),
-        updatedBy: null,
-        updatedAt: null,
-        boardFileIds: uploadedFiles.map((file) => file.id), // 업로드된 파일의 id를 배열로 저장
+      title: newTitle,
+      content: editorContent,
+      readCount: 0,
+      createdBy: 'admin',
+      createdAt: new Date().toISOString(),
+      updatedBy: null,
+      updatedAt: null,
+      boardFileIds: uploadedFiles.map((file) => file.id),
     };
 
     try {
-        if (editMode && currentNoticeId) {
-            await axios.put(`https://lcaapi.acess.co.kr/Boards/${currentNoticeId}`, newNotice);
-        } else {
-            await axios.post('https://lcaapi.acess.co.kr/Boards', newNotice);
-        }
-        fetchNotices();
-        handleClose();
+      if (editMode && currentNoticeId) {
+        await axios.put(`https://lcaapi.acess.co.kr/Boards/${currentNoticeId}`, newNotice);
+      } else {
+        await axios.post('https://lcaapi.acess.co.kr/Boards', newNotice);
+      }
+      fetchNotices();
+      handleClose();
     } catch (error) {
-        console.error('공지사항을 등록하는데 실패했습니다:', error);
-        alert('공지사항 등록에 실패했습니다. 다시 시도해 주세요.');
+      console.error('공지사항을 등록하는데 실패했습니다:', error);
+      alert('공지사항 등록에 실패했습니다. 다시 시도해 주세요.');
     }
   };
 
@@ -167,55 +189,45 @@ export function NoticeControl() {
 
   const handleEditNotice = async (noticeId: number) => {
     try {
-        const response = await axios.get(`https://lcaapi.acess.co.kr/Boards/${noticeId}`);
-        const noticeData = response.data;
+      const response = await axios.get(`https://lcaapi.acess.co.kr/Boards/${noticeId}`);
+      const noticeData = response.data;
 
-        setNewTitle(noticeData.title);
-        setEditorContent(noticeData.content);
-        setCurrentNoticeId(noticeData.id);
-        setEditMode(true);
-        setOpen(true);
+      setNewTitle(noticeData.title);
+      setEditorContent(noticeData.content);
+      setCurrentNoticeId(noticeData.id);
+      setEditMode(true);
+      setOpen(true);
 
-        if (noticeData.boardFiles && noticeData.boardFiles.length > 0) {
-            const uploadedFilesFromNotice = noticeData.boardFiles.map((file: UploadedFile) => ({
-                id: file.id,
-                fileName: file.fileName,
-            }));
-            setUploadedFiles(uploadedFilesFromNotice);
-        } else {
-            setUploadedFiles([]);
-        }
-    } catch (error) {
-        console.error('공지사항을 불러오는데 실패했습니다:', error);
-        alert('공지사항을 불러오는 중 오류가 발생했습니다. 다시 시도해 주세요.');
-    }
-};
-
-const handleDeleteNotice = async (noticeId: number) => {
-  try {
-    const notice = notices.find((n) => n.id === noticeId);
-    if (notice?.boardFiles) {
-      for (const file of notice.boardFiles) {
-        await axios.delete(`https://lcaapi.acess.co.kr/Boards/files/${file.id}`);
+      if (noticeData.boardFiles && noticeData.boardFiles.length > 0) {
+        const uploadedFilesFromNotice = noticeData.boardFiles.map((file: UploadedFile) => ({
+          id: file.id,
+          fileName: file.fileName,
+        }));
+        setUploadedFiles(uploadedFilesFromNotice);
+      } else {
+        setUploadedFiles([]);
       }
+    } catch (error) {
+      console.error('공지사항을 불러오는데 실패했습니다:', error);
+      alert('공지사항을 불러오는 중 오류가 발생했습니다. 다시 시도해 주세요.');
     }
-
-    await axios.delete(`https://lcaapi.acess.co.kr/Boards/${noticeId}`);
-    fetchNotices();
-  } catch (error) {
-    console.error('공지사항을 삭제하는데 실패했습니다:', error);
-    alert('공지사항 삭제에 실패했습니다. 다시 시도해 주세요.');
-  }
-};
-
-  const handleViewNotice = (notice: Notice) => {
-    setSelectedNotice(notice);
-    setViewOpen(true);
   };
 
-  const handleViewClose = () => {
-    setViewOpen(false);
-    setSelectedNotice(null);
+  const handleDeleteNotice = async (noticeId: number) => {
+    try {
+      const notice = notices.find((n) => n.id === noticeId);
+      if (notice?.boardFiles) {
+        for (const file of notice.boardFiles) {
+          await axios.delete(`https://lcaapi.acess.co.kr/Boards/files/${file.id}`);
+        }
+      }
+
+      await axios.delete(`https://lcaapi.acess.co.kr/Boards/${noticeId}`);
+      fetchNotices();
+    } catch (error) {
+      console.error('공지사항을 삭제하는데 실패했습니다:', error);
+      alert('공지사항 삭제에 실패했습니다. 다시 시도해 주세요.');
+    }
   };
 
   const handleClickOpen = () => {
@@ -236,37 +248,144 @@ const handleDeleteNotice = async (noticeId: number) => {
     setEditMode(false);
   };
 
+  const handlePaginationChange = (updater: Updater<{ pageIndex: number; pageSize: number }>) => {
+    if (typeof updater === 'function') {
+      const newState = updater({ pageIndex, pageSize });
+      if (newState.pageIndex !== pageIndex || newState.pageSize !== pageSize) {
+        setPageIndex(newState.pageIndex);
+        setPageSize(newState.pageSize);
+      }
+    } else {
+      const newPageIndex = updater.pageIndex ?? pageIndex;
+      const newPageSize = updater.pageSize ?? pageSize;
+      if (newPageIndex !== pageIndex || newPageSize !== pageSize) {
+        setPageIndex(newPageIndex);
+        setPageSize(newPageSize);
+      }
+    }
+  };
+
+  const columns: ColumnDef<Notice>[] = [
+    { accessorKey: 'title', header: '제목' },
+    {
+      accessorKey: 'content',
+      header: '내용',
+      cell: (info) => (
+        <div
+          dangerouslySetInnerHTML={{
+            __html: String(info.getValue<string>()) || '',
+          }}
+          style={{
+            maxWidth: '300px',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        />
+      ),
+    },
+    { accessorKey: 'createdBy', header: '작성자' },
+    {
+      accessorKey: 'createdAt',
+      header: '작성일',
+      cell: (info) => new Date(info.getValue<string>()).toLocaleString(),
+    },
+    { accessorKey: 'readCount', header: '조회수' },
+    {
+      accessorKey: 'id',
+      header: '수정/삭제',
+      cell: (info) => (
+        <>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={() => handleEditNotice(info.getValue<number>())}
+            style={{ marginRight: '10px' }}
+          >
+            수정
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => handleDeleteNotice(info.getValue<number>())}
+          >
+            삭제
+          </Button>
+        </>
+      ),
+    },
+  ];
+
+  const table = useReactTable<Notice>({
+    data: notices,
+    columns,
+    pageCount: Math.ceil(totalCount / pageSize),
+    state: {
+      pagination: {
+        pageIndex,
+        pageSize,
+      },
+    },
+    manualPagination: true,
+    onPaginationChange: handlePaginationChange,
+    getCoreRowModel: getCoreRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    autoResetPageIndex: false,
+  });
+
+  const renderPageNumbers = () => {
+    const startPage = Math.floor(pageIndex / 5) * 5;
+    const endPage = Math.min(startPage + 5, table.getPageCount());
+  
+    return Array.from({ length: endPage - startPage }, (_, i) => startPage + i).map((number) => (
+      <Button
+        key={number}
+        variant={pageIndex === number ? 'contained' : 'outlined'}
+        color="primary"
+        style={{ marginRight: '5px', minWidth: '30px', padding: '5px' }}
+        onClick={() => {
+          table.setPageIndex(number);
+        }}
+      >
+        {number + 1}
+      </Button>
+    ));
+  };
+
   return (
     <div className="notice-control-container" style={{ padding: '0 30px' }}>
-      <div className="search-container" style={{ 
-        display: 'flex', 
-        position: 'sticky', 
-        top: 70, 
-        backgroundColor: '#fff', 
-        zIndex: 1, 
-        paddingTop: '10px', 
-        paddingBottom: '10px',
-        marginBottom: '20px'
-      }}>
+      <div
+        className="search-container"
+        style={{
+          display: 'flex',
+          position: 'sticky',
+          top: 70,
+          backgroundColor: '#fff',
+          zIndex: 1,
+          paddingTop: '10px',
+          paddingBottom: '10px',
+          marginBottom: '20px',
+        }}
+      >
         <TextField
           label="제목 검색"
           variant="outlined"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          style={{ marginRight: '10px', height: '40px' }} 
-            InputProps={{
-              style: { height: '100%' }
-            }}
+          style={{ marginRight: '10px', height: '40px' }}
+          InputProps={{
+            style: { height: '100%' },
+          }}
         />
         <TextField
           label="내용 검색"
           variant="outlined"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          style={{ marginRight: '10px', height: '40px' }} 
-            InputProps={{
-              style: { height: '100%' }
-            }}
+          style={{ marginRight: '10px', height: '40px' }}
+          InputProps={{
+            style: { height: '100%' },
+          }}
         />
         <Button
           variant="contained"
@@ -275,11 +394,7 @@ const handleDeleteNotice = async (noticeId: number) => {
         >
           검색
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={handleClickOpen}
-        >
+        <Button variant="contained" color="primary" onClick={handleClickOpen}>
           공지사항 등록
         </Button>
       </div>
@@ -287,75 +402,92 @@ const handleDeleteNotice = async (noticeId: number) => {
         <p>로딩 중...</p>
       ) : (
         <>
-          <ul className="notice-list">
-            {notices.map((notice) => (
-              <li key={notice.id}>
-                <div style={{ position: 'relative', paddingRight: '120px' }}>
-                  <h3
-                    style={{ cursor: 'pointer', color: 'blue' }}
-                    onClick={() => handleViewNotice(notice)}
-                  >
-                    {notice.title}
-                  </h3>
-                  <p 
-                    dangerouslySetInnerHTML={{ __html: notice.content }} 
-                    style={{
-                      maxWidth: '1420px',
-                      maxHeight: '20px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
-                  />
-                  <small>
-                    작성자: {notice.updatedBy}
-                  </small><br></br>
-                  <small>
-                    작성일: {new Date(notice.createdAt).toLocaleString()}
-                  </small><br></br>
-                  <small>
-                    조회수: {notice.readCount}
-                  </small>
-                  <div
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      right: 0,
-                      display: 'flex',
-                      justifyContent: 'flex-end',
-                    }}
-                  >
-                    <Button
-                      variant="outlined"
-                      color="primary"
-                      onClick={() => handleEditNotice(notice.id)}
-                      style={{ marginRight: '10px' }}
-                    >
-                      수정
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="secondary"
-                      onClick={() => handleDeleteNotice(notice.id)}
-                    >
-                      삭제
-                    </Button>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
-          <div className="pagination">
-            {[...Array(Math.ceil(totalCount / pageSize)).keys()].map((_, index) => (
-              <Button
-                key={index + 1}
-                variant="outlined"
-                onClick={() => setPage(index + 1)}
-                disabled={page === index + 1}
-              >
-                {index + 1}
+          <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
+            <Table stickyHeader>
+              <TableHead>
+                {table.getHeaderGroups().map((headerGroup) => (
+                  <TableRow key={headerGroup.id}>
+                    {headerGroup.headers.map((header) => (
+                      <TableCell key={header.id} style={{ backgroundColor: '#cfcfcf' }}>
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))}
+              </TableHead>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                      <CircularProgress />
+                    </TableCell>
+                  </TableRow>
+                ) : table.getRowModel().rows.length > 0 ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          style={{
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                      데이터가 없습니다.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div>
+              <Button onClick={() => table.setPageIndex(pageIndex - 1)} disabled={!table.getCanPreviousPage()} variant="contained" color="primary" style={{ marginRight: '10px' }}>
+                이전
               </Button>
-            ))}
+              <Button onClick={() => table.setPageIndex(pageIndex + 1)} disabled={!table.getCanNextPage()} variant="contained" color="primary">
+                다음
+              </Button>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
+              <Button onClick={() => table.setPageIndex(0)} disabled={pageIndex === 0} variant="contained" color="primary" style={{ marginRight: '10px', minWidth: '30px', padding: '5px', width: 50 }}>
+                처음
+              </Button>
+              <Button onClick={() => table.setPageIndex(Math.max(0, pageIndex - 5))} disabled={pageIndex < 5} variant="contained" color="warning" style={{ marginRight: '15px', minWidth: '30px', padding: '5px' }}>
+                -5
+              </Button>
+              {renderPageNumbers()}
+              <Button onClick={() => table.setPageIndex(Math.min(table.getPageCount() - 1, pageIndex + 5))} disabled={pageIndex >= table.getPageCount() - 5} variant="contained" color="warning" style={{ marginLeft: '10px', minWidth: '30px', padding: '5px' }}>
+                +5
+              </Button>
+              <Button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={pageIndex === table.getPageCount() - 1} variant="contained" color="primary" style={{ marginLeft: '10px', minWidth: '30px', padding: '5px', width: 50 }}>
+                끝
+              </Button>
+            </div>
+            <div>
+              <Typography variant="body1" component="span" style={{ marginRight: '10px' }}>
+                페이지 {table.getState().pagination.pageIndex + 1} / {table.getPageCount()}
+              </Typography>
+              <Select
+                value={table.getState().pagination.pageSize}
+                onChange={(e) => table.setPageSize(Number(e.target.value))}
+              >
+                {[5, 10, 20, 30, 40, 50].map((size) => (
+                  <MenuItem key={size} value={size}>
+                    Show {size}
+                  </MenuItem>
+                ))}
+              </Select>
+            </div>
           </div>
         </>
       )}
@@ -448,17 +580,6 @@ const handleDeleteNotice = async (noticeId: number) => {
           </Button>
           <Button onClick={handleClose} color="secondary">
             취소
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog open={viewOpen} onClose={handleViewClose} maxWidth="md" fullWidth>
-        <DialogTitle>{selectedNotice?.title}</DialogTitle>
-        <DialogContent>
-          <div dangerouslySetInnerHTML={{ __html: selectedNotice?.content || '' }} />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleViewClose} color="primary">
-            닫기
           </Button>
         </DialogActions>
       </Dialog>

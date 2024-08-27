@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
@@ -11,7 +12,12 @@ interface Notice {
   id: number;
   title: string;
   content: string;
+  readCount: number;
+  createdBy: string;
   createdAt: string;
+  updatedBy: string;
+  updatedAt: string;
+  boardFiles: [];
 }
 
 export function Ad_Dashboard() {
@@ -19,6 +25,8 @@ export function Ad_Dashboard() {
   const [viewOpen, setViewOpen] = useState(false);
   const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const navigate = useNavigate();
 
   const fetchNotices = useCallback(async () => {
     setLoading(true);
@@ -34,16 +42,40 @@ export function Ad_Dashboard() {
 
   useEffect(() => {
     fetchNotices();
+
+    const authData = localStorage.getItem('kt-auth-react-v');
+    if (authData) {
+      const parsedAuthData = JSON.parse(authData);
+      if (parsedAuthData.userInfo?.role === 'Admin') {
+        setIsAdmin(true);
+      }
+    }
   }, [fetchNotices]);
 
-  const handleViewNotice = (notice: Notice) => {
-    setSelectedNotice(notice);
-    setViewOpen(true);
+  const handleViewNotice = async (noticeId: number) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`https://lcaapi.acess.co.kr/Boards/${noticeId}`);
+      setSelectedNotice(response.data);
+      setViewOpen(true);
+    } catch (error) {
+      console.error('공지사항을 불러오는데 실패했습니다:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleViewClose = () => {
     setViewOpen(false);
     setSelectedNotice(null);
+  };
+
+  const handleAdminClick = () => {
+    if (isAdmin) {
+      navigate('/NoticeControl');
+    } else {
+      alert('관리자만 접근할 수 있습니다.');
+    }
   };
 
   return (
@@ -67,7 +99,9 @@ export function Ad_Dashboard() {
 
         <div className="announcement-section">
           <div className="sticky-header">
-            <h2>공지사항</h2>
+            <h2 style={{ cursor: 'pointer' }} onClick={handleAdminClick}>
+              공지사항
+            </h2>
           </div>
           {loading ? (
             <p>로딩 중...</p>
@@ -78,23 +112,10 @@ export function Ad_Dashboard() {
                   <div style={{ paddingRight: '120px' }}>
                     <h3
                       style={{ cursor: 'pointer', color: 'blue' }}
-                      onClick={() => handleViewNotice(notice)}
+                      onClick={() => handleViewNotice(notice.id)}
                     >
                       {notice.title}
                     </h3>
-                    <p
-                      dangerouslySetInnerHTML={{ __html: notice.content }}
-                      style={{
-                        maxWidth: '600px',
-                        maxHeight: '20px',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
-                    />
-                    <small>
-                      작성일: {new Date(notice.createdAt).toLocaleString()}
-                    </small>
                   </div>
                 </li>
               ))}
