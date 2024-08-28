@@ -172,7 +172,7 @@ export function DisposalScale() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        폐기물 보정중량
+        폐기물 중량
       </Typography>
       <Button
         variant="contained"

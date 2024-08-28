@@ -137,6 +137,8 @@ const SidebarMenuMain = () => {
             <SidebarMenuItem to='/Ad_UseFacility' title='설비 가동시간 관리' hasBullet={true} />
             <SidebarMenuItem to='/Ad_Waste' title='폐기물 관리' hasBullet={true} />
             <SidebarMenuItem to='/Ad_Effluent' title='배출물 관리' hasBullet={true} />
+            <SidebarMenuItem to='/LCI_Item' title='LCI 품목 관리' hasBullet={true} />
+            <SidebarMenuItem to='/GWP_Item' title='GWP 관리' hasBullet={true} />
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub

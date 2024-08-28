@@ -64,8 +64,6 @@ type ApiResponse = {
   monthlyAmounts: number[];
 };
 
-const inputTypes = ["전력", "경유", "상수", "공업용수"];
-
 const columns: ColumnDef<Input>[] = [
   { accessorKey: 'ids', header: '통합ID' },
   { accessorKey: 'inputType', header: '항목' },
@@ -111,7 +109,7 @@ export function Ad_Input() {
   const [open, setOpen] = useState(false);
   const [newInput, setNewInput] = useState({
     companyCode: '',
-    typeId: '',
+    lciItemId: '',
     year: '2023',
     month: 1,
     amount: '',
@@ -248,20 +246,20 @@ export function Ad_Input() {
 
   const handleSubmit = async () => {
     try {
-      const { companyCode, typeId, year, month, amount } = newInput;
+      const { companyCode, lciItemId, year, month, amount } = newInput;
       
       // Check for an empty year and set it to null if necessary
       const actualYear = year || null;
   
-      const checkUrl = `https://lcaapi.acess.co.kr/Inputs/Exist?typeId=${typeId}&companyCode=${companyCode}&year=${actualYear}&month=${month}`;
+      const checkUrl = `https://lcaapi.acess.co.kr/Inputs/Exist?lciItemId=${lciItemId}&companyCode=${companyCode}&year=${actualYear}&month=${month}`;
       const checkResponse = await axios.get(checkUrl);
       const exists = checkResponse.data.isExist;
   
       if (exists) {
-        const updateUrl = `https://lcaapi.acess.co.kr/Inputs/${typeId}`;
+        const updateUrl = `https://lcaapi.acess.co.kr/Inputs/${lciItemId}`;
         const updatePayload = {
           companyCode,
-          typeId: Number(typeId),
+          lciItemId: Number(lciItemId),
           year: Number(actualYear),
           month: Number(month),
           amount: Number(amount),
@@ -271,7 +269,7 @@ export function Ad_Input() {
         const createUrl = 'https://lcaapi.acess.co.kr/Inputs';
         const createPayload = {
           companyCode,
-          typeId: Number(typeId),
+          lciItemId: Number(lciItemId),
           year: Number(actualYear),
           month: Number(month),
           amount: Number(amount),
@@ -471,14 +469,14 @@ export function Ad_Input() {
               <FormControl fullWidth variant="outlined" margin="normal">
                 <InputLabel>항목</InputLabel>
                 <Select
-                  value={newInput.typeId}
-                  onChange={(e) => handleSelectChange(e as SelectChangeEvent<number>, 'typeId')}
+                  value={newInput.lciItemId}
+                  onChange={(e) => handleSelectChange(e as SelectChangeEvent<number>, 'lciItemId')}
                   label="항목"
                 >
-                  {inputTypes.map((type, index) => (
-                    <MenuItem key={index} value={index + 1}>{type}</MenuItem>
+                  {items.map((item) => (
+                    <MenuItem key={item.id} value={item.id}>{item.itemName}</MenuItem>
                   ))}
-                </Select>
+              </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12}>
@@ -527,7 +525,7 @@ export function Ad_Input() {
             <Grid item xs={12}>
               <TextField
                 name="amount"
-                label="투입량"
+                label="투입량 (kg)"
                 variant="outlined"
                 type="number"
                 fullWidth

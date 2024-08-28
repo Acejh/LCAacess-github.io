@@ -49,6 +49,8 @@ import { Login } from '../modules/auth/components/Login'
 import { ForgotPassword } from '../modules/auth/components/ForgotPassword'
 import { Registration } from '../modules/auth/components/Registration'
 import { NoticeControl } from '../pages/admin-page/AuthManagement/NoticeControl'
+import { LCI_Item } from '../pages/admin-page/InputManagement/KeyIn/LCI_Item'
+import { GWP_Item } from '../pages/admin-page/InputManagement/KeyIn/GWP_Item'
 
 const PrivateRoutes = () => {
     const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
@@ -111,6 +113,8 @@ const PrivateRoutes = () => {
         <Route path='/Ad_UseFacility' element={<Ad_UseFacility />} />
         <Route path='/Ad_Input' element={<Ad_Input />} />
         <Route path='/Ad_Waste' element={<Ad_Waste />} />
+        <Route path='/LCI_Item' element={<LCI_Item />} />
+        <Route path='/GWP_Item' element={<GWP_Item />} />
 
         {/* 데이터 처리 */}
         <Route path='/DataStatus' element={<DataStatus />} />

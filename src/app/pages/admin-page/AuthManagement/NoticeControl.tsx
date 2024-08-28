@@ -59,9 +59,11 @@ export function NoticeControl() {
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [open, setOpen] = useState(false);
+  const [viewOpen, setViewOpen] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [editMode, setEditMode] = useState(false);
   const [currentNoticeId, setCurrentNoticeId] = useState<number | null>(null);
+  const [selectedNotice, setSelectedNotice] = useState<Notice | null>(null);
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
 
   const fetchNotices = useCallback(async () => {
@@ -213,6 +215,19 @@ export function NoticeControl() {
     }
   };
 
+  const handleViewNotice = async (noticeId: number) => {
+    setLoading(true);
+    try {
+      const response = await axios.get(`https://lcaapi.acess.co.kr/Boards/${noticeId}`);
+      setSelectedNotice(response.data);
+      setViewOpen(true);
+    } catch (error) {
+      console.error('공지사항을 불러오는데 실패했습니다:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleDeleteNotice = async (noticeId: number) => {
     try {
       const notice = notices.find((n) => n.id === noticeId);
@@ -248,6 +263,11 @@ export function NoticeControl() {
     setEditMode(false);
   };
 
+  const handleViewClose = () => {
+    setViewOpen(false);
+    setSelectedNotice(null);
+  };
+
   const handlePaginationChange = (updater: Updater<{ pageIndex: number; pageSize: number }>) => {
     if (typeof updater === 'function') {
       const newState = updater({ pageIndex, pageSize });
@@ -266,22 +286,17 @@ export function NoticeControl() {
   };
 
   const columns: ColumnDef<Notice>[] = [
-    { accessorKey: 'title', header: '제목' },
     {
-      accessorKey: 'content',
-      header: '내용',
+      accessorKey: 'title',
+      header: '제목',
       cell: (info) => (
-        <div
-          dangerouslySetInnerHTML={{
-            __html: String(info.getValue<string>()) || '',
-          }}
-          style={{
-            maxWidth: '300px',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
-          }}
-        />
+        <Button
+          variant="text"
+          color="primary"
+          onClick={() => handleViewNotice(info.row.original.id)}
+        >
+          {info.getValue<string>()}
+        </Button>
       ),
     },
     { accessorKey: 'createdBy', header: '작성자' },
@@ -580,6 +595,27 @@ export function NoticeControl() {
           </Button>
           <Button onClick={handleClose} color="secondary">
             취소
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={viewOpen} onClose={handleViewClose} maxWidth="md" fullWidth>
+        <DialogTitle>{selectedNotice?.title}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body1" gutterBottom>
+            작성자: {selectedNotice?.createdBy}
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            작성일: {selectedNotice?.createdAt}
+          </Typography>
+          <Typography variant="body1" gutterBottom>
+            조회수: {selectedNotice?.readCount}
+          </Typography>
+          <div dangerouslySetInnerHTML={{ __html: selectedNotice?.content || '' }} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleViewClose} color="primary">
+            닫기
           </Button>
         </DialogActions>
       </Dialog>
