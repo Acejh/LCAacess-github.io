@@ -51,6 +51,7 @@ import { Registration } from '../modules/auth/components/Registration'
 import { NoticeControl } from '../pages/admin-page/AuthManagement/NoticeControl'
 import { LCI_Item } from '../pages/admin-page/InputManagement/KeyIn/LCI_Item'
 import { GWP_Item } from '../pages/admin-page/InputManagement/KeyIn/GWP_Item'
+import { GTG_Data } from '../pages/admin-page/ProStatus/GTG_Data'
 
 const PrivateRoutes = () => {
     const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
@@ -121,6 +122,7 @@ const PrivateRoutes = () => {
         <Route path='/CTMapping' element={<CTMapping />} />
         <Route path='/SupMapping' element={<SupMapping />} />
         <Route path='/DisMapping' element={<DisMapping />} />
+        <Route path='/GTG_Data' element={<GTG_Data />} />
 
         {/* Lazy Modules */}
         <Route

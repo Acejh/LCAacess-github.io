@@ -103,9 +103,9 @@ export function DisposalTable() {
   
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/EcoasRecc/Etc?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `https://lcaapi.acess.co.kr/EcoasRecc/Waste?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) {
-        url += `&transNo=${searchQuery}`;
+        url += `&reccNo=${searchQuery}`;
       }
       if (searchParams.company) {
         url += `&companyCode=${searchParams.company.code}`;

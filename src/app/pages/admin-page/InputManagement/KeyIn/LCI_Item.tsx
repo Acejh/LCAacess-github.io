@@ -65,13 +65,19 @@ export function LCI_Item() {
       id: 'unit',
     },
     {
-      header: '구성 여부',
-      accessorFn: row => (row.hasComposition ? '예' : '아니오'),
-      id: 'hasComposition',
-    },
-    {
       header: '구성 유형',
-      accessorFn: row => row.componentType,
+      accessorFn: row => {
+        switch (row.componentType) {
+          case 'Valuable':
+            return '유가물';
+          case 'Part':
+            return '부품';
+          case 'Waste':
+            return '폐기물';
+          default:
+            return row.componentType;
+          }
+        },
       id: 'componentType',
     },
   ];
@@ -119,7 +125,7 @@ export function LCI_Item() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        LCI 관리
+        LCI 품목 관리
       </Typography>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <FormControl style={{ marginRight: '10px' }}>

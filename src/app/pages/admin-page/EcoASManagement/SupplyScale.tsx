@@ -183,7 +183,7 @@ export function SupplyScale() {
         엑셀 다운로드
       </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-        <UseCompany onCompanyChange={setSelectedCompany} />
+        <UseCompany onCompanyChange={setSelectedCompany} showAllOption={false}/>
         <FormControl style={{ marginRight: '10px' }}>
           <Select
             id="year-select"

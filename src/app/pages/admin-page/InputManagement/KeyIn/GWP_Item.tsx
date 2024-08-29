@@ -101,13 +101,19 @@ export function GWP_Item() {
         numeral(info.getValue() as number).format('0.00000'),
     },
     {
-      header: '구성 여부',
-      accessorFn: row => (row.lciItem.hasComposition ? '예' : '아니오'),
-      id: 'hasComposition',
-    },
-    {
       header: '구성 유형',
-      accessorFn: row => row.lciItem.componentType,
+      accessorFn: row => {
+        switch (row.lciItem.componentType) {
+          case 'Valuable':
+            return '유가물';
+          case 'Part':
+            return '부품';
+          case 'Waste':
+            return '폐기물';
+          default:
+            return row.lciItem.componentType;
+        }
+      },
       id: 'componentType',
     },
   ];

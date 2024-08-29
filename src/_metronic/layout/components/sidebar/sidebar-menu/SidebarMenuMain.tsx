@@ -151,6 +151,7 @@ const SidebarMenuMain = () => {
             <SidebarMenuItem to='/CTMapping' title='수집운반 매핑' hasBullet={true} />
             <SidebarMenuItem to='/SupMapping' title='공급 매핑' hasBullet={true} />
             <SidebarMenuItem to='/DisMapping' title='폐기 매핑' hasBullet={true} />
+            <SidebarMenuItem to='/GTG_Data' title='GTG 결과' hasBullet={true} />
           </SidebarMenuItemWithSub>
         </>
       )}
