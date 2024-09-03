@@ -44,13 +44,10 @@ const EditableCell: React.FC<EditableCellProps> = ({ value, onSave }) => {
       onBlur={handleBlur}
       onKeyDown={handleKeyDown}
       fullWidth
-      InputProps={{
-        endAdornment: <span style={{ marginLeft: '5px' }}>시간/월</span>,
-      }}
     />
   ) : (
     <div onDoubleClick={handleDoubleClick} style={{ cursor: 'pointer' }}>
-      {editValue} 시간/월
+      {editValue}
     </div>
   );
 };

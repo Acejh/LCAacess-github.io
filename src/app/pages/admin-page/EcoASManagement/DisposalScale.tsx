@@ -43,14 +43,14 @@ const columns: ColumnDef<WasteData>[] = [
     accessorKey: `month_${i + 1}`,
     header: () => (
       <div style={{ textAlign: 'center' }}>
-        {i + 1}월
+        {i + 1}월 (kg)
       </div>
     ),
     cell: (info: CellContext<WasteData, unknown>) => numeral(info.getValue()).format('0,0.00000'),
   })),
   {
     accessorKey: 'total',
-    header: '총합',
+    header: '총합 (kg)',
     cell: (info: CellContext<WasteData, unknown>) => numeral(info.getValue()).format('0,0.00000'),
   },
 ];

@@ -61,11 +61,11 @@ const columns: ColumnDef<Scale>[] = [
   { accessorKey: 'itemCode', header: () => <div style={{ textAlign: 'center' }}>제품코드</div>},
   { accessorKey: 'itemName', header: '제품명' },
   { accessorKey: 'itemCount', header: () => <div style={{ textAlign: 'center' }}>제품개수</div>},
-  { accessorKey: 'meanWeight', header: () => <div style={{ textAlign: 'center' }}>평균중량</div>, cell: info => numeral(info.getValue()).format('0,0.00000')},
-  { accessorKey: 'totalWeight', header: () => <div style={{ textAlign: 'center' }}>평균중량합계</div>, cell: info => numeral(info.getValue()).format('0,0.00000') },
-  { accessorKey: 'ratio', header: () => <div style={{ textAlign: 'center' }}>비율</div>, cell: info => numeral(info.getValue()).format('0.00000')},
-  { accessorKey: 'tkinWeight', header: () => <div style={{ textAlign: 'center' }}>실중량</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>보정중량</div>, cell: info => numeral(info.getValue()).format('0,0.00000') },
+  { accessorKey: 'meanWeight', header: () => <div style={{ textAlign: 'center' }}>평균중량 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0.00000')},
+  { accessorKey: 'totalWeight', header: () => <div style={{ textAlign: 'center' }}>평균중량합계 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0.00000') },
+  { accessorKey: 'ratio', header: () => <div style={{ textAlign: 'center' }}>비율 (%)</div>, cell: info => numeral(info.getValue()).format('0.00000')},
+  { accessorKey: 'tkinWeight', header: () => <div style={{ textAlign: 'center' }}>실중량 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>보정중량 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0.00000') },
 ];
 
 export function CTMScale() {

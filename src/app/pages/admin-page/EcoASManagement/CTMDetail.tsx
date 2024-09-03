@@ -46,8 +46,8 @@ const columns: ColumnDef<Detail>[] = [
   { accessorKey: 'itemCode', header: () => <div style={{ textAlign: 'center' }}>품목코드</div>},
   { accessorKey: 'itemName', header: '품목명', },
   { accessorKey: 'itemCount', header: () => <div style={{ textAlign: 'center' }}>수량</div>},
-  { accessorKey: 'meanWeight', header: () => <div style={{ textAlign: 'center' }}>평균중량</div>},
-  { accessorKey: 'totalWeight', header: () => <div style={{ textAlign: 'center' }}>총중량</div>},
+  { accessorKey: 'meanWeight', header: () => <div style={{ textAlign: 'center' }}>평균중량 (kg)</div>},
+  { accessorKey: 'totalWeight', header: () => <div style={{ textAlign: 'center' }}>총중량 (kg)</div>},
   { accessorKey: 'receivedAt', header: '수신일시', },
 ];
 

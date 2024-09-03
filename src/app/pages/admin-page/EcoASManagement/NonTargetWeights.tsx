@@ -45,7 +45,7 @@ const columns: ColumnDef<WeightData>[] = [
     accessorKey: `month_${i + 1}`,
     header: () => (
       <div style={{ textAlign: 'center' }}>
-        {i + 1}월
+        {i + 1}월 (kg)
       </div>
     ),
     cell: (info: CellContext<WeightData, unknown>) => numeral(info.getValue()).format('0,0'),

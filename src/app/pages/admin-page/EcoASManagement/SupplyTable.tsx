@@ -66,8 +66,8 @@ const columns: ColumnDef<Supply>[] = [
   { accessorKey: 'item1', header: '품목군' },
   { accessorKey: 'item2', header: '제품군' },
   { accessorKey: 'item3', header: '제품분류' },
-  { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>중량</div> , cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: 'ecoasWeight', header: () => <div style={{ textAlign: 'center' }}>EcoAS중량</div> , cell: info => numeral(info.getValue()).format('0,0')  },
+  { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>중량 (kg)</div> , cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: 'ecoasWeight', header: () => <div style={{ textAlign: 'center' }}>EcoAS중량 (kg) </div> , cell: info => numeral(info.getValue()).format('0,0')  },
 ];
 
 export function SupplyTable() {

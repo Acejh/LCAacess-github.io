@@ -46,7 +46,7 @@ const columns: ColumnDef<Weight>[] = [
   { accessorKey: 'itemName', header: '품목군 명', },
   { 
     accessorKey: 'weight', 
-    header: () => <div style={{ textAlign: 'center' }}>실중량</div>, 
+    header: () => <div style={{ textAlign: 'center' }}>실중량 (kg)</div>, 
     cell: info => numeral(info.getValue()).format('0,0') 
   },
   { accessorKey: 'receivedAt', header: '수신일시', },

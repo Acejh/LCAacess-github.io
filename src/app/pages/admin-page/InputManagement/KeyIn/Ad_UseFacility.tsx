@@ -279,10 +279,10 @@ export function Ad_UseFacility() {
   const columns: ColumnDef<Input>[] = [
     { accessorKey: 'facilityName', header: '설비명' },
     { accessorKey: 'capacity', header: () => <div style={{ textAlign: 'center' }}>용량(Kw)</div> },
-    { accessorKey: 'year', header: () => <div style={{ textAlign: 'center' }}>연도</div>},
+    { accessorKey: 'year', header: () => <div style={{ textAlign: 'center' }}>연도</div> },
     ...['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].map((month) => ({
       accessorKey: month,
-      header: () => <div style={{ textAlign: 'center' }}>{month}</div>,
+      header: () => <div style={{ textAlign: 'center' }}>{`${month} (시간/월)`}</div>,  
       cell: (info: CellContext<Input, number>) => (
         <EditableCell
           value={info.getValue() as number}

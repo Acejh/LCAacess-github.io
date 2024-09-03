@@ -286,18 +286,21 @@ export function SupMapping() {
 
   const handleSearch = () => {
     if (!selectedCompany) {
-      setErrorMessage("사업회원을 선택하여주십시오");
-      return;
+        setErrorMessage("사업회원을 선택하여주십시오");
+        return;
     }
-  
+
     setErrorMessage(null);
+
+    setPageIndex(0);
+
     setSearchParams({
-      query: searchQuery,
-      company: selectedCompany,
-      year: year || '', 
-      month: month || '',
+        query: searchQuery,
+        company: selectedCompany,
+        year: year || '', 
+        month: month || '',
     });
-  };
+};
 
   const handleSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -488,8 +491,8 @@ export function SupMapping() {
         </Button>
       ),
     },
-    { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>무게</div>},
-    { accessorKey: 'ecoasWeight', header: () => <div style={{ textAlign: 'center' }}>EcoAS무게</div>},
+    { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>무게(kg)</div>},
+    { accessorKey: 'ecoasWeight', header: () => <div style={{ textAlign: 'center' }}>EcoAS무게(kg)</div>},
     {
       id: 'reccSupplyClient',
       header: '거래처 매핑 확인',
@@ -771,7 +774,7 @@ export function SupMapping() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} style={{ textAlign: 'center' }}>
+                <TableCell colSpan={columns.length} style={{ textAlign: 'center', color: 'red' }}>
                   데이터가 없습니다.
                 </TableCell>
               </TableRow>

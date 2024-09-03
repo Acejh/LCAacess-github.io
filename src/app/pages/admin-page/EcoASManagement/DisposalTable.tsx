@@ -71,8 +71,8 @@ const columns: ColumnDef<Disposal>[] = [
   { accessorKey: 'item1', header: '폐기물 분류' },
   { accessorKey: 'item2', header: '폐기물 군' },
   { accessorKey: 'item3', header: '폐기물 명' },
-  { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>중량</div>, cell: info => numeral(info.getValue()).format('0,0')  },
-  { accessorKey: 'ecoasWeight', header: () => <div style={{ textAlign: 'center' }}>EcoAS중량</div>, cell: info => numeral(info.getValue()).format('0,0')  },
+  { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>중량 (kg) </div>, cell: info => numeral(info.getValue()).format('0,0')  },
+  { accessorKey: 'ecoasWeight', header: () => <div style={{ textAlign: 'center' }}>EcoAS중량 (kg) </div>, cell: info => numeral(info.getValue()).format('0,0')  },
 ];
 
 export function DisposalTable() {
