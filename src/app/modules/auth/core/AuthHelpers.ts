@@ -115,6 +115,7 @@ export function setupAxios(axiosInstance: typeof axios) {
           // console.log('기존 토큰:', auth.accessToken)
           const newAuth = await refreshToken(auth.accessToken, auth.refreshToken)
           if (newAuth) {
+            setAuth(newAuth);
             const updatedAuth = {
               ...newAuth,
               userInfo: auth.userInfo,
@@ -132,7 +133,6 @@ export function setupAxios(axiosInstance: typeof axios) {
         const errorResponseData = error.response?.data as { title?: string; message?: string }
         const errorMessage = errorResponseData?.title || errorResponseData?.message || '알 수 없는 오류 발생'
         console.error('요청이 거부되었습니다:', errorMessage)
-        // 403 오류 시에도 로그아웃 처리
         logout()
       }
       return Promise.reject(error)

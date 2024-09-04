@@ -95,16 +95,18 @@ const SidebarMenuMain = () => {
             </div>
           </div>
           <SidebarMenuItemWithSub
-            to='/admin-page/AuthManagement'
-            title='관리기능'
+            to='/admin-page/InputManagement'
+            title='데이터 관리/조회'
             fontIcon='bi-chat-left'
             icon='message-text-2'
           >
-            <SidebarMenuItem to='/MemberControl' title='사업회원관리' hasBullet={true} />
-            <SidebarMenuItem to='/UserControl' title='계정 관리' hasBullet={true} />
-            <SidebarMenuItem to='/AdminClient' title='거래처 관리' hasBullet={true} />
-            <SidebarMenuItem to='/CarsControl' title='차량 관리' hasBullet={true} />
-            <SidebarMenuItem to='/NoticeControl' title='공지사항 관리' hasBullet={true} />
+            <SidebarMenuItem to='/Ad_Input' title='투입물 관리' hasBullet={true} />
+            <SidebarMenuItem to='/Ad_Facility' title='설비 관리' hasBullet={true} />
+            <SidebarMenuItem to='/Ad_UseFacility' title='설비 가동시간 관리' hasBullet={true} />
+            <SidebarMenuItem to='/Ad_Waste' title='폐기물 관리' hasBullet={true} />
+            <SidebarMenuItem to='/Ad_Effluent' title='배출물 관리' hasBullet={true} />
+            <SidebarMenuItem to='/LCI_Item' title='LCI 품목 관리' hasBullet={true} />
+            <SidebarMenuItem to='/GWP_Item' title='GWP 관리' hasBullet={true} />
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub
@@ -127,21 +129,6 @@ const SidebarMenuMain = () => {
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub
-            to='/admin-page/InputManagement'
-            title='데이터 관리/조회'
-            fontIcon='bi-chat-left'
-            icon='message-text-2'
-          >
-            <SidebarMenuItem to='/Ad_Input' title='투입물 관리' hasBullet={true} />
-            <SidebarMenuItem to='/Ad_Facility' title='설비 관리' hasBullet={true} />
-            <SidebarMenuItem to='/Ad_UseFacility' title='설비 가동시간 관리' hasBullet={true} />
-            <SidebarMenuItem to='/Ad_Waste' title='폐기물 관리' hasBullet={true} />
-            <SidebarMenuItem to='/Ad_Effluent' title='배출물 관리' hasBullet={true} />
-            <SidebarMenuItem to='/LCI_Item' title='LCI 품목 관리' hasBullet={true} />
-            <SidebarMenuItem to='/GWP_Item' title='GWP 관리' hasBullet={true} />
-          </SidebarMenuItemWithSub>
-
-          <SidebarMenuItemWithSub
             to='/admin-page/ProStatus'
             title='데이터 매핑/처리'
             fontIcon='bi-chat-left'
@@ -152,6 +139,19 @@ const SidebarMenuMain = () => {
             <SidebarMenuItem to='/SupMapping' title='공급 매핑' hasBullet={true} />
             <SidebarMenuItem to='/DisMapping' title='폐기 매핑' hasBullet={true} />
             <SidebarMenuItem to='/GTG_Data' title='GTG 결과' hasBullet={true} />
+          </SidebarMenuItemWithSub>
+
+          <SidebarMenuItemWithSub
+            to='/admin-page/AuthManagement'
+            title='관리기능'
+            fontIcon='bi-chat-left'
+            icon='message-text-2'
+          >
+            <SidebarMenuItem to='/MemberControl' title='사업회원관리' hasBullet={true} />
+            <SidebarMenuItem to='/UserControl' title='계정 관리' hasBullet={true} />
+            <SidebarMenuItem to='/AdminClient' title='거래처 관리' hasBullet={true} />
+            <SidebarMenuItem to='/CarsControl' title='차량 관리' hasBullet={true} />
+            <SidebarMenuItem to='/NoticeControl' title='공지사항 관리' hasBullet={true} />
           </SidebarMenuItemWithSub>
         </>
       )}
