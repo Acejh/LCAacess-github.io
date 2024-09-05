@@ -347,6 +347,7 @@ export function Ad_UseFacility() {
           color="primary"
           style={{ height: '35px', padding: '0 10px', fontSize: '14px', marginRight: '10px' }}
           onClick={handleFetchData}
+          disabled={!tempSelectedYear}
         >
           조회
         </Button>
