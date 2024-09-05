@@ -203,6 +203,7 @@ export function CompositionSet() {
         color="secondary"
         style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
         onClick={handleDownloadExcel}
+        disabled={!hasSearched || !selectedYear}  
       >
         엑셀 다운로드
       </Button>

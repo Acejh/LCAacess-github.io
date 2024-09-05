@@ -17,9 +17,6 @@ import { WasteTrade } from '../pages/user-page/Inquiry/WasteTrade'
 import { ManageClient } from '../pages/user-page/Management/ManageClient'
 import { ManageFacility } from '../pages/user-page/Management/ManageFacility'
 import { ManageVehicle } from '../pages/user-page/Management/ManageVehicle'
-import { ComProducts } from '../pages/admin-page/Management/ComProducts'
-import { Mapping } from '../pages/admin-page/Management/Mapping'
-import { TotalInfo } from '../pages/admin-page/Management/TotalInfo'
 import { UserControl } from '../pages/admin-page/AuthManagement/AccountControl'
 import { MemberControl } from '../pages/admin-page/AuthManagement/MemberControl'
 import { DisposalTable } from '../pages/admin-page/EcoASManagement/DisposalTable'
@@ -86,9 +83,6 @@ const PrivateRoutes = () => {
         <Route path="/ManageVehicle" element={<ManageVehicle />} />
 
         {/* 관리자 관리 기능 */}
-        <Route path='/ComProducts' element={<ComProducts />} />
-        <Route path='/Mapping' element={<Mapping />} />
-        <Route path='/TotalInfo' element={<TotalInfo />} />
         <Route path='/UserControl' element={<UserControl />} />
         <Route path='/MemberControl' element={<MemberControl />} />
         <Route path='/AdminClient' element={<AdminClient />} />

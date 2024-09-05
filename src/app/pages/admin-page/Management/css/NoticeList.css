@@ -1,0 +1,40 @@
+/* 공지사항 섹션 */
+.notice-list-container {
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  height: 360px;
+  overflow-y: auto; 
+  position: relative;
+}
+
+/* 고정된 헤더 (공지사항에서만 사용) */
+.sticky-header {
+  height: 40px;
+  margin-top: 20px;
+  margin-left: 20px;
+  position: sticky;
+  top: 0; 
+  background-color: #f9f9f9;
+  z-index: 10;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 10px;
+}
+
+/* 공지사항 목록 */
+.notice-list {
+  list-style: none;
+  padding: 0;
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.notice-list li {
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ccc;
+}
+
+.notice-list li h3 {
+  cursor: pointer;
+  color: blue;
+}
