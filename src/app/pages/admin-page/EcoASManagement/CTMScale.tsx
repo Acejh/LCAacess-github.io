@@ -29,7 +29,6 @@ import {
   CircularProgress,
   TextField,
 } from '@mui/material';
-import * as XLSX from 'xlsx';
 
 type Scale = {
   id: number;
@@ -147,12 +146,61 @@ export function CTMScale() {
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const handleDownloadExcel = () => {
-    const tableData = table.getRowModel().rows.map((row) => row.original);
-    const worksheet = XLSX.utils.json_to_sheet(tableData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    XLSX.writeFile(workbook, '수집운반 관리표 원장.xlsx');
+  //엑셀다운
+  const handleDownloadExcel = async () => {
+    try {
+      let url = `https://lcaapi.acess.co.kr/EcoasTrans/Export-Scaled?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      if (searchQuery) {
+        url += `&transNo=${searchQuery}`;
+      }
+      if (selectedCompany) {
+        url += `&companyCode=${selectedCompany.code}`;
+      }
+      if (year) {
+        url += `&year=${year}`;
+      }
+      if (month) {
+        url += `&month=${month}`;
+      }
+  
+      const response = await axios.get(url, { responseType: 'blob' });
+      
+      // 서버 응답 상태 코드 확인
+      console.log('Response status:', response.status);
+  
+      // 정상 응답이 아니면 에러 처리
+      if (response.status !== 200) {
+        console.error('Error fetching the file:', response.statusText);
+        return;
+      }
+  
+      // 이후 Blob 처리
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = 'download.xlsx';
+  
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename\*=UTF-8''(.+?)($|;|\s)/);
+        if (filenameMatch?.[1]) {
+          filename = decodeURIComponent(filenameMatch[1]);
+        } else {
+          const simpleFilenameMatch = contentDisposition.match(/filename="?(.+?)($|;|\s)"/);
+          if (simpleFilenameMatch?.[1]) {
+            filename = simpleFilenameMatch[1];
+          }
+        }
+      }
+  
+      const blob = new Blob([response.data]);
+      const urlBlob = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = urlBlob;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error('Error downloading Excel file:', error);
+    }
   };
 
   const handleSearch = () => {

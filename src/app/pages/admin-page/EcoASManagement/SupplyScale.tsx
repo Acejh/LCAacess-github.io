@@ -46,12 +46,12 @@ const columns: ColumnDef<ValuableData>[] = [
         {i + 1}월 (kg)
       </div>
     ),
-    cell: (info: CellContext<ValuableData, unknown>) => numeral(info.getValue()).format('0,0.00000'),
+    cell: (info: CellContext<ValuableData, unknown>) => numeral(info.getValue()).format('0,0'),
   })),
   {
     accessorKey: 'total',
     header: '총합 (kg)',
-    cell: (info: CellContext<ValuableData, unknown>) => numeral(info.getValue()).format('0,0.00000'),
+    cell: (info: CellContext<ValuableData, unknown>) => numeral(info.getValue()).format('0,0'),
   },
 ];
 
