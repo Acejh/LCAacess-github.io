@@ -25,7 +25,6 @@ import {
   FormControl,
   CircularProgress,
 } from '@mui/material';
-import * as XLSX from 'xlsx';
 
 type WeightData = {
   categoryName: string;
@@ -60,6 +59,8 @@ export function ProductsScale() {
     company: null as Company | null,
     year: '',
   });
+  const [countdown, setCountdown] = useState<number | null>(null); 
+  const [downloading, setDownloading] = useState(false); 
 
   const categoryNameRef = useRef<HTMLTableCellElement>(null);
   const midItemNameRef = useRef<HTMLTableCellElement>(null);
@@ -131,12 +132,62 @@ export function ProductsScale() {
     };
   }, [data]);
 
-  const handleDownloadExcel = () => {
-    const tableData = table.getRowModel().rows.map(row => row.original);
-    const worksheet = XLSX.utils.json_to_sheet(tableData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    XLSX.writeFile(workbook, 'NonTargetWeights.xlsx');
+  const handleDownloadExcel = async () => {
+    setDownloading(true); // 다운로드 중 상태 설정
+    setCountdown(60); // 카운트다운 시작 (60초)
+  
+    const countdownInterval = setInterval(() => {
+      setCountdown(prev => (prev !== null && prev > 0 ? prev - 1 : 0));
+    }, 1000);
+  
+    try {
+      let url = `https://lcaapi.acess.co.kr/MonthlyWeights/export-compensated?`;
+      if (selectedCompany) {
+        url += `&companyCode=${selectedCompany.code}`;
+      }
+      if (year) {
+        url += `&year=${year}`;
+      }
+  
+      const response = await axios.get(url, {
+        responseType: 'blob',
+        timeout: 60000, // 60초 타임아웃 설정
+      });
+  
+      // 서버에서 전달된 파일 이름 추출
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = '품목별_보정중량.xlsx'; 
+  
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename\*?=['"]?UTF-8['"]?''(.+?)['"]?(;|$)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = decodeURIComponent(filenameMatch[1]);
+        } else {
+          const simpleFilenameMatch = contentDisposition.match(/filename="?(.+?)['"]?(;|$)/);
+          if (simpleFilenameMatch && simpleFilenameMatch[1]) {
+            filename = simpleFilenameMatch[1];
+          }
+        }
+      }
+  
+      // Blob 생성 및 파일 다운로드
+      const blob = new Blob([response.data]);
+      const urlBlob = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = urlBlob;
+      link.setAttribute('download', filename); 
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+  
+      clearInterval(countdownInterval); 
+      setCountdown(null); 
+    } catch (error) {
+      console.error('Error downloading Excel file:', error);
+      clearInterval(countdownInterval); 
+    } finally {
+      setDownloading(false); 
+    }
   };
 
   const handleSearch = () => {
@@ -169,11 +220,18 @@ export function ProductsScale() {
       <Button
         variant="contained"
         color="secondary"
-        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px', display: 'none' }}
+        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
         onClick={handleDownloadExcel}
+        disabled={!hasSearched || !selectedCompany || !year || downloading} 
       >
-        엑셀 다운로드
+        {downloading ? '다운로드 중...' : '엑셀 다운로드'}
       </Button>
+
+      {countdown !== null && (
+        <Typography variant="body1" color="textSecondary" style={{ marginBottom: '10px' }}>
+          {countdown}초 후 다운로드가 완료됩니다.
+        </Typography>
+      )}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} showAllOption={false}/>
         <FormControl style={{ marginRight: '10px' }}>
