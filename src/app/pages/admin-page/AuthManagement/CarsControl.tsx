@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import ClientType from '../../ComponentBox/ClientType'; 
+import '../../CSS/SCbar.css';
 import {
   useReactTable,
   getCoreRowModel,
@@ -444,7 +445,11 @@ export function CarsControl() {
           차량 등록
         </Button>
       </div>
-      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
+      <TableContainer
+        component={Paper}
+        style={{ maxHeight: 545, overflowY: 'auto' }}
+        className="custom-scrollbar"
+      >
         <Table stickyHeader>
           <TableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
             {table.getHeaderGroups().map(headerGroup => (

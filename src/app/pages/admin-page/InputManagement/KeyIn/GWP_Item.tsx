@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import numeral from 'numeral';
+import '../../../CSS/SCbar.css';
 import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -55,8 +56,8 @@ export function GWP_Item() {
       header: 'LCI 구분',
       accessorFn: row => {
         // LCI 구분 변환
-        if (row.lciItem.lciType === 'INPUT') return '입고';
-        if (row.lciItem.lciType === 'OUTPUT') return '출고';
+        if (row.lciItem.lciType === 'INPUT') return '투입물';
+        if (row.lciItem.lciType === 'OUTPUT') return '배출물';
         return row.lciItem.lciType;
       },
       id: 'lciType',
@@ -193,7 +194,11 @@ export function GWP_Item() {
           조회
         </Button>
       </div>
-      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
+      <TableContainer
+        component={Paper}
+        style={{ maxHeight: 545, overflowY: 'auto' }}
+        className="custom-scrollbar"
+      >
       <Table>
         {loading ? (
           <TableBody>

@@ -3,6 +3,7 @@ import axios from 'axios';
 import numeral from 'numeral';
 import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
+import '../../CSS/SCbar.css';
 import {
   useReactTable,
   getCoreRowModel,
@@ -237,7 +238,11 @@ export function CompositionSet() {
           조회
         </Button>
       </div>
-      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
+      <TableContainer
+        component={Paper}
+        style={{ maxHeight: 545, overflowY: 'auto' }}
+        className="custom-scrollbar"
+      >
         <Table>
           {loading ? (
             <TableBody>

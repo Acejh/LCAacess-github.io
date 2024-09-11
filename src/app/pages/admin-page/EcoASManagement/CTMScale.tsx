@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import numeral from 'numeral';
+import '../../CSS/SCbar.css';
 import {
   useReactTable,
   getCoreRowModel,
@@ -85,7 +86,6 @@ export function CTMScale() {
     month: '',
     company: null as Company | null,
   });
-  const [countdown, setCountdown] = useState<number | null>(null); 
   const [downloading, setDownloading] = useState(false); 
 
   useEffect(() => {
@@ -151,11 +151,11 @@ export function CTMScale() {
   //엑셀다운
   const handleDownloadExcel = async () => {
     setDownloading(true); // 다운로드 중 상태 설정
-    setCountdown(60); // 카운트다운 시작 (60초)
-  
-    const countdownInterval = setInterval(() => {
-      setCountdown(prev => (prev !== null && prev > 0 ? prev - 1 : 0));
-    }, 1000);
+    
+    // 3분(180초) 타임아웃 설정
+    const countdownTimeout = setTimeout(() => {
+      setDownloading(false); // 3분 후 다운로드 중 상태 해제
+    }, 180000); // 3분 후 해제
   
     try {
       let url = `https://lcaapi.acess.co.kr/EcoasTrans/Export-Scaled?page=${pageIndex + 1}&pageSize=${pageSize}`;
@@ -174,7 +174,7 @@ export function CTMScale() {
   
       const response = await axios.get(url, {
         responseType: 'blob',
-        timeout: 60000, // 60초 타임아웃 설정
+        timeout: 180000, // 3분 타임아웃 설정
       });
   
       // 서버에서 전달된 파일 이름 추출
@@ -203,13 +203,11 @@ export function CTMScale() {
       link.click();
       link.parentNode?.removeChild(link);
   
-      clearInterval(countdownInterval); 
-      setCountdown(null); 
     } catch (error) {
       console.error('Error downloading Excel file:', error);
-      clearInterval(countdownInterval); 
     } finally {
-      setDownloading(false); 
+      clearTimeout(countdownTimeout); // 타임아웃 클리어
+      setDownloading(false); // 다운로드가 완료되면 다시 원래 상태로 돌림
     }
   };
 
@@ -301,12 +299,6 @@ export function CTMScale() {
       >
         {downloading ? '다운로드 중...' : '엑셀 다운로드'}
       </Button>
-
-      {countdown !== null && (
-        <Typography variant="body1" color="textSecondary" style={{ marginBottom: '10px' }}>
-          {countdown}초 후 다운로드가 완료됩니다.
-        </Typography>
-      )}
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} />
         <FormControl style={{ marginRight: '10px' }}>
@@ -380,7 +372,11 @@ export function CTMScale() {
           조회
         </Button>
       </div>
-      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
+      <TableContainer
+        component={Paper}
+        style={{ maxHeight: 545, overflowY: 'auto' }}
+        className="custom-scrollbar"
+      >
       <Table>
         {loading ? (
           <TableBody>

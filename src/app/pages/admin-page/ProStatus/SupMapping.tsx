@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
+import '../../CSS/SCbar.css';
 import {
   useReactTable,
   getCoreRowModel,
@@ -711,7 +712,11 @@ export function SupMapping() {
           조회
         </Button>
       </div>
-      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
+      <TableContainer
+        component={Paper}
+        style={{ maxHeight: 545, overflowY: 'auto' }}
+        className="custom-scrollbar"
+      >
         <Table>
           <TableHead>
             {table.getHeaderGroups().map((headerGroup) => (

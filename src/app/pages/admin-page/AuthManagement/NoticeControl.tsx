@@ -21,6 +21,7 @@ import {
 } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
+import '../../CSS/SCbar.css';
 import {
   useReactTable,
   getCoreRowModel,
@@ -417,7 +418,11 @@ export function NoticeControl() {
         <p>로딩 중...</p>
       ) : (
         <>
-          <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
+          <TableContainer
+            component={Paper}
+            style={{ maxHeight: 545, overflowY: 'auto' }}
+            className="custom-scrollbar"
+          >
             <Table stickyHeader>
               <TableHead>
                 {table.getHeaderGroups().map((headerGroup) => (

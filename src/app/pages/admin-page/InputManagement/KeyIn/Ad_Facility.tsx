@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
 import UseProduct from '../../../ComponentBox/UseProduct';
 import numeral from 'numeral';
+import '../../../CSS/SCbar.css';
 import {
   useReactTable,
   getCoreRowModel,
@@ -374,7 +375,11 @@ export function Ad_Facility() {
           {error}
         </Typography>
       )}
-      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
+      <TableContainer
+        component={Paper}
+        style={{ maxHeight: 545, overflowY: 'auto' }}
+        className="custom-scrollbar"
+      >
         <Table stickyHeader>
           <TableHead>
             {/* 첫 번째 헤더 줄: 설비 용량 */}

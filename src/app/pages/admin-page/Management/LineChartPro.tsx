@@ -12,6 +12,7 @@ import {
   ChartOptions,
   TooltipItem,
 } from 'chart.js';
+import { Button } from '@mui/material'
 
 // Chart.js 모듈 등록
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
@@ -65,7 +66,7 @@ export function LineChartPro() {
 
   const options: ChartOptions<'line'> = {
     responsive: true,
-    maintainAspectRatio: false,  // 비율 유지하지 않도록 설정
+    maintainAspectRatio: false, 
     plugins: {
       legend: {
         position: 'top',
@@ -102,8 +103,8 @@ export function LineChartPro() {
   return (
     <div style={{ width: '100%', height: '360px' }}>  {/* 동일한 크기 적용 */}
       <div>
-        <button onClick={() => setChartType('business')}>사업회원별 그래프</button>
-        <button onClick={() => setChartType('product')}>제품군별 그래프</button>
+        <Button onClick={() => setChartType('business')}>사업회원별 그래프</Button>
+        <Button onClick={() => setChartType('product')}>제품군별 그래프</Button>
       </div>
       <div style={{ height: '310px', width: '100%' }}>  {/* 동일한 높이 */}
         {chartType === 'business' ? (

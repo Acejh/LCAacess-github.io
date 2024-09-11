@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import '../../../CSS/SCbar.css';
 // import numeral from 'numeral';
 // import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
@@ -48,8 +49,8 @@ export function LCI_Item() {
       header: 'LCI 구분',
       accessorFn: row => {
         // LCI 구분 변환
-        if (row.lciType === 'INPUT') return '입고';
-        if (row.lciType === 'OUTPUT') return '출고';
+        if (row.lciType === 'INPUT') return '투입물';
+        if (row.lciType === 'OUTPUT') return '배출물';
         return row.lciType;
       },
       id: 'lciType',
@@ -157,7 +158,11 @@ export function LCI_Item() {
           조회
         </Button>
       </div>
-      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
+      <TableContainer
+        component={Paper}
+        style={{ maxHeight: 545, overflowY: 'auto' }}
+        className="custom-scrollbar"
+      >
       <Table>
         {loading ? (
           <TableBody>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import '../../CSS/SCbar.css';
 import {
   Button,
   Select,
@@ -152,7 +153,11 @@ export function GTG_Data() {
         </Button>
       </div>
 
-      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
+      <TableContainer
+        component={Paper}
+        style={{ maxHeight: 545, overflowY: 'auto' }}
+        className="custom-scrollbar"
+      >
         <Table>
           <TableHead>
             <TableRow style={{

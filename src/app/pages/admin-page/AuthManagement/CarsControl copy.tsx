@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import ClientType from '../../ComponentBox/ClientType'; 
+import '../../CSS/SCbar.css';
 import {
   useReactTable,
   getCoreRowModel,
