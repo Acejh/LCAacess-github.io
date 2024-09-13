@@ -256,7 +256,7 @@ export function ProductsScale() {
       </div>
       <TableContainer
         component={Paper}
-        style={{ maxHeight: 545, overflowY: 'auto' }}
+        style={{ maxHeight: 600, overflowY: 'auto' }}
         className="custom-scrollbar"
       >
         <Table>
