@@ -29,11 +29,11 @@ import {
 import * as XLSX from 'xlsx';
 
 type GTGData = {
-  type: string;
+  category: string;
   name: string;
   unit: string;
   amount: number;
-  [key: string]: string | number; // 동적 컬럼을 추가하기 위한 타입
+  [key: string]: string | number; 
 };
 
 type GTGItem = {
@@ -43,7 +43,7 @@ type GTGItem = {
 
 type GTGResult = {
   lciItem: {
-    type: string;
+    category: string;
     name: string;
     unit: string;
   };
@@ -69,15 +69,15 @@ export function GTG_Data() {
   });
 
   const columns: ColumnDef<GTGData>[] = [
-    { accessorKey: 'type', header: '구분' },
+    { accessorKey: 'category', header: '구분' },
     { accessorKey: 'name', header: '이름' },
     { accessorKey: 'unit', header: '단위' },
     { accessorKey: 'amount', header: '총값', cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0') },
     ...data.length > 0
       ? Object.keys(data[0])
-          .filter(key => !['type', 'name', 'unit', 'amount'].includes(key)) // 필터링해서 동적 헤더 생성
+          .filter(key => !['category', 'name', 'unit', 'amount'].includes(key)) 
           .map(itemCode => ({
-            accessorKey: itemCode,
+            accessorKey: itemCode,  
             header: itemCode,
             cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0'),
           }))
@@ -102,7 +102,7 @@ export function GTG_Data() {
       // 데이터 변환
       const transformedData = gtoGResults.map((item: GTGResult) => {
         const baseData: GTGData = {
-          type: item.lciItem.type,
+          category: item.lciItem.category,
           name: item.lciItem.name,
           unit: item.lciItem.unit,
           amount: item.amount,
@@ -206,44 +206,120 @@ export function GTG_Data() {
       </div>
       <TableContainer
         component={Paper}
-        style={{ maxHeight: 600, overflowY: 'auto' }}
+        style={{ maxHeight: 600, overflowY: 'auto', overflowX: 'auto' }} // 좌우 스크롤 추가
         className="custom-scrollbar"
       >
-        <Table>
+        <Table stickyHeader> {/* stickyHeader 속성 유지 */}
           <TableHead>
             <TableRow>
-              <TableCell colSpan={4} style={{ textAlign: 'center', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', backgroundColor: '#cfcfcf' }}>
+              <TableCell 
+                colSpan={4} 
+                style={{ 
+                  textAlign: 'center', 
+                  fontWeight: 'bold', 
+                  whiteSpace: 'nowrap', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis', 
+                  backgroundColor: '#cfcfcf', 
+                  position: 'sticky', 
+                  left: 0, // 첫 번째 열이므로 left 값은 0
+                  zIndex: 5,
+                  width: '200px', // 처리제품의 너비 설정
+                }}
+              >
                 처리제품
               </TableCell>
               {weightByItems.map((item, index) => (
-                <TableCell key={index} style={{ textAlign: 'center', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', backgroundColor: '#cfcfcf' }}>
+                <TableCell 
+                  key={index} 
+                  style={{ 
+                    textAlign: 'center', 
+                    fontWeight: 'bold', 
+                    whiteSpace: 'nowrap', 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis', 
+                    backgroundColor: '#cfcfcf',
+                    width: '200px', // 처리제품과 동일한 너비 설정
+                  }}
+                >
                   {item.itemName}
                 </TableCell>
               ))}
             </TableRow>
             <TableRow>
-              <TableCell colSpan={4} style={{ textAlign: 'center', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', backgroundColor: '#cfcfcf' }}>
-                처리비율
+              <TableCell 
+                colSpan={4} 
+                style={{ 
+                  textAlign: 'center', 
+                  fontWeight: 'bold', 
+                  whiteSpace: 'nowrap', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis', 
+                  backgroundColor: '#cfcfcf', 
+                  position: 'sticky', 
+                  left: 0, // 첫 번째 열이므로 left 값은 0
+                  zIndex: 5,
+                  width: '200px', // 처리비율의 너비 설정
+                }}
+              >
+                처리비율(%)
               </TableCell>
               {weightByItems.map((item, index) => (
-                <TableCell key={index} style={{ textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', backgroundColor: '#cfcfcf' }}>
+                <TableCell 
+                  key={index} 
+                  style={{ 
+                    textAlign: 'center', 
+                    whiteSpace: 'nowrap', 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis', 
+                    backgroundColor: '#cfcfcf',
+                    width: '200px', // 처리비율과 동일한 너비 설정
+                  }}
+                >
                   {item.ratio}
                 </TableCell>
               ))}
             </TableRow>
             <TableRow>
-              <TableCell colSpan={4} style={{ textAlign: 'center', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', backgroundColor: '#cfcfcf' }}>
-                총 처리 중량
+              <TableCell 
+                colSpan={4} 
+                style={{ 
+                  textAlign: 'center', 
+                  fontWeight: 'bold', 
+                  whiteSpace: 'nowrap', 
+                  overflow: 'hidden', 
+                  textOverflow: 'ellipsis', 
+                  backgroundColor: '#cfcfcf', 
+                  position: 'sticky', 
+                  left: 0, // 첫 번째 열이므로 left 값은 0
+                  zIndex: 5,
+                  width: '200px', // 총 처리 중량의 너비 설정
+                }}
+              >
+                총 처리 중량(kg)
               </TableCell>
               {weightByItems.map((item, index) => (
-                <TableCell key={index} style={{ textAlign: 'center', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', backgroundColor: '#cfcfcf' }}>
+                <TableCell 
+                  key={index} 
+                  style={{ 
+                    textAlign: 'center', 
+                    whiteSpace: 'nowrap', 
+                    overflow: 'hidden', 
+                    textOverflow: 'ellipsis', 
+                    backgroundColor: '#cfcfcf',
+                    width: '200px', // 총 처리 중량과 동일한 너비 설정
+                  }}
+                >
                   {item.totalWeight}
                 </TableCell>
               ))}
             </TableRow>
-              {table.getHeaderGroups().map(headerGroup => (
-                <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map(header => (
+            {table.getHeaderGroups().map(headerGroup => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header, index) => {
+                  // 각 열에 대한 left 값을 설정
+                  const leftValues = [0, 85, 260, 325]; // 각 열의 위치를 제어하기 위한 left 값
+                  return (
                     <TableCell 
                       key={header.id} 
                       style={{ 
@@ -253,13 +329,18 @@ export function GTG_Data() {
                         textAlign: 'center',
                         backgroundColor: '#cfcfcf', 
                         fontWeight: 'bold',
+                        position: index < 4 ? 'sticky' : 'static', // 구분, 이름, 단위, 총값 열을 고정
+                        left: leftValues[index], // 각 열의 고정 위치를 설정 (배열에서 위치에 따른 값 적용)
+                        width: index === 0 ? '150px' : index === 1 ? '200px' : index === 2 ? '100px' : '120px', // 각 열의 개별 너비 설정
+                        zIndex: 10, // 스크롤 시 열 고정 처리
                       }}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+                  );
+                })}
+              </TableRow>
+            ))}
           </TableHead>
           <TableBody>
             {loading ? (
@@ -269,13 +350,31 @@ export function GTG_Data() {
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows.length > 0 ? (
-              table.getRowModel().rows.map(row => (
+              table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
-                  {row.getVisibleCells().map(cell => (
-                    <TableCell key={cell.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell, index) => {
+                    const isRightAligned = cell.column.id === 'amount' || !['category', 'name', 'unit', 'amount'].includes(cell.column.id);
+                    const leftValues = [0, 85, 260, 325]; // 각 열의 위치를 제어하기 위한 left 값
+            
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        style={{
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          textAlign: isRightAligned ? 'right' : 'left',
+                          position: index < 4 ? 'sticky' : 'static', // 고정해야 할 열에 대해 position 설정
+                          left: leftValues[index], // 각 고정 열의 left 위치 설정 (배열에서 위치에 따른 값 적용)
+                          width: index === 0 ? '150px' : index === 1 ? '200px' : index === 2 ? '100px' : '120px', // 각 열의 개별 너비 설정
+                          backgroundColor: '#fff', // 고정된 셀의 배경색 설정
+                          zIndex: 1, // 셀 고정 시 zIndex 설정
+                        }}
+                      >
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             ) : (
