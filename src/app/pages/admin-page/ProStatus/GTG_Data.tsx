@@ -313,7 +313,7 @@ export function GTG_Data() {
             {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
               {headerGroup.headers.map((header, index) => {
-                const leftValues = [0, 85, 260, 325]; // 각 열의 위치를 제어하기 위한 left 값
+                const leftValues = [0, 85, 260, 325]; 
                 return (
                   <TableCell
                     key={header.id}
@@ -324,11 +324,11 @@ export function GTG_Data() {
                       textAlign: 'center',
                       backgroundColor: '#cfcfcf',
                       fontWeight: 'bold',
-                      position: 'sticky', // sticky로 변경하여 위아래로 스크롤 시 고정
-                      top: 0, // 위아래 스크롤 시 고정 위치를 top으로 설정
-                      left: index < 4 ? leftValues[index] : 'auto', // 좌우 스크롤 시 고정은 기존 설정 유지
-                      width: index === 0 ? '150px' : index === 1 ? '200px' : index === 2 ? '100px' : '120px', // 열의 너비 설정
-                      zIndex: index < 4 ? 100 : 1, // 좌우로 고정되는 열에 더 높은 zIndex 설정
+                      position: 'sticky', 
+                      top: 0, 
+                      left: index < 4 ? leftValues[index] : 'auto', 
+                      width: index === 0 ? '150px' : index === 1 ? '200px' : index === 2 ? '100px' : '120px', 
+                      zIndex: index < 4 ? 100 : 1, 
                     }}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
