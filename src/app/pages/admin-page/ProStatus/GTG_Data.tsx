@@ -90,7 +90,7 @@ export function GTG_Data() {
   
             // 지수 표기법으로 나오는 숫자일 경우 처리
             if (typeof value === 'number' && value.toString().includes('e')) {
-              return parseFloat(value.toFixed(10));  // 소수점 10자리로 고정, 필요시 조정
+              return parseFloat(value.toFixed(10));
             }
   
             // 일반 숫자는 그대로 포맷팅
