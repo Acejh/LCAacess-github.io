@@ -26,20 +26,19 @@ import {
   FormControl,
   CircularProgress,
 } from '@mui/material';
-import * as XLSX from 'xlsx';
 
 type GTGData = {
   category: string;
   name: string;
   unit: string;
-  amount: number;
+  totalAmount: number;
   [key: string]: string | number;
 };
 
-type GTGItem = {
-  itemCode: string;
-  amount: number;
-};
+// type GTGItem = {
+//   itemCode: string;
+//   amount: number;
+// };
 
 type GTGResult = {
   lciItem: {
@@ -47,14 +46,21 @@ type GTGResult = {
     name: string;
     unit: string;
   };
-  amount: number;
-  gtoGByItems: GTGItem[];
+  totalAmount: number;
+  gtoGByItems: {
+    item: {
+      itemCode: string;
+      itemName: string;
+    };
+    amount: number;
+  }[];
 };
 
 type WeightByItems = {
   itemName: string;
   ratio: number;
   totalWeight: number;
+  weight: number;
 };
 
 export function GTG_Data() {
@@ -72,16 +78,26 @@ export function GTG_Data() {
     { accessorKey: 'category', header: '구분' },
     { accessorKey: 'name', header: '이름' },
     { accessorKey: 'unit', header: '단위' },
-    { accessorKey: 'amount', header: '총값', cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0') },
+    { accessorKey: 'totalAmount', header: '총값', cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0') },
     ...data.length > 0
-      ? Object.keys(data[0])
-          .filter(key => !['category', 'name', 'unit', 'amount'].includes(key))
-          .map(itemCode => ({
-            accessorKey: itemCode,
-            header: itemCode,
-            cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0'),
-          }))
-      : [],
+    ? Object.keys(data[0])
+        .filter(key => !['category', 'name', 'unit', 'totalAmount'].includes(key))
+        .map(itemCode => ({
+          accessorKey: itemCode,
+          header: itemCode,
+          cell: (info: CellContext<GTGData, unknown>) => {
+            const value = info.getValue();
+  
+            // 지수 표기법으로 나오는 숫자일 경우 처리
+            if (typeof value === 'number' && value.toString().includes('e')) {
+              return parseFloat(value.toFixed(10));  // 소수점 10자리로 고정, 필요시 조정
+            }
+  
+            // 일반 숫자는 그대로 포맷팅
+            return numeral(value).format('0,0.0000000000');
+          },
+        }))
+    : [],
   ];
 
   const fetchGTGData = useCallback(async () => {
@@ -92,11 +108,13 @@ export function GTG_Data() {
       return;
     }
 
-    setLoading(true);
+    setLoading(true);  // 로딩 시작
 
     try {
       const url = `https://lcaapi.acess.co.kr/GToGResults?CompanyCode=${searchParams.company?.code}&Year=${searchParams.year}`;
       const response = await axios.get(url);
+      console.log(response.data);  // 데이터 확인용 로그
+
       const { gtoGResults, weightByItems }: { gtoGResults: GTGResult[]; weightByItems: WeightByItems[] } = response.data;
 
       const transformedData = gtoGResults.map((item: GTGResult) => {
@@ -104,46 +122,44 @@ export function GTG_Data() {
           category: item.lciItem.category,
           name: item.lciItem.name,
           unit: item.lciItem.unit,
-          amount: item.amount,
+          totalAmount: item.totalAmount || 0,  // totalAmount가 없으면 0으로 처리
         };
 
-        item.gtoGByItems.forEach((subItem: GTGItem) => {
-          baseData[subItem.itemCode] = subItem.amount;
-        });
+        // gtoGByItems가 배열인지 체크하고 처리
+        if (Array.isArray(item.gtoGByItems)) {
+          item.gtoGByItems.forEach((subItem) => {
+            baseData[subItem.item.itemName] = subItem.amount || 0;  // amount가 없으면 0 처리
+          });
+        }
 
         return baseData;
       });
 
-      const transformedWeightByItems = weightByItems.map((item: WeightByItems) => ({
-        itemName: item.itemName,
-        ratio: item.ratio,
-        totalWeight: item.totalWeight,
-      }));
+      const transformedWeightByItems = Array.isArray(weightByItems)
+        ? weightByItems.map((item: WeightByItems) => ({
+            itemName: item.itemName,
+            ratio: item.ratio,
+            totalWeight: item.totalWeight,
+            weight: item.weight,
+          }))
+        : [];
 
       setData(transformedData);
       setWeightByItems(transformedWeightByItems);
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching GTG data:', error);
-      setLoading(false);
+    } finally {
+      setLoading(false);  // 요청 완료 후 로딩 종료
     }
   }, [searchParams]);
 
-  const handleDownloadExcel = () => {
-    const tableData = table.getRowModel().rows.map(row => row.original);
-    const worksheet = XLSX.utils.json_to_sheet(tableData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'GTGResults');
-    XLSX.writeFile(workbook, 'GTGResults.xlsx');
-  };
-
   const handleSearch = () => {
+    // 조회 버튼을 누르면 로딩 상태가 true로 설정되고 fetchGTGData 호출
     setSearchParams({
       company: selectedCompany,
       year,
     });
-    setLoading(true);
-    fetchGTGData();
+    fetchGTGData();  // fetchGTGData에서 로딩 상태를 처리하므로 별도로 setLoading(true) 필요 없음
   };
 
   const handleYearChange = (event: SelectChangeEvent<string>) => {
@@ -166,7 +182,7 @@ export function GTG_Data() {
         variant="contained"
         color="secondary"
         style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px', display: 'none' }}
-        onClick={handleDownloadExcel}
+        // onClick={handleDownloadExcel}
       >
         엑셀 다운로드
       </Button>
@@ -271,7 +287,8 @@ export function GTG_Data() {
                     zIndex: 0,
                   }}
                 >
-                  {item.ratio}
+                  {/* 처리비율 값 포맷팅 적용 */}
+                  {item.ratio.toFixed(10)}
                 </TableCell>
               ))}
             </TableRow>
@@ -306,37 +323,37 @@ export function GTG_Data() {
                     zIndex: 0,
                   }}
                 >
-                  {item.totalWeight}
+                  {numeral(item.weight).format('0,0.00000')}
                 </TableCell>
               ))}
             </TableRow>
             {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header, index) => {
-                const leftValues = [0, 85, 260, 325]; 
-                return (
-                  <TableCell
-                    key={header.id}
-                    style={{
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      textAlign: 'center',
-                      backgroundColor: '#cfcfcf',
-                      fontWeight: 'bold',
-                      position: 'sticky', 
-                      top: 0, 
-                      left: index < 4 ? leftValues[index] : 'auto', 
-                      width: index === 0 ? '150px' : index === 1 ? '200px' : index === 2 ? '100px' : '120px', 
-                      zIndex: index < 4 ? 100 : 1, 
-                    }}
-                  >
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableCell>
-                );
-              })}
-            </TableRow>
-          ))}
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header, index) => {
+                  const leftValues = [0, 112, 287, 355]; 
+                  return (
+                    <TableCell
+                      key={header.id}
+                      style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        textAlign: 'center',
+                        backgroundColor: '#cfcfcf',
+                        fontWeight: 'bold',
+                        position: 'sticky', 
+                        top: 0, 
+                        left: index < 4 ? leftValues[index] : 'auto', 
+                        width: index === 0 ? '150px' : index === 1 ? '200px' : index === 2 ? '100px' : '120px', 
+                        zIndex: index < 4 ? 100 : 1, 
+                      }}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))}
           </TableHead>
           <TableBody>
             {loading ? (
@@ -349,8 +366,9 @@ export function GTG_Data() {
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell, index) => {
-                    const isRightAligned = cell.column.id === 'amount' || !['category', 'name', 'unit', 'amount'].includes(cell.column.id);
-                    const leftValues = [0, 85, 260, 325];
+                    const isRightAligned = cell.column.id === 'totalAmount' || !['category', 'name', 'unit', 'totalAmount'].includes(cell.column.id);
+                    const leftValues = [0, 112, 287, 355];
+                    
                     return (
                       <TableCell
                         key={cell.id}
