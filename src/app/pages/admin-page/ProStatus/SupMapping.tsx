@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import '../../CSS/SCbar.css';
 import {
@@ -136,7 +137,8 @@ export function SupMapping() {
   const [cars, setCars] = useState<Basic['reccSupplyCar'][]>([]);
   const [clientTypes, setClientTypes] = useState<ClientType[]>([]);
   const [selectedClient2nd, setSelectedClient2nd] = useState<Basic['reccSupplyClient'] | null>(null);
-
+  const navigate = useNavigate();
+  
   const fetchClientTypes = async () => {
     try {
       const response = await axios.get('https://lcaapi.acess.co.kr/Clients/types');
@@ -619,11 +621,11 @@ export function SupMapping() {
   };
 
   const navigateToCarsManagement = () => {
-    window.location.href = '/CarsControl'
+    navigate('/CarsControl');
   }
 
   const navigateToClientManagement = () => {
-    window.location.href = '/AdminClient'; 
+    navigate('/AdminClient');
   };
 
   return (
