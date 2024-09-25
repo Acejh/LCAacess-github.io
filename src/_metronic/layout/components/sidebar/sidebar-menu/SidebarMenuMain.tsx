@@ -170,8 +170,7 @@ const SidebarMenuMain = () => {
             <SidebarMenuItem to='/UserControl' title='계정 관리' hasBullet={true} />
             <SidebarMenuItem to='/NoticeControl' title='공지사항 관리' hasBullet={true} />
             <SidebarMenuItem to='/CompositionSet' title='유가물 구성비율 관리' hasBullet={true} />
-            <SidebarMenuItem to='/LCI_Item' title='LCI 항목 및 GWP 관리(LCI)' hasBullet={true} />
-            <SidebarMenuItem to='/GWP_Item' title='LCI 항목 및 GWP 관리(GWP)' hasBullet={true} />
+            <SidebarMenuItem to='/LCI_Item' title='LCI 항목 및 GWP 관리' hasBullet={true} />
           </SidebarMenuItemWithSub>
         </>
       )}
