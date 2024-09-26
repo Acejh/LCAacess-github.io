@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';  // AxiosError 타입 import
 import '../../../CSS/SCbar.css';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -22,6 +22,10 @@ import {
   Typography,
   FormControl,
   CircularProgress,
+  Modal,
+  TextField,
+  Box,
+  InputLabel,
 } from '@mui/material';
 
 type LciItem = {
@@ -47,6 +51,17 @@ type LciCategory = {
   }[];
 };
 
+const modalStyle = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 4,
+};
+
 export function LCI_Item() {
   const [data, setData] = useState<LciItem[]>([]);
   const [filteredData, setFilteredData] = useState<LciItem[]>([]);
@@ -55,11 +70,8 @@ export function LCI_Item() {
   const [year, setYear] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
 
-  // 실제 필터링에 사용될 상태
   const [selectedType, setSelectedType] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
-
-  // 드롭다운 선택 값 임시 저장 상태
   const [tempSelectedType, setTempSelectedType] = useState('');
   const [tempSelectedCategory, setTempSelectedCategory] = useState('');
 
@@ -67,7 +79,15 @@ export function LCI_Item() {
   const [hasSearched, setHasSearched] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  // LCI 타입 데이터를 가져오는 함수
+  // 수정 및 등록 모달 관리
+  const [openModal, setOpenModal] = useState(false);
+  const [editItem, setEditItem] = useState<LciItem | null>(null);
+  const [isEditing, setIsEditing] = useState(false); // 수정 모드인지 등록 모드인지 구분
+
+  // 삭제 모달 관리
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [deleteItemId, setDeleteItemId] = useState<number | null>(null);
+
   const fetchLciTypes = async () => {
     try {
       const response = await axios.get<LciType[]>(
@@ -83,7 +103,6 @@ export function LCI_Item() {
     }
   };
 
-  // LCI 카테고리 데이터를 가져오는 함수
   const fetchLciCategories = async () => {
     try {
       const response = await axios.get<{ lciCategories: LciCategory }>(
@@ -95,7 +114,6 @@ export function LCI_Item() {
     }
   };
 
-  // LCI 항목 데이터를 가져오는 함수
   const fetchData = useCallback(async () => {
     if (!year) return;
 
@@ -106,7 +124,7 @@ export function LCI_Item() {
       const response = await axios.get<LciItem[]>(url);
 
       setData(response.data);
-      setFilteredData(response.data); // 전체 데이터를 설정
+      setFilteredData(response.data);
       setLoading(false);
     } catch (error) {
       console.error('데이터 가져오기 오류:', error);
@@ -115,7 +133,6 @@ export function LCI_Item() {
   }, [year]);
 
   useEffect(() => {
-    // 초기 로드 시 LCI 타입과 카테고리 데이터 가져오기
     fetchLciTypes();
     fetchLciCategories();
   }, []);
@@ -126,7 +143,6 @@ export function LCI_Item() {
     }
   }, [hasSearched, fetchData]);
 
-  // 필터링 로직
   useEffect(() => {
     let filtered = data;
 
@@ -141,27 +157,23 @@ export function LCI_Item() {
     setFilteredData(filtered);
   }, [selectedType, selectedCategory, data]);
 
-  // 조회 버튼이 눌렸을 때 필터링 적용
   const handleSearch = () => {
-    setSelectedType(tempSelectedType); // 임시 상태를 실제 필터링 상태에 반영
-    setSelectedCategory(tempSelectedCategory); // 임시 상태를 실제 필터링 상태에 반영
+    setSelectedType(tempSelectedType);
+    setSelectedCategory(tempSelectedCategory);
     setYear(selectedYear);
     setHasSearched(true);
     setInitialLoad(false);
   };
 
-  // 드롭다운에서 연도 변경 시
   const handleYearChange = (event: SelectChangeEvent<string>) => {
     setSelectedYear(event.target.value as string);
   };
 
-  // 드롭다운에서 구분 변경 시 임시 상태에 저장
   const handleTypeChange = (event: SelectChangeEvent<string>) => {
     setTempSelectedType(event.target.value as string);
-    setTempSelectedCategory(''); // 구분이 바뀌면 종류 초기화
+    setTempSelectedCategory('');
   };
 
-  // 드롭다운에서 종류 변경 시 임시 상태에 저장
   const handleCategoryChange = (event: SelectChangeEvent<string>) => {
     setTempSelectedCategory(event.target.value as string);
   };
@@ -170,6 +182,126 @@ export function LCI_Item() {
     const categoryList = lciCategories[type] || [];
     const category = categoryList.find((cat) => cat.key === categoryKey);
     return category ? category.value : categoryKey;
+  };
+
+  // 수정 모달을 열고 해당 row 데이터를 불러옴
+  const handleEdit = (item: LciItem) => {
+    setEditItem(item);
+    setIsEditing(true);
+    setOpenModal(true);
+  };
+
+  // 등록 모달을 열기 위한 함수
+  const handleRegister = () => {
+    setEditItem({
+      id: 0,
+      year: new Date().getFullYear(),
+      type: '',
+      category: '',
+      itemName: '',
+      unit: '',
+      gwp: 0,
+      gwpAlt: 0,
+    });
+    setIsEditing(false);
+    setOpenModal(true);
+  };
+
+  const handleModalClose = () => {
+    setOpenModal(false);
+    setEditItem(null);
+  };
+
+  // PUT 요청을 보내는 함수 (수정)
+  const handleSave = async () => {
+    if (editItem && isEditing) {
+      try {
+        const postData = {
+          year: editItem.year,
+          type: editItem.type,
+          category: editItem.category,
+          name: editItem.itemName,
+          unit: editItem.unit,
+          gwp: editItem.gwp,
+          gwpAlt: editItem.gwpAlt,
+        };
+
+        console.log('수정할 데이터:', postData);
+        await axios.put(`https://lcaapi.acess.co.kr/LciItems/${editItem.id}`, postData);
+
+        // 데이터 업데이트
+        await fetchData();
+        setOpenModal(false);
+        console.log('모달 닫힘');
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          console.error('수정 실패:', error.response ? error.response.data : error.message);
+        } else {
+          console.error('수정 실패 (기타 에러):', error);
+        }
+      }
+    }
+  };
+
+  // POST 요청을 보내는 함수 (등록)
+  const handleRegisterSave = async () => {
+    if (editItem && !isEditing) {
+      try {
+        const postData = {
+          year: editItem.year,
+          type: editItem.type,
+          category: editItem.category,
+          name: editItem.itemName,
+          unit: editItem.unit,
+          gwp: editItem.gwp,
+          gwpAlt: editItem.gwpAlt,
+        };
+
+        console.log('등록할 데이터:', postData);
+        await axios.post('https://lcaapi.acess.co.kr/LciItems', postData);
+
+        // 데이터 업데이트
+        await fetchData();
+        setOpenModal(false);
+        console.log('모달 닫힘');
+      } catch (error) {
+        if (error instanceof AxiosError) {
+          console.error('등록 실패 (AxiosError):', error.response ? error.response.data : error.message);
+        } else {
+          console.error('등록 실패 (기타 에러):', error);
+        }
+      }
+    }
+  };
+
+  // 삭제 버튼 클릭 시 처리
+  const handleDelete = (id: number) => {
+    setDeleteItemId(id);
+    setOpenDeleteModal(true);
+  };
+
+  // DELETE 요청을 보내는 함수 (삭제)
+  const handleDeleteConfirm = async () => {
+    if (deleteItemId) {
+      try {
+        console.log(`삭제할 항목 ID: ${deleteItemId}`);
+        await axios.delete(`https://lcaapi.acess.co.kr/LciItems/${deleteItemId}`);
+        console.log('삭제 완료');
+
+        // 데이터 업데이트
+        await fetchData();
+        setOpenDeleteModal(false);
+        setDeleteItemId(null);
+      } catch (error) {
+        console.error('삭제 실패:', error);
+      }
+    }
+  };
+
+  // 삭제 취소
+  const handleDeleteCancel = () => {
+    setOpenDeleteModal(false);
+    setDeleteItemId(null);
   };
 
   const columns: ColumnDef<LciItem>[] = [
@@ -205,10 +337,38 @@ export function LCI_Item() {
       accessorFn: (row) => row.gwpAlt,
       id: 'gwpAlt',
     },
+    // 수정/삭제 컬럼 추가
+    {
+      header: '수정/삭제',
+      id: 'actions',
+      cell: ({ row }) => (
+        <>
+          <Button
+            variant="contained"
+            color="primary"
+            style={{ marginRight: '8px' }}
+            onClick={() => handleEdit(row.original)}
+          >
+            수정
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={() => handleDelete(row.original.id)}
+          >
+            삭제
+          </Button>
+        </>
+      ),
+    },
   ];
 
+  const handleInputChange = useCallback((field: keyof LciItem, value: string | number) => {
+    setEditItem(prev => prev ? { ...prev, [field]: value } : prev);
+  }, []);
+
   const table = useReactTable<LciItem>({
-    data: filteredData, // 필터링된 데이터 사용
+    data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     autoResetPageIndex: false,
@@ -240,11 +400,10 @@ export function LCI_Item() {
           </Select>
         </FormControl>
 
-        {/* 구분 선택 드롭다운 */}
         <FormControl style={{ marginRight: '10px' }}>
           <Select
             id="type-select"
-            value={tempSelectedType} // 임시 상태 사용
+            value={tempSelectedType}
             onChange={handleTypeChange}
             displayEmpty
             style={{ width: '150px' }}
@@ -259,16 +418,15 @@ export function LCI_Item() {
           </Select>
         </FormControl>
 
-        {/* 종류 선택 드롭다운 */}
         <FormControl style={{ marginRight: '10px' }}>
           <Select
             id="category-select"
-            value={tempSelectedCategory} // 임시 상태 사용
+            value={tempSelectedCategory}
             onChange={handleCategoryChange}
             displayEmpty
             style={{ width: '150px' }}
             sx={{ height: '45px' }}
-            disabled={!tempSelectedType} // 구분이 선택되지 않으면 비활성화
+            disabled={!tempSelectedType}
           >
             <MenuItem value="">종류(전체)</MenuItem>
             {tempSelectedType &&
@@ -289,12 +447,20 @@ export function LCI_Item() {
         >
           조회
         </Button>
+
+        {/* 등록 버튼 */}
+        <Button
+          variant="contained"
+          color="success"
+          style={{ height: '35px', marginLeft: '10px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleRegister}
+          disabled={!hasSearched}
+        >
+          등록
+        </Button>
       </div>
-      <TableContainer
-        component={Paper}
-        style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
-      >
+
+      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
         <Table>
           {loading ? (
             <TableBody>
@@ -366,6 +532,141 @@ export function LCI_Item() {
           )}
         </Table>
       </TableContainer>
+
+      {/* 수정/등록 모달 UI */}
+      <Modal
+        open={openModal}
+        onClose={handleModalClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            {isEditing ? '항목 수정' : '항목 등록'}
+          </Typography>
+          {editItem && (
+            <>
+              {/* 연도 선택 드롭다운 */}
+                <FormControl fullWidth margin="normal">
+                  <InputLabel id="year-select-label">연도 선택</InputLabel>
+                  <Select
+                    labelId="year-select-label"
+                    value={editItem.year.toString()}  // value를 string으로 변환하여 전달
+                    onChange={(e) => setEditItem({ ...editItem, year: parseInt(e.target.value) })}  // string을 number로 변환하여 처리
+                  >
+                    {/* 현재 연도 기준으로 5년간의 연도 목록 생성 */}
+                    {Array.from({ length: 5 }, (_, i) => (new Date().getFullYear() - i)).map((year) => (
+                      <MenuItem key={year} value={year.toString()}>  {/* value를 string으로 변환 */}
+                        {year}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+
+              {/* 유형 선택 드롭다운 */}
+              <FormControl fullWidth margin="normal">
+                <Select
+                  value={editItem.type}
+                  onChange={(e) => setEditItem({ ...editItem, type: e.target.value })}
+                >
+                  {Object.entries(lciTypes).map(([key, value]) => (
+                    <MenuItem key={key} value={key}>
+                      {value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* 종류 선택 드롭다운 */}
+              <FormControl fullWidth margin="normal" disabled={!editItem.type}>
+                <Select
+                  value={editItem.category}
+                  onChange={(e) => setEditItem({ ...editItem, category: e.target.value })}
+                >
+                  {(lciCategories[editItem.type] || []).map((category) => (
+                    <MenuItem key={category.key} value={category.key}>
+                      {category.value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+
+              {/* 명칭, 단위, GWP, 유가물 대체효과 수정 */}
+              <TextField
+                fullWidth
+                margin="normal"
+                label="명칭"
+                value={editItem.itemName}
+                onChange={(e) => handleInputChange('itemName', e.target.value)}  
+              />
+              <TextField
+                fullWidth
+                margin="normal"
+                label="단위"
+                value={editItem.unit}
+                onChange={(e) => handleInputChange('unit', e.target.value)}  
+              />
+              <TextField
+                fullWidth
+                margin="normal"
+                label="GWP"
+                type="number"
+                value={editItem.gwp}
+                onChange={(e) => handleInputChange('gwp', parseFloat(e.target.value))}  
+              />
+              <TextField
+                fullWidth
+                margin="normal"
+                label="유가물 대체효과"
+                type="number"
+                value={editItem.gwpAlt}
+                onChange={(e) => handleInputChange('gwpAlt', parseFloat(e.target.value))}  
+              />
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
+                <Button onClick={handleModalClose} color="secondary">
+                  취소
+                </Button>
+                <Button
+                  onClick={isEditing ? handleSave : handleRegisterSave}
+                  variant="contained"
+                  color="primary"
+                  style={{ marginLeft: '10px' }}
+                >
+                  {isEditing ? '수정' : '등록'}
+                </Button>
+              </Box>
+            </>
+          )}
+        </Box>
+      </Modal>
+
+      {/* 삭제 경고 모달 UI */}
+      <Modal
+        open={openDeleteModal}
+        onClose={handleDeleteCancel}
+        aria-labelledby="modal-delete-title"
+        aria-describedby="modal-delete-description"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="modal-delete-title" variant="h6" component="h2">
+            삭제하시겠습니까?
+          </Typography>
+          <Typography sx={{ mt: 2 }}>되돌릴 수 없습니다.</Typography>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
+            <Button onClick={handleDeleteCancel} color="secondary">
+              취소
+            </Button>
+            <Button
+              onClick={handleDeleteConfirm}
+              variant="contained"
+              color="error"
+              style={{ marginLeft: '10px' }}
+            >
+              삭제
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </div>
   );
 }

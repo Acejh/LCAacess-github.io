@@ -255,25 +255,27 @@ export function CarsControl() {
 
   const handleEditSubmit = () => {
     if (editIndex !== null) {
+      if (!editCar.carNo) {
+        console.error('차량 번호는 필수입니다.');
+        return;  // 필수 필드가 없을 때 요청을 보내지 않음
+      }
+  
       const updatedCarData = {
-        ...editCar,
+        year: editCar.year,
+        inOutType: editCar.inOutType === '입고' ? 'IN' : 'OUT',  // 서버가 이해할 수 있는 값으로 변환
+        carNo: editCar.carNo,
+        spec: editCar.spec,
       };
-
-      // 수정된 데이터 콘솔에 출력
-      // console.log("수정할 데이터:", updatedCarData);
-
-      const url = `https://lcaapi.acess.co.kr/Cars/${editCar.id}`;
-      // console.log("PUT URL:", url);
-
-      axios.put(url, updatedCarData)
+  
+      axios.put(`https://lcaapi.acess.co.kr/Cars/${editCar.id}`, updatedCarData)
         .then(() => {
-          // console.log('Data updated successfully:', response.data);
+          console.log('Data updated successfully');
           fetchData(pageIndex, pageSize);  // 데이터 갱신
         })
         .catch(error => {
-          console.error('Error updating data:', error);
+          console.error('Error updating data:', error.response ? error.response.data : error.message);
         });
-
+  
       setEditOpen(false);
     }
   };

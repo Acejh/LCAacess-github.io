@@ -3,7 +3,6 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
 import UseProduct from '../../../ComponentBox/UseProduct';
 import numeral from 'numeral';
-import { v4 as uuidv4 } from 'uuid';
 import '../../../CSS/SCbar.css';
 import {
   useReactTable,
@@ -249,6 +248,14 @@ export function Ad_Facility() {
     setEditFacility(prev => ({ ...prev, [name]: value }));
   };
 
+  // const handleRemoveItem = (itemCode: string) => {
+  //   setNewFacility(prev => ({ ...prev, items: prev.items.filter(code => code !== itemCode) }));
+  // };
+
+  // const handleRemoveEditItem = (itemCode: string) => {
+  //   setEditFacility(prev => ({ ...prev, items: prev.items.filter(code => code !== itemCode) }));
+  // };
+
   const handleSubmit = async () => {
     try {
       const payload = {
@@ -408,15 +415,14 @@ export function Ad_Facility() {
                 </TableRow>
               ) : (
                 table.getRowModel().rows.map((row) => {
-                  const uniqueKey = uuidv4(); // 여전히 고유한 키로 사용
+                  const uniqueKey = `${row.id}-${row.original.itemCode}-${row.original.itemName}`;
                   return (
                     <TableRow key={uniqueKey}>
-                      {row.getVisibleCells().map((cell, index) => {  // index 추가
+                      {row.getVisibleCells().map((cell) => {
                         const isCategoryOrProduct = ['categoryName', 'itemName'].includes(cell.column.id);
-                        // row.id, cell.id, index를 함께 사용하여 고유한 key 생성
                         return (
                           <TableCell
-                            key={`row-${row.id}_cell-${cell.id}_index-${index}`}  // index 추가로 고유한 key 생성
+                            key={cell.id}
                             style={{
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',

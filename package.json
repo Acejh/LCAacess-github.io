@@ -59,6 +59,7 @@
     "react-topbar-progress-indicator": "4.1.1",
     "socicon": "3.0.5",
     "text-mask-addons": "^3.8.0",
+    "uuid": "^10.0.0",
     "xlsx": "^0.18.5",
     "yup": "^1.0.0"
   },
@@ -75,6 +76,7 @@
     "@types/react-dom": "^18.2.7",
     "@types/react-table": "^7.7.9",
     "@types/sass-loader": "8.0.3",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vitejs/plugin-react-swc": "^3.3.2",

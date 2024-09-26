@@ -34,8 +34,13 @@ import * as XLSX from 'xlsx';
 
 type Item = {
   id: number;
+  year: number;
+  type: string;
+  category: string;
   itemName: string;
   unit: string;
+  gwp: number;
+  gwpAlt: number;
 };
 
 type Input = {
@@ -58,6 +63,15 @@ type Input = {
 };
 
 type ApiResponse = {
+  inputType: string;
+  unit: string;
+  year: number;
+  ids: number[];
+  monthlyAmounts: number[];
+};
+
+type InputResponse = {
+  companyCode: string;
   inputType: string;
   unit: string;
   year: number;
@@ -247,43 +261,85 @@ export function Ad_Input() {
 
   const handleSubmit = async () => {
     try {
-      const { companyCode, lciItemId, year, month, amount } = newInput;
-      
-      // Check for an empty year and set it to null if necessary
-      const actualYear = year || null;
-  
-      const checkUrl = `https://lcaapi.acess.co.kr/Inputs/Exist?lciItemId=${lciItemId}&companyCode=${companyCode}&year=${actualYear}&month=${month}`;
-      const checkResponse = await axios.get(checkUrl);
-      const exists = checkResponse.data.isExist;
-  
-      if (exists) {
-        const updateUrl = `https://lcaapi.acess.co.kr/Inputs/${lciItemId}`;
-        const updatePayload = {
-          companyCode,
-          lciItemId: Number(lciItemId),
-          year: Number(actualYear),
-          month: Number(month),
-          amount: Number(amount),
-        };
-        await axios.put(updateUrl, updatePayload);
-      } else {
-        const createUrl = 'https://lcaapi.acess.co.kr/Inputs';
-        const createPayload = {
-          companyCode,
-          lciItemId: Number(lciItemId),
-          year: Number(actualYear),
-          month: Number(month),
-          amount: Number(amount),
-        };
-        await axios.post(createUrl, createPayload);
-      }
-  
-      handleClose();
-      fetchData(selectedCompany, selectedYear);
+        const { companyCode, lciItemId, year, month, amount } = newInput;
+        const actualYear = year || null;
+
+        if (!companyCode || !lciItemId || !year || !month || !amount) {
+            throw new Error('모든 필드를 입력해 주세요.');
+        }
+
+        // lciItemId에 해당하는 itemName을 가져오기 위한 API 호출
+        const itemUrl = 'https://lcaapi.acess.co.kr/Inputs/items';
+        const itemResponse = await axios.get<Item[]>(itemUrl);
+        const items = itemResponse.data;
+
+        // lciItemId와 일치하는 항목 찾기
+        const selectedItem = items.find((item: Item) => item.id === Number(lciItemId));
+        if (!selectedItem) {
+            throw new Error(`lciItemId '${lciItemId}'에 대한 항목을 찾을 수 없습니다.`);
+        }
+
+        // 가져온 itemName을 사용하여 inputType과 매칭
+        const inputType = selectedItem.itemName;
+        // console.log(`Found inputType: ${inputType}`);
+
+        // inputType을 사용하여 회사 코드와 연도에 맞는 Input 데이터를 가져오기
+        const fetchUrl = `https://lcaapi.acess.co.kr/Inputs?companyCode=${companyCode}&year=${actualYear}`;
+        // console.log(`Fetching data from URL: ${fetchUrl}`);
+        const fetchResponse = await axios.get<InputResponse[]>(fetchUrl);
+        const inputs = fetchResponse.data;
+
+        // inputType에 맞는 데이터를 찾기
+        const matchedInput = inputs.find((input: InputResponse) => input.inputType === inputType);
+        if (!matchedInput) {
+            throw new Error(`입력 데이터에서 inputType '${inputType}'에 맞는 항목을 찾을 수 없습니다.`);
+        }
+
+        // 선택된 월(month)에 대한 ID 가져오기
+        const ids: number[] = matchedInput.ids;
+        const id = ids[month - 1]; // 월은 1부터 시작하므로 -1
+        // console.log(`ID for month ${month}:`, id);
+
+        if (id) {
+            // 업데이트 요청
+            const updateUrl = `https://lcaapi.acess.co.kr/Inputs/${id}`;
+            const updatePayload = {
+                companyCode,
+                lciItemId: Number(lciItemId),
+                year: Number(actualYear),
+                month: Number(month),
+                amount: Number(amount),
+            };
+
+            // console.log('Update URL:', updateUrl);
+            // console.log('Update Payload:', updatePayload);
+
+            const updateResponse = await axios.put(updateUrl, updatePayload);
+            console.log('Update Response:', updateResponse.data);
+        } else {
+            // ID가 없을 때 새로 등록
+            const createUrl = 'https://lcaapi.acess.co.kr/Inputs';
+            const createPayload = {
+                companyCode,
+                lciItemId: Number(lciItemId),
+                year: Number(actualYear),
+                month: Number(month),
+                amount: Number(amount),
+            };
+
+            // console.log('Create URL:', createUrl);
+            // console.log('Create Payload:', createPayload);
+
+            const createResponse = await axios.post(createUrl, createPayload);
+            console.log('Create Response:', createResponse.data);
+        }
+
+        handleClose();
+        fetchData(selectedCompany, selectedYear);
     } catch (error) {
-      console.error('데이터 등록 중 오류 발생:', error);
+        console.error('데이터 등록 중 오류 발생:', error);
     }
-  };
+};
 
   // 엑셀 다운로드
   const handleDownloadExcel = () => {
