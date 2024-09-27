@@ -28,7 +28,7 @@ import {
 } from '@mui/material';
 
 type GTGData = {
-  category: string;
+  type: string;
   name: string;
   unit: string;
   totalAmount: number;
@@ -42,7 +42,7 @@ type GTGData = {
 
 type GTGResult = {
   lciItem: {
-    category: string;
+    type: string;
     name: string;
     unit: string;
   };
@@ -75,25 +75,23 @@ export function GTG_Data() {
   });
 
   const columns: ColumnDef<GTGData>[] = [
-    { accessorKey: 'category', header: '구분' },
+    { accessorKey: 'type', header: '구분' },
     { accessorKey: 'name', header: '이름' },
     { accessorKey: 'unit', header: '단위' },
     { accessorKey: 'totalAmount', header: '총값', cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0') },
     ...data.length > 0
     ? Object.keys(data[0])
-        .filter(key => !['category', 'name', 'unit', 'totalAmount'].includes(key))
+        .filter(key => !['type', 'name', 'unit', 'totalAmount'].includes(key))
         .map(itemCode => ({
           accessorKey: itemCode,
           header: itemCode,
           cell: (info: CellContext<GTGData, unknown>) => {
             const value = info.getValue();
   
-            // 지수 표기법으로 나오는 숫자일 경우 처리
             if (typeof value === 'number' && value.toString().includes('e')) {
               return parseFloat(value.toFixed(10));
             }
   
-            // 일반 숫자는 그대로 포맷팅
             return numeral(value).format('0,0.0000000000');
           },
         }))
@@ -108,27 +106,26 @@ export function GTG_Data() {
       return;
     }
 
-    setLoading(true);  // 로딩 시작
+    setLoading(true); 
 
     try {
       const url = `https://lcaapi.acess.co.kr/GToGResults?CompanyCode=${searchParams.company?.code}&Year=${searchParams.year}`;
       const response = await axios.get(url);
-      console.log(response.data);  // 데이터 확인용 로그
+      console.log(response.data);  
 
       const { gtoGResults, weightByItems }: { gtoGResults: GTGResult[]; weightByItems: WeightByItems[] } = response.data;
 
       const transformedData = gtoGResults.map((item: GTGResult) => {
         const baseData: GTGData = {
-          category: item.lciItem.category,
+          type: item.lciItem.type,
           name: item.lciItem.name,
           unit: item.lciItem.unit,
-          totalAmount: item.totalAmount || 0,  // totalAmount가 없으면 0으로 처리
+          totalAmount: item.totalAmount || 0,  
         };
 
-        // gtoGByItems가 배열인지 체크하고 처리
         if (Array.isArray(item.gtoGByItems)) {
           item.gtoGByItems.forEach((subItem) => {
-            baseData[subItem.item.itemName] = subItem.amount || 0;  // amount가 없으면 0 처리
+            baseData[subItem.item.itemName] = subItem.amount || 0;  
           });
         }
 
@@ -149,17 +146,16 @@ export function GTG_Data() {
     } catch (error) {
       console.error('Error fetching GTG data:', error);
     } finally {
-      setLoading(false);  // 요청 완료 후 로딩 종료
+      setLoading(false);  
     }
   }, [searchParams]);
 
   const handleSearch = () => {
-    // 조회 버튼을 누르면 로딩 상태가 true로 설정되고 fetchGTGData 호출
     setSearchParams({
       company: selectedCompany,
       year,
     });
-    fetchGTGData();  // fetchGTGData에서 로딩 상태를 처리하므로 별도로 setLoading(true) 필요 없음
+    fetchGTGData(); 
   };
 
   const handleYearChange = (event: SelectChangeEvent<string>) => {
@@ -330,7 +326,7 @@ export function GTG_Data() {
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header, index) => {
-                  const leftValues = [0, 112, 287, 355]; 
+                  const leftValues = [0, 97, 302, 369]; 
                   return (
                     <TableCell
                       key={header.id}
@@ -366,8 +362,8 @@ export function GTG_Data() {
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell, index) => {
-                    const isRightAligned = cell.column.id === 'totalAmount' || !['category', 'name', 'unit', 'totalAmount'].includes(cell.column.id);
-                    const leftValues = [0, 112, 287, 355];
+                    const isRightAligned = cell.column.id === 'totalAmount' || !['type', 'name', 'unit', 'totalAmount'].includes(cell.column.id);
+                    const leftValues = [0, 97, 302, 369];
                     
                     return (
                       <TableCell

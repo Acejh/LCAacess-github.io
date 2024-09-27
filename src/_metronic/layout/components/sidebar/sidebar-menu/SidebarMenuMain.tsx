@@ -113,7 +113,7 @@ const SidebarMenuMain = () => {
             <SidebarMenuItem to='/Ad_Input' title='투입물 관리' hasBullet={true} />
             <SidebarMenuItem to='/Ad_Effluent' title='수계배출물 관리' hasBullet={true} />
             <SidebarMenuItem to='/Ad_Waste' title='폐기물 품목-매핑 관리' hasBullet={true} />
-            <SidebarMenuItem to='/Ad_Waste' title='유가물 품목-매핑 관리' hasBullet={true} />
+            <SidebarMenuItem to='/ValuableMapping' title='유가물 품목-매핑 관리' hasBullet={true} />
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub 
