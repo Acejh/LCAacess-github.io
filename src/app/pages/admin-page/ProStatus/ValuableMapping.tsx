@@ -39,7 +39,7 @@ type LciItem = {
   year: number;
   type: string;
   category: string;
-  itemName: string | null;
+  name: string | null;
   unit: string;
   gwp: number;
   gwpAlt: number;
@@ -78,6 +78,9 @@ export function ValuableMapping() {
   const [initialLoad, setInitialLoad] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalData, setModalData] = useState<ModalData>(null);
+
+  const [typeMapping, setTypeMapping] = useState<Record<string, string>>({});
+  const [categoryMapping, setCategoryMapping] = useState<Record<string, Record<string, string>>>({});
 
   const [isMappingTestMode, setIsMappingTestMode] = useState(false); // 테스트 삭제예정
 
@@ -125,6 +128,49 @@ export function ValuableMapping() {
       setLoading(false);
     }
   }, [searchParams, isMappingTestMode]);
+
+  // 유형 및 카테고리 매핑 데이터 가져오기
+  const fetchMappings = useCallback(async () => {
+    try {
+      // 유형 매핑 데이터 가져오기
+      const typeResponse = await axios.get('https://lcaapi.acess.co.kr/LciItems/LciTypes');
+      const typeMap: Record<string, string> = {};
+      typeResponse.data.forEach((item: { key: string; value: string }) => {
+        typeMap[item.key] = item.value;
+      });
+      setTypeMapping(typeMap);
+  
+      // 카테고리 매핑 데이터 가져오기
+      const categoryResponse = await axios.get('https://lcaapi.acess.co.kr/LciItems/LciCategories');
+      const categoryMap: Record<string, Record<string, string>> = {};
+  
+      // lciCategories가 있는지 확인
+      if (categoryResponse.data && categoryResponse.data.lciCategories) {
+        Object.entries(categoryResponse.data.lciCategories).forEach(([typeKey, categories]) => {
+          // categories가 배열인지 확인
+          if (Array.isArray(categories)) {
+            categoryMap[typeKey] = {};
+            categories.forEach((item: { key: string; value: string }) => {
+              categoryMap[typeKey][item.key] = item.value;
+            });
+          } else {
+            console.error(`'categories' is not an array for typeKey: ${typeKey}`);
+          }
+        });
+      } else {
+        console.error('No lciCategories found in the response.');
+      }
+  
+      setCategoryMapping(categoryMap);
+    } catch (error) {
+      console.error('Error fetching mappings:', error);
+    }
+  }, []);
+
+  // 컴포넌트 초기 로드 시 매핑 데이터 가져오기
+  useEffect(() => {
+    fetchMappings();
+  }, [fetchMappings]);
 
   // 검색 조건이 설정된 후 데이터를 가져오기 위한 useEffect
   useEffect(() => {
@@ -227,20 +273,20 @@ export function ValuableMapping() {
     { accessorKey: 'item2', header: '제품군' },
     { accessorKey: 'item3', header: '제품분류' },
     {
-      accessorKey: 'lciItem.itemName',
+      accessorKey: 'lciItem.name',
       header: 'LCI 품목매핑',
       cell: (info: CellContext<ValuableMappingData, unknown>) => {
         const lciItem = info.row.original.lciItem;
         
         if (lciItem) {
           // lciItem 데이터가 존재하면 매핑된 상태로 간주
-          const itemName = lciItem.itemName ? lciItem.itemName : '매핑된 품목';
+          const name = lciItem.name ? lciItem.name : '매핑된 품목';
           return (
             <Typography
               style={{ color: 'blue', cursor: 'pointer' }}
               onClick={() => info.row.original.onItemClick(lciItem)}  
             >
-              {itemName}
+              {name}
             </Typography>
           );
         } else {
@@ -377,7 +423,7 @@ export function ValuableMapping() {
                     <TableRow
                       key={row.id}
                       style={{
-                        backgroundColor: row.original.lciItem ? 'white' : '#64fccedd', 
+                        backgroundColor: row.original.lciItem ? 'white' : '#f5c6cb', 
                       }}
                     >
                       {row.getVisibleCells().map((cell) => (
@@ -413,10 +459,17 @@ export function ValuableMapping() {
         <DialogContent>
           {modalData ? (
             <>
-              <Typography variant="body1"><strong>품목명:</strong> {modalData.itemName || 'N/A'}</Typography>
+              <Typography variant="body1"><strong>품목명:</strong> {modalData.name || 'N/A'}</Typography>
               <Typography variant="body1"><strong>연도:</strong> {modalData.year}</Typography>
-              <Typography variant="body1"><strong>유형:</strong> {modalData.type}</Typography>
-              <Typography variant="body1"><strong>카테고리:</strong> {modalData.category}</Typography>
+              <Typography variant="body1">
+                <strong>유형:</strong> {typeMapping[modalData.type] || modalData.type || '알 수 없음'}
+              </Typography>
+              <Typography variant="body1">
+                <strong>카테고리:</strong>{' '}
+                {categoryMapping[modalData.type] && categoryMapping[modalData.type][modalData.category]
+                  ? categoryMapping[modalData.type][modalData.category]
+                  : modalData.category || '알 수 없음'}
+              </Typography>
               <Typography variant="body1"><strong>단위:</strong> {modalData.unit}</Typography>
               <Typography variant="body1"><strong>GWP:</strong> {modalData.gwp}</Typography>
               <Typography variant="body1"><strong>GWP 대체:</strong> {modalData.gwpAlt}</Typography>
@@ -426,24 +479,24 @@ export function ValuableMapping() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal} color="primary">
-            닫기
-          </Button>
+          <Button onClick={handleCloseModal} color="primary">닫기</Button>
         </DialogActions>
       </Dialog>
       <Dialog open={mappingModalOpen} onClose={handleCloseMappingModal} maxWidth="sm" fullWidth>
         <DialogTitle>LCI 품목 매핑</DialogTitle>
         <DialogContent dividers>
           <Typography variant="h6" gutterBottom>매핑할 품목 선택</Typography>
+          <div style={{ marginTop: '20px' }}>
           <Autocomplete
             options={mappingItems}
-            getOptionLabel={(option) => option.name}  // 드롭다운에 표시할 필드
+            getOptionLabel={(option) => option.name}  
             renderInput={(params) => <TextField {...params} label="LCI 품목 선택" variant="outlined" />}
             value={mappingItems.find(item => item.id === selectedMappingItem) || null}
             onChange={handleMappingSelectChange}
             isOptionEqualToValue={(option, value) => option.id === value.id}
             style={{ maxHeight: 224, overflowY: 'auto' }}
           />
+          </div>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleSaveMapping} color="primary" disabled={!selectedMappingItem}>

@@ -30,14 +30,13 @@ import {
   Box,
   Grid
 } from '@mui/material';
-import * as XLSX from 'xlsx';
 
 type Item = {
   id: number;
   year: number;
   type: string;
   category: string;
-  itemName: string;
+  name: string;
   unit: string;
   gwp: number;
   gwpAlt: number;
@@ -70,17 +69,7 @@ type ApiResponse = {
   monthlyAmounts: number[];
 };
 
-type InputResponse = {
-  companyCode: string;
-  inputType: string;
-  unit: string;
-  year: number;
-  ids: number[];
-  monthlyAmounts: number[];
-};
-
 const columns: ColumnDef<Input>[] = [
-  { accessorKey: 'ids', header: '통합ID' },
   { accessorKey: 'inputType', header: '항목' },
   { accessorKey: 'unit', header: '단위' },
   { accessorKey: 'year', header: () => <div style={{ textAlign: 'right' }}>연도</div>},
@@ -122,6 +111,7 @@ export function Ad_Input() {
   const [selectedYear, setSelectedYear] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
+  const [isExist, setIsExist] = useState(false);
   const [newInput, setNewInput] = useState({
     companyCode: '',
     lciItemId: '',
@@ -167,14 +157,14 @@ export function Ad_Input() {
       const apiResponse: ApiResponse[] = response.data;
   
       const formattedData: Input[] = items.map((item) => {
-        const apiItem = apiResponse.find(apiItem => apiItem.inputType === item.itemName) || {
+        const apiItem = apiResponse.find(apiItem => apiItem.inputType === item.name) || {
           ids: Array(12).fill(0),
           monthlyAmounts: Array(12).fill(0),
           year: year || '전체',
         };
         return {
           ids: apiItem.ids[0],
-          inputType: item.itemName,
+          inputType: item.name,
           unit: item.unit,
           year: apiItem.year,
           '1월': apiItem.monthlyAmounts[0],
@@ -216,6 +206,51 @@ export function Ad_Input() {
   }, [selectedCompany, selectedYear, fetchData,]);
 
   useEffect(() => {
+    const fetchAmount = async () => {
+      console.log('현재 선택된 값:', {
+        companyCode: newInput.companyCode,
+        lciItemId: newInput.lciItemId,
+        year: newInput.year,
+        month: newInput.month,
+      });
+  
+      if (newInput.companyCode && newInput.lciItemId && newInput.year && newInput.month) {
+        try {
+          const response = await axios.get(
+            `https://lcaapi.acess.co.kr/Inputs/Exist?lciItemId=${newInput.lciItemId}&companyCode=${newInput.companyCode}&year=${newInput.year}&month=${newInput.month}`
+          );
+          const { isExist, amount } = response.data;
+  
+          console.log('API 응답:', response.data);
+  
+          setIsExist(isExist); // isExist 상태 업데이트
+  
+          if (isExist) {
+            // 가져온 amount 값을 투입량 필드에 설정
+            setNewInput(prevState => ({
+              ...prevState,
+              amount: amount.toFixed(5), // 소수점 5자리까지
+            }));
+            console.log('투입량 업데이트:', amount.toFixed(5));
+          } else {
+            // 데이터를 찾지 못한 경우 투입량을 0으로 초기화
+            setNewInput(prevState => ({
+              ...prevState,
+              amount: '',
+            }));
+            console.log('데이터가 존재하지 않음. 투입량 초기화.');
+          }
+        } catch (error) {
+          console.error('Error fetching amount:', error);
+        }
+      }
+    };
+  
+    // newInput 값이 변경될 때마다 호출
+    fetchAmount();
+  }, [newInput.companyCode, newInput.lciItemId, newInput.year, newInput.month]);
+
+  useEffect(() => {
     fetchItems();
   }, [fetchItems]);
 
@@ -244,111 +279,106 @@ export function Ad_Input() {
     setOpen(false);
   };
 
+  const handleSelectChange = (e: SelectChangeEvent<number>, key: string) => {
+    setNewInput(prevState => ({
+      ...prevState,
+      [key]: e.target.value as number,
+    }));
+    
+    console.log(`선택된 ${key}:`, e.target.value);
+  };
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setNewInput(prevState => ({
       ...prevState,
       [name]: value,
     }));
-  };
-
-  const handleSelectChange = (e: SelectChangeEvent<number>, key: string) => {
-    setNewInput(prevState => ({
-      ...prevState,
-      [key]: e.target.value as number,
-    }));
+    
+    console.log(`입력된 ${name}:`, value);
   };
 
   const handleSubmit = async () => {
     try {
-        const { companyCode, lciItemId, year, month, amount } = newInput;
-        const actualYear = year || null;
-
-        if (!companyCode || !lciItemId || !year || !month || !amount) {
-            throw new Error('모든 필드를 입력해 주세요.');
+      const { companyCode, lciItemId, year, month, amount } = newInput;
+  
+      if (!companyCode || !lciItemId || !year || !month || !amount) {
+        throw new Error('모든 필드를 입력해 주세요.');
+      }
+  
+      if (isExist) {
+        // isExist가 true일 때, PUT 요청을 실행
+        const inputType = items.find(item => item.id === Number(lciItemId))?.name; // 선택된 항목의 이름을 찾아냄
+        if (!inputType) {
+          throw new Error('선택된 항목이 올바르지 않습니다.');
         }
-
-        // lciItemId에 해당하는 itemName을 가져오기 위한 API 호출
-        const itemUrl = 'https://lcaapi.acess.co.kr/Inputs/items';
-        const itemResponse = await axios.get<Item[]>(itemUrl);
-        const items = itemResponse.data;
-
-        // lciItemId와 일치하는 항목 찾기
-        const selectedItem = items.find((item: Item) => item.id === Number(lciItemId));
-        if (!selectedItem) {
-            throw new Error(`lciItemId '${lciItemId}'에 대한 항목을 찾을 수 없습니다.`);
+  
+        // 선택한 항목, 연도, 회사코드를 기반으로 GET 요청을 보내 ids 값을 찾아야 함
+        const fetchUrl = `https://lcaapi.acess.co.kr/Inputs?inputType=${inputType}&year=${year}&companyCode=${companyCode}`;
+        console.log('데이터 확인 API 호출 경로:', fetchUrl);
+  
+        try {
+          const response = await axios.get(fetchUrl);
+          const inputData = response.data[0]; // 데이터는 배열 형태로 들어옴
+          if (!inputData || !inputData.ids || inputData.ids.length === 0) {
+            throw new Error('선택한 조건에 맞는 데이터가 없습니다.');
+          }
+  
+          const ids = inputData.ids;
+          const id = ids[month - 1]; // month에 맞는 id를 찾아냄 (1월이 index 0)
+          if (!id) {
+            throw new Error('해당 월에 대한 데이터가 없습니다.');
+          }
+  
+          // PUT 요청을 위한 경로
+          const putUrl = `https://lcaapi.acess.co.kr/Inputs/${id}`;
+          const putPayload = {
+            companyCode,
+            lciItemId: Number(lciItemId),
+            year: Number(year),
+            month: Number(month),
+            amount: Number(amount),
+          };
+  
+          // PUT 요청 실행
+          console.log('PUT 요청 URL:', putUrl);
+          console.log('PUT 요청 데이터:', putPayload);
+  
+          const putResponse = await axios.put(putUrl, putPayload);
+          console.log('PUT 응답:', putResponse.data);
+  
+        } catch (fetchError) {
+          console.error('데이터를 확인하는 중 오류 발생:', fetchError);
         }
-
-        // 가져온 itemName을 사용하여 inputType과 매칭
-        const inputType = selectedItem.itemName;
-        // console.log(`Found inputType: ${inputType}`);
-
-        // inputType을 사용하여 회사 코드와 연도에 맞는 Input 데이터를 가져오기
-        const fetchUrl = `https://lcaapi.acess.co.kr/Inputs?companyCode=${companyCode}&year=${actualYear}`;
-        // console.log(`Fetching data from URL: ${fetchUrl}`);
-        const fetchResponse = await axios.get<InputResponse[]>(fetchUrl);
-        const inputs = fetchResponse.data;
-
-        // inputType에 맞는 데이터를 찾기
-        const matchedInput = inputs.find((input: InputResponse) => input.inputType === inputType);
-        if (!matchedInput) {
-            throw new Error(`입력 데이터에서 inputType '${inputType}'에 맞는 항목을 찾을 수 없습니다.`);
+      } else {
+        // isExist가 false일 때, POST 요청을 실행
+        const postUrl = `https://lcaapi.acess.co.kr/Inputs`;
+        const postPayload = {
+          lciItemId: Number(lciItemId),
+          companyCode: companyCode,
+          year: Number(year),
+          month: Number(month),
+          amount: Number(amount),
+        };
+  
+        console.log('POST 요청 URL:', postUrl);
+        console.log('POST 요청 데이터:', postPayload);
+  
+        try {
+          const postResponse = await axios.post(postUrl, postPayload);
+          console.log('POST 응답:', postResponse.data);
+        } catch (postError) {
+          console.error('POST 요청 중 오류 발생:', postError);
         }
-
-        // 선택된 월(month)에 대한 ID 가져오기
-        const ids: number[] = matchedInput.ids;
-        const id = ids[month - 1]; // 월은 1부터 시작하므로 -1
-        // console.log(`ID for month ${month}:`, id);
-
-        if (id) {
-            // 업데이트 요청
-            const updateUrl = `https://lcaapi.acess.co.kr/Inputs/${id}`;
-            const updatePayload = {
-                companyCode,
-                lciItemId: Number(lciItemId),
-                year: Number(actualYear),
-                month: Number(month),
-                amount: Number(amount),
-            };
-
-            // console.log('Update URL:', updateUrl);
-            // console.log('Update Payload:', updatePayload);
-
-            const updateResponse = await axios.put(updateUrl, updatePayload);
-            console.log('Update Response:', updateResponse.data);
-        } else {
-            // ID가 없을 때 새로 등록
-            const createUrl = 'https://lcaapi.acess.co.kr/Inputs';
-            const createPayload = {
-                companyCode,
-                lciItemId: Number(lciItemId),
-                year: Number(actualYear),
-                month: Number(month),
-                amount: Number(amount),
-            };
-
-            // console.log('Create URL:', createUrl);
-            // console.log('Create Payload:', createPayload);
-
-            const createResponse = await axios.post(createUrl, createPayload);
-            console.log('Create Response:', createResponse.data);
-        }
-
-        handleClose();
-        fetchData(selectedCompany, selectedYear);
+      }
+  
+      handleClose();
+      fetchData(selectedCompany, selectedYear); // 새로 데이터를 불러옴
     } catch (error) {
-        console.error('데이터 등록 중 오류 발생:', error);
+      console.error('데이터 등록 중 오류 발생:', error);
     }
-};
-
-  // 엑셀 다운로드
-  const handleDownloadExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(data);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    XLSX.writeFile(workbook, '투입물 정보.xlsx');
   };
-
+  
   const table = useReactTable<Input>({
     data,
     columns,
@@ -360,14 +390,6 @@ export function Ad_Input() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         투입물 관리
       </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
-        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px', marginRight: '10px', display: 'none' }}
-        onClick={handleDownloadExcel}
-      >
-        엑셀 다운로드
-      </Button>
       
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={handleCompanyChange} showAllOption={false}/>
@@ -535,7 +557,7 @@ export function Ad_Input() {
                   label="항목"
                 >
                   {items.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>{item.itemName}</MenuItem>
+                    <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
                   ))}
               </Select>
               </FormControl>

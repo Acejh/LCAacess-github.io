@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import numeral from 'numeral';
@@ -69,13 +69,18 @@ export function GTG_Data() {
   const [year, setYear] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [lciTypeMap, setLciTypeMap] = useState<{ [key: string]: string }>({});
   const [searchParams, setSearchParams] = useState({
     company: null as Company | null,
     year: '',
   });
 
   const columns: ColumnDef<GTGData>[] = [
-    { accessorKey: 'type', header: '구분' },
+    { 
+    accessorKey: 'type', 
+    header: '구분', 
+    cell: (info: CellContext<GTGData, unknown>) => lciTypeMap[info.getValue() as string] || info.getValue() 
+    },
     { accessorKey: 'name', header: '이름' },
     { accessorKey: 'unit', header: '단위' },
     { accessorKey: 'totalAmount', header: '총값', cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0') },
@@ -97,6 +102,23 @@ export function GTG_Data() {
         }))
     : [],
   ];
+
+  const fetchLciTypes = async () => {
+    try {
+      const response = await axios.get('https://lcaapi.acess.co.kr/LciItems/LciTypes');
+      const lciTypes = response.data.reduce((acc: { [key: string]: string }, item: { key: string; value: string }) => {
+        acc[item.key] = item.value;
+        return acc;
+      }, {});
+      setLciTypeMap(lciTypes);
+    } catch (error) {
+      console.error('Error fetching LCI types:', error);
+    }
+  };
+  
+  useEffect(() => {
+    fetchLciTypes();
+  }, []);
 
   const fetchGTGData = useCallback(async () => {
     if (!searchParams.company || !searchParams.year) {
@@ -326,7 +348,7 @@ export function GTG_Data() {
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header, index) => {
-                  const leftValues = [0, 97, 302, 369]; 
+                  const leftValues = [0, 66, 271, 338]; 
                   return (
                     <TableCell
                       key={header.id}
@@ -363,7 +385,7 @@ export function GTG_Data() {
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell, index) => {
                     const isRightAligned = cell.column.id === 'totalAmount' || !['type', 'name', 'unit', 'totalAmount'].includes(cell.column.id);
-                    const leftValues = [0, 97, 302, 369];
+                    const leftValues = [0, 66, 271, 338];
                     
                     return (
                       <TableCell

@@ -81,6 +81,7 @@ export function CarsControl() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [searchCarNo, setSearchCarNo] = useState('');
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useState<{
     company: Company | null;
     inOutType: 'IN' | 'OUT' | '';
@@ -181,6 +182,25 @@ export function CarsControl() {
       .catch(error => {
         console.error('There was an error fetching the data!', error);
       });
+  }, []);
+
+  useEffect(() => {
+    const userInfoString = localStorage.getItem('kt-auth-react-v');
+    
+    if (userInfoString) {
+      try {
+        const parsedData = JSON.parse(userInfoString);
+        const userInfo = parsedData?.userInfo;  // userInfo 객체 접근
+        if (userInfo) {
+          console.log('Parsed Role:', userInfo.role);  // role 값 확인
+          setUserRole(userInfo.role);  // role 값 설정
+        }
+      } catch (error) {
+        console.error('Error parsing JSON:', error);
+      }
+    } else {
+      console.error('No user info found in localStorage');
+    }
   }, []);
 
   // 엑셀 다운로드
@@ -481,23 +501,48 @@ export function CarsControl() {
                     </TableCell>
                   </TableRow>
                 ) : table.getRowModel().rows.length > 0 ? (
-                  table.getRowModel().rows.map((row, index) => (
-                    <TableRow key={row.id}>
-                      {row.getVisibleCells().map(cell => (
-                        <TableCell key={cell.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', textAlign: ['spec'].includes(cell.column.id) ? 'right' : 'left', }}>
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  table.getRowModel().rows.map((row, index) => {
+                    // 차량 규격(spec)이 0인지 확인
+                    const isSpecZero = parseFloat(row.original.spec) === 0;
+
+                    return (
+                      <TableRow
+                        key={row.id}
+                        style={{
+                          backgroundColor: isSpecZero ? '#f5c6cb' : 'white', 
+                        }}
+                      >
+                        {row.getVisibleCells().map(cell => (
+                          <TableCell
+                            key={cell.id}
+                            style={{
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              textAlign: ['spec'].includes(cell.column.id) ? 'right' : 'left',
+                            }}
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                        <TableCell>
+                          <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)} style={{ padding: '2px' }}>
+                            수정
+                          </Button>
+                          {userRole === 'Admin' && (
+                            <Button
+                              variant="contained"
+                              color="secondary"
+                              onClick={() => handleDeleteOpen(index)}
+                              style={{ marginLeft: '10px', padding: '2px' }}
+                            >
+                              삭제
+                            </Button>
+                          )}
                         </TableCell>
-                      ))}
-                      <TableCell>
-                        <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)} style={{ padding: '2px' }}>
-                          수정
-                        </Button>
-                        <Button variant="contained" color="secondary" onClick={() => handleDeleteOpen(index)} style={{ marginLeft: '10px', padding: '2px' }}>
-                          삭제
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                      </TableRow>
+                    );
+                  })
                 ) : (
                   <TableRow>
                     <TableCell colSpan={12} style={{ textAlign: 'center' }}>

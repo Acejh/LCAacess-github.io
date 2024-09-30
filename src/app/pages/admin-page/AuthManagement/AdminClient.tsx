@@ -112,6 +112,7 @@ export function AdminClient() {
   const [searchBizNo, setSearchBizNo] = useState<string>('');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useState<{
     company: Company | null;
     type: string;
@@ -223,6 +224,22 @@ export function AdminClient() {
   
     fetchClientTypes();
   }, []);
+
+  useEffect(() => {
+    const userInfoString = localStorage.getItem('kt-auth-react-v');
+    if (userInfoString) {
+      try {
+        const parsedData = JSON.parse(userInfoString);
+        const userInfo = parsedData?.userInfo;  // userInfo 객체 접근
+        if (userInfo) {
+          setUserRole(userInfo.role);  // role 값 설정
+        }
+      } catch (error) {
+        console.error('Error parsing JSON:', error);
+      }
+    }
+  }, []);
+
   //사업회원 데이터 변환
   useEffect(() => {
     axios.get('https://lcaapi.acess.co.kr/Companies')
@@ -529,31 +546,49 @@ export function AdminClient() {
                     </TableCell>
                   </TableRow>
                 ) : table.getRowModel().rows.length > 0 ? (
-                  table.getRowModel().rows.map((row, index) => (
-                    <TableRow key={row.id}>
-                      {row.getVisibleCells().map(cell => (
-                        <TableCell
-                          key={cell.id}
-                          style={{
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            textAlign: ['distance'].includes(cell.column.id) ? 'right' : 'left',
-                          }}
-                        >
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  table.getRowModel().rows.map((row, index) => {
+                    // 거리 값이 0인지 확인
+                    const distanceValue = parseFloat(row.original.distance);
+                    const isDistanceZero = distanceValue === 0;
+
+                    return (
+                      <TableRow
+                        key={row.id}
+                        style={{
+                          backgroundColor: isDistanceZero ? '#f5c6cb' : 'white', // 거리가 0인 경우 배경색 변경
+                        }}
+                      >
+                        {row.getVisibleCells().map(cell => (
+                          <TableCell
+                            key={cell.id}
+                            style={{
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              textAlign: ['distance'].includes(cell.column.id) ? 'right' : 'left',
+                            }}
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </TableCell>
+                        ))}
+                        <TableCell>
+                          <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)} style={{ padding: '2px' }}>
+                            수정
+                          </Button>
+                          {userRole === 'Admin' && (
+                            <Button
+                              variant="contained"
+                              color="secondary"
+                              onClick={() => handleDeleteOpen(index)}
+                              style={{ marginLeft: '10px', padding: '2px' }}
+                            >
+                              삭제
+                            </Button>
+                          )}
                         </TableCell>
-                      ))}
-                      <TableCell>
-                        <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)} style={{ padding: '2px' }}>
-                          수정
-                        </Button>
-                        <Button variant="contained" color="secondary" onClick={() => handleDeleteOpen(index)} style={{ marginLeft: '10px', padding: '2px' }}>
-                          삭제
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))
+                      </TableRow>
+                    );
+                  })
                 ) : (
                   <TableRow>
                     <TableCell colSpan={12} style={{ textAlign: 'center' }}>

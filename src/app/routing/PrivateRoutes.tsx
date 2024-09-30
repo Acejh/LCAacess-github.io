@@ -50,6 +50,7 @@ import { LCI_Item } from '../pages/admin-page/InputManagement/KeyIn/LCI_Item'
 import { GWP_Item } from '../pages/admin-page/InputManagement/KeyIn/GWP_Item'
 import { GTG_Data } from '../pages/admin-page/ProStatus/GTG_Data'
 import { ValuableMapping } from '../pages/admin-page/ProStatus/ValuableMapping'
+import { WasteMapping } from '../pages/admin-page/ProStatus/WasteMapping'
 
 const PrivateRoutes = () => {
     const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
@@ -66,6 +67,7 @@ const PrivateRoutes = () => {
         <Route path="/Registration" element={<Registration />} />
         <Route path="/Dashboard" element={<Ad_Dashboard />} />
         <Route path="/ValuableMapping" element={< ValuableMapping/>} />
+        <Route path="/WasteMapping" element={< WasteMapping/>} />
 
         {/* 유저 기능 */}
         <Route path="/Input-Info" element={<InputInfo />} />

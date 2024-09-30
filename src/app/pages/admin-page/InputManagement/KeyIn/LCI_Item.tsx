@@ -33,7 +33,7 @@ type LciItem = {
   year: number;
   type: string;
   category: string;
-  itemName: string;
+  name: string;
   unit: string;
   gwp: number;
   gwpAlt: number;
@@ -198,7 +198,7 @@ export function LCI_Item() {
       year: new Date().getFullYear(),
       type: '',
       category: '',
-      itemName: '',
+      name: '',
       unit: '',
       gwp: 0,
       gwpAlt: 0,
@@ -220,7 +220,7 @@ export function LCI_Item() {
           year: editItem.year,
           type: editItem.type,
           category: editItem.category,
-          name: editItem.itemName,
+          name: editItem.name,
           unit: editItem.unit,
           gwp: editItem.gwp,
           gwpAlt: editItem.gwpAlt,
@@ -251,7 +251,7 @@ export function LCI_Item() {
           year: editItem.year,
           type: editItem.type,
           category: editItem.category,
-          name: editItem.itemName,
+          name: editItem.name,
           unit: editItem.unit,
           gwp: editItem.gwp,
           gwpAlt: editItem.gwpAlt,
@@ -319,8 +319,8 @@ export function LCI_Item() {
     },
     {
       header: '명칭',
-      accessorFn: (row) => row.itemName,
-      id: 'itemName',
+      accessorFn: (row) => row.name,
+      id: 'name',
     },
     {
       header: '단위',
@@ -596,8 +596,8 @@ export function LCI_Item() {
                 fullWidth
                 margin="normal"
                 label="명칭"
-                value={editItem.itemName}
-                onChange={(e) => handleInputChange('itemName', e.target.value)}  
+                value={editItem.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}  
               />
               <TextField
                 fullWidth
