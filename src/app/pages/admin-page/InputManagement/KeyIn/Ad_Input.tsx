@@ -105,7 +105,8 @@ export function Ad_Input() {
   const [data, setData] = useState<Input[]>([]);
   const [loading, setLoading] = useState(true);
   const currentYear = new Date().getFullYear();
-  const [amountLabel, setAmountLabel] = useState('투입량'); // 기본 레이블
+  const [amountLabel, setAmountLabel] = useState('투입량');
+  const [guideMessage, setGuideMessage] = useState('');
   const years = Array.from(new Array(6), (val, index) => currentYear - index);
   const [items, setItems] = useState<Item[]>([]);
   const [tempSelectedCompany, setTempSelectedCompany] = useState<Company | null>(null); 
@@ -224,7 +225,7 @@ export function Ad_Input() {
           );
           const { isExist, amount } = response.data;
   
-          console.log('API 응답:', response.data);
+          // console.log('API 응답:', response.data);
   
           setIsExist(isExist); // isExist 상태 업데이트
   
@@ -234,14 +235,14 @@ export function Ad_Input() {
               ...prevState,
               amount: amount.toFixed(5), // 소수점 5자리까지
             }));
-            console.log('투입량 업데이트:', amount.toFixed(5));
+            // console.log('투입량 업데이트:', amount.toFixed(5));
           } else {
             // 데이터를 찾지 못한 경우 투입량을 0으로 초기화
             setNewInput(prevState => ({
               ...prevState,
               amount: '',
             }));
-            console.log('데이터가 존재하지 않음. 투입량 초기화.');
+            // console.log('데이터가 존재하지 않음. 투입량 초기화.');
           }
         } catch (error) {
           console.error('Error fetching amount:', error);
@@ -293,7 +294,7 @@ export function Ad_Input() {
           );
           const { isExist, amount } = response.data;
   
-          console.log('API 응답:', response.data);
+          // console.log('API 응답:', response.data);
   
           setIsExist(isExist); // isExist 상태 업데이트
   
@@ -303,14 +304,14 @@ export function Ad_Input() {
               ...prevState,
               amount: amount.toFixed(5), // 소수점 5자리까지
             }));
-            console.log('투입량 업데이트:', amount.toFixed(5));
+            // console.log('투입량 업데이트:', amount.toFixed(5));
           } else {
             // 데이터를 찾지 못한 경우 투입량을 0으로 초기화
             setNewInput(prevState => ({
               ...prevState,
               amount: '',
             }));
-            console.log('데이터가 존재하지 않음. 투입량 초기화.');
+            // console.log('데이터가 존재하지 않음. 투입량 초기화.');
           }
         } catch (error) {
           console.error('Error fetching amount:', error);
@@ -332,15 +333,36 @@ export function Ad_Input() {
       [key]: e.target.value as number,
     }));
   
-    // lciItemId가 변경될 때 해당 항목의 unit 값을 찾아서 레이블을 업데이트
+    // lciItemId가 변경될 때 해당 항목의 category 값을 찾아서 가이드 메시지 업데이트
     if (key === 'lciItemId') {
       const selectedItem = items.find(item => item.id === Number(e.target.value));
       if (selectedItem) {
         setAmountLabel(`투입량 (${selectedItem.unit})`);
+        
+        // 카테고리에 따른 가이드 메시지 설정
+        switch (selectedItem.category) {
+          case 'Electricity':
+            setGuideMessage('한전 고지서에 기입된 [kWh] 단위의 사용량을 기재해 주세요.');
+            break;
+          case 'Fuel':
+            setGuideMessage(
+              '투입되는 모든 연료 및 열원에 대해 [L] 단위의 사용량을 기재해 주세요.<br />' + 
+              '(예시 : 지게차 경유 사용량 등)'
+            );
+            break;
+          case 'Water':
+            setGuideMessage(
+              '외부에서 투입되는 상수, 공업용수, 지하수에 대해 [㎥] 단위의 사용량을 기재해 주세요.<br />' +
+              '따로 외부에서 투입하지 않고 내부에서 순환하여 사용하는 경우에는 기재하지 마세요.<br />' + 
+              '(예시 : 세탁기 평형수 등)'
+            );
+            break;
+          default:
+            setGuideMessage('');
+            break;
+        }
       }
     }
-  
-    console.log(`선택된 ${key}:`, e.target.value);
   };
   
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -350,7 +372,7 @@ export function Ad_Input() {
       [name]: value,
     }));
     
-    console.log(`입력된 ${name}:`, value);
+    // console.log(`입력된 ${name}:`, value);
   };
 
   const handleSubmit = async () => {
@@ -363,7 +385,7 @@ export function Ad_Input() {
   
       if (isExist) {
         const fetchUrl = `https://lcaapi.acess.co.kr/Inputs?year=${year}&companyCode=${companyCode}`;
-        console.log('데이터 확인 API 호출 경로:', fetchUrl);
+        // console.log('데이터 확인 API 호출 경로:', fetchUrl);
   
         try {
           const response = await axios.get<ApiResponse[]>(fetchUrl); // 여기서 타입 명시
@@ -388,8 +410,8 @@ export function Ad_Input() {
             amount: Number(amount),
           };
   
-          console.log('PUT 요청 URL:', putUrl);
-          console.log('PUT 요청 데이터:', putPayload);
+          // console.log('PUT 요청 URL:', putUrl);
+          // console.log('PUT 요청 데이터:', putPayload);
   
           const putResponse = await axios.put(putUrl, putPayload);
           console.log('PUT 응답:', putResponse.data);
@@ -407,8 +429,8 @@ export function Ad_Input() {
           amount: Number(amount),
         };
   
-        console.log('POST 요청 URL:', postUrl);
-        console.log('POST 요청 데이터:', postPayload);
+        // console.log('POST 요청 URL:', postUrl);
+        // console.log('POST 요청 데이터:', postPayload);
   
         try {
           const postResponse = await axios.post(postUrl, postPayload);
@@ -606,6 +628,13 @@ export function Ad_Input() {
                     <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
                   ))}
                 </Select>
+                {/* 가이드 메시지 추가 */}
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  style={{ marginTop: '10px', marginLeft: '5px', color: 'black'}}
+                  dangerouslySetInnerHTML={{ __html: guideMessage }}
+                />
               </FormControl>
             </Grid>
             <Grid item xs={12}>

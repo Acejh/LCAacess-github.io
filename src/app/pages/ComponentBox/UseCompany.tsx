@@ -42,17 +42,37 @@ const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListC
       const sortedCompanies: Company[] = response.data.list.sort((a: Company, b: Company) =>
         a.name.localeCompare(b.name)
       );
-
+  
       if (showAllOption) {
-        sortedCompanies.unshift({ id: -1, code: '', name: '전체', bizNo: '', ecoasCode: '', zipCode: '', address: '', addressDetail: null, managerName: '', tel: '', longitude: 0, latitude: 0, createdBy: '', createdAt: '', updatedBy: null, updatedAt: null });
+        const allCompany = {
+          id: -1,
+          code: '',
+          name: '전체',
+          bizNo: '',
+          ecoasCode: '',
+          zipCode: '',
+          address: '',
+          addressDetail: null,
+          managerName: '',
+          tel: '',
+          longitude: 0,
+          latitude: 0,
+          createdBy: '',
+          createdAt: '',
+          updatedBy: null,
+          updatedAt: null
+        };
+        sortedCompanies.unshift(allCompany);
+        setSelectedCompany(allCompany); // "전체"를 기본 선택값으로 설정
+        onCompanyChange(allCompany); // "전체"를 외부로도 전달
       }
-      
+  
       setCompanies(sortedCompanies);
-
+  
       if (onCompanyListChange) {
         onCompanyListChange(sortedCompanies);
       }
-
+  
       const authString = localStorage.getItem('kt-auth-react-v');
       if (authString) {
         const auth = JSON.parse(authString);

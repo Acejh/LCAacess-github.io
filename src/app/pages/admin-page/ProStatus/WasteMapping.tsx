@@ -465,7 +465,7 @@ export function WasteMapping() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        폐기물 품목 매핑 관리
+        폐기물 처리품목&middot;방법 관리
       </Typography>
 
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>

@@ -90,8 +90,8 @@ const UseProduct: React.FC<UseProductProps> = ({
         const allSelected = categoryProducts.every(product => selectedProducts.includes(product.itemCode));
 
         return (
-          <div key={categoryName} style={{ marginBottom: '6px' }}>
-            <Typography variant="h6" gutterBottom >
+          <div key={categoryName} style={{ marginBottom: '2px'}}>
+            <Typography variant="h6" gutterBottom sx={{ fontSize: '13px' }}>
               {categoryName}
               <Chip
                 label="All"
