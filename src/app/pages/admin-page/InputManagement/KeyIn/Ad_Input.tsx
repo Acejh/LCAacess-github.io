@@ -62,7 +62,9 @@ type Input = {
 };
 
 type ApiResponse = {
+  companyCode: string;
   inputType: string;
+  lciItemId: number;
   unit: string;
   year: number;
   ids: number[];
@@ -73,18 +75,18 @@ const columns: ColumnDef<Input>[] = [
   { accessorKey: 'inputType', header: '항목' },
   { accessorKey: 'unit', header: '단위' },
   { accessorKey: 'year', header: () => <div style={{ textAlign: 'right' }}>연도</div>},
-  { accessorKey: '1월', header: () => <div style={{ textAlign: 'right' }}>1월 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '2월', header: () => <div style={{ textAlign: 'right' }}>2월 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '3월', header: () => <div style={{ textAlign: 'right' }}>3월 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '4월', header: () => <div style={{ textAlign: 'right' }}>4월 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '5월', header: () => <div style={{ textAlign: 'right' }}>5월 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '6월', header: () => <div style={{ textAlign: 'right' }}>6월 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '7월', header: () => <div style={{ textAlign: 'right' }}>7월 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '8월', header: () => <div style={{ textAlign: 'right' }}>8월 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '9월', header: () => <div style={{ textAlign: 'right' }}>9월 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '10월', header: () => <div style={{ textAlign: 'right' }}>10월 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '11월', header: () => <div style={{ textAlign: 'right' }}>11월 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '12월', header: () => <div style={{ textAlign: 'right' }}>12월 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '1월', header: () => <div style={{ textAlign: 'right' }}>1월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '2월', header: () => <div style={{ textAlign: 'right' }}>2월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '3월', header: () => <div style={{ textAlign: 'right' }}>3월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '4월', header: () => <div style={{ textAlign: 'right' }}>4월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '5월', header: () => <div style={{ textAlign: 'right' }}>5월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '6월', header: () => <div style={{ textAlign: 'right' }}>6월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '7월', header: () => <div style={{ textAlign: 'right' }}>7월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '8월', header: () => <div style={{ textAlign: 'right' }}>8월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '9월', header: () => <div style={{ textAlign: 'right' }}>9월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '10월', header: () => <div style={{ textAlign: 'right' }}>10월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '11월', header: () => <div style={{ textAlign: 'right' }}>11월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '12월', header: () => <div style={{ textAlign: 'right' }}>12월</div>, cell: info => numeral(info.getValue()).format('0,0') },
 ];
 
 const style = {
@@ -103,6 +105,7 @@ export function Ad_Input() {
   const [data, setData] = useState<Input[]>([]);
   const [loading, setLoading] = useState(true);
   const currentYear = new Date().getFullYear();
+  const [amountLabel, setAmountLabel] = useState('투입량'); // 기본 레이블
   const years = Array.from(new Array(6), (val, index) => currentYear - index);
   const [items, setItems] = useState<Item[]>([]);
   const [tempSelectedCompany, setTempSelectedCompany] = useState<Company | null>(null); 
@@ -271,8 +274,52 @@ export function Ad_Input() {
   };
 
   const handleOpen = () => {
-    setNewInput(prev => ({ ...prev, companyCode: selectedCompany?.code || '', year: selectedYear || '' })); 
-    setOpen(true);
+    // 회사 코드와 연도를 업데이트하고 모달을 엽니다.
+    setNewInput(prev => ({ ...prev, companyCode: selectedCompany?.code || '', year: selectedYear || '' }));
+  
+    // 투입물 등록 버튼을 눌렀을 때 데이터를 가져오는 fetchAmount 함수를 호출합니다.
+    const fetchAmount = async () => {
+      console.log('현재 선택된 값:', {
+        companyCode: newInput.companyCode,
+        lciItemId: newInput.lciItemId,
+        year: newInput.year,
+        month: newInput.month,
+      });
+  
+      if (newInput.companyCode && newInput.lciItemId && newInput.year && newInput.month) {
+        try {
+          const response = await axios.get(
+            `https://lcaapi.acess.co.kr/Inputs/Exist?lciItemId=${newInput.lciItemId}&companyCode=${newInput.companyCode}&year=${newInput.year}&month=${newInput.month}`
+          );
+          const { isExist, amount } = response.data;
+  
+          console.log('API 응답:', response.data);
+  
+          setIsExist(isExist); // isExist 상태 업데이트
+  
+          if (isExist) {
+            // 가져온 amount 값을 투입량 필드에 설정
+            setNewInput(prevState => ({
+              ...prevState,
+              amount: amount.toFixed(5), // 소수점 5자리까지
+            }));
+            console.log('투입량 업데이트:', amount.toFixed(5));
+          } else {
+            // 데이터를 찾지 못한 경우 투입량을 0으로 초기화
+            setNewInput(prevState => ({
+              ...prevState,
+              amount: '',
+            }));
+            console.log('데이터가 존재하지 않음. 투입량 초기화.');
+          }
+        } catch (error) {
+          console.error('Error fetching amount:', error);
+        }
+      }
+    };
+  
+    fetchAmount(); // 모달을 열 때 데이터를 가져옴.
+    setOpen(true); // 모달 열기
   };
 
   const handleClose = () => {
@@ -284,7 +331,15 @@ export function Ad_Input() {
       ...prevState,
       [key]: e.target.value as number,
     }));
-    
+  
+    // lciItemId가 변경될 때 해당 항목의 unit 값을 찾아서 레이블을 업데이트
+    if (key === 'lciItemId') {
+      const selectedItem = items.find(item => item.id === Number(e.target.value));
+      if (selectedItem) {
+        setAmountLabel(`투입량 (${selectedItem.unit})`);
+      }
+    }
+  
     console.log(`선택된 ${key}:`, e.target.value);
   };
   
@@ -307,30 +362,23 @@ export function Ad_Input() {
       }
   
       if (isExist) {
-        // isExist가 true일 때, PUT 요청을 실행
-        const inputType = items.find(item => item.id === Number(lciItemId))?.name; // 선택된 항목의 이름을 찾아냄
-        if (!inputType) {
-          throw new Error('선택된 항목이 올바르지 않습니다.');
-        }
-  
-        // 선택한 항목, 연도, 회사코드를 기반으로 GET 요청을 보내 ids 값을 찾아야 함
-        const fetchUrl = `https://lcaapi.acess.co.kr/Inputs?inputType=${inputType}&year=${year}&companyCode=${companyCode}`;
+        const fetchUrl = `https://lcaapi.acess.co.kr/Inputs?year=${year}&companyCode=${companyCode}`;
         console.log('데이터 확인 API 호출 경로:', fetchUrl);
   
         try {
-          const response = await axios.get(fetchUrl);
-          const inputData = response.data[0]; // 데이터는 배열 형태로 들어옴
-          if (!inputData || !inputData.ids || inputData.ids.length === 0) {
+          const response = await axios.get<ApiResponse[]>(fetchUrl); // 여기서 타입 명시
+          const inputData = response.data.find((item: ApiResponse) => item.lciItemId === Number(lciItemId)); // 'item'의 타입 명시
+  
+          if (!inputData) {
             throw new Error('선택한 조건에 맞는 데이터가 없습니다.');
           }
   
           const ids = inputData.ids;
-          const id = ids[month - 1]; // month에 맞는 id를 찾아냄 (1월이 index 0)
+          const id = ids[month - 1];
           if (!id) {
             throw new Error('해당 월에 대한 데이터가 없습니다.');
           }
   
-          // PUT 요청을 위한 경로
           const putUrl = `https://lcaapi.acess.co.kr/Inputs/${id}`;
           const putPayload = {
             companyCode,
@@ -340,7 +388,6 @@ export function Ad_Input() {
             amount: Number(amount),
           };
   
-          // PUT 요청 실행
           console.log('PUT 요청 URL:', putUrl);
           console.log('PUT 요청 데이터:', putPayload);
   
@@ -351,7 +398,6 @@ export function Ad_Input() {
           console.error('데이터를 확인하는 중 오류 발생:', fetchError);
         }
       } else {
-        // isExist가 false일 때, POST 요청을 실행
         const postUrl = `https://lcaapi.acess.co.kr/Inputs`;
         const postPayload = {
           lciItemId: Number(lciItemId),
@@ -559,7 +605,7 @@ export function Ad_Input() {
                   {items.map((item) => (
                     <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
                   ))}
-              </Select>
+                </Select>
               </FormControl>
             </Grid>
             <Grid item xs={12}>
@@ -608,7 +654,7 @@ export function Ad_Input() {
             <Grid item xs={12}>
               <TextField
                 name="amount"
-                label="투입량 (kg)"
+                label={amountLabel} 
                 variant="outlined"
                 type="number"
                 fullWidth

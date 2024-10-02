@@ -160,16 +160,16 @@ export function WasteMapping() {
       const { wasteMaps } = response.data;
 
       // 데이터 변환 및 상태 업데이트
-      const transformedData = wasteMaps.map((item: WasteMapItem, index: number) => ({
+      const transformedData = wasteMaps.map((item: WasteMapItem) => ({
         id: item.id,
         companyCode: item.companyCode,
         client: item.client,
         item1: item.item1,
         item2: item.item2,
         item3: item.item3,
-        wasteMethod: index === 0 ? null : item.wasteMethod, 
-        lciItem: index === 0 ? null : item.lciItem,         
-        itemCodes: index === 0 ? [] : item.itemCodes,       
+        wasteMethod: item.wasteMethod, 
+        lciItem: item.lciItem,         
+        itemCodes: item.itemCodes,       
         onItemClick: handleLciItemClick,
         onClientClick: handleClientClick,
       }));

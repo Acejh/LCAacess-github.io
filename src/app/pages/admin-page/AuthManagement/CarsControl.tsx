@@ -422,7 +422,7 @@ export function CarsControl() {
       </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} onCompanyListChange={setCompanies} />
-        <FormControl style={{ marginRight: '10px' }}>
+        <FormControl style={{ marginRight: '10px', display: 'none' }}>
           <InputLabel id="year-select-label">연도</InputLabel>
           <Select
             labelId="year-select-label"

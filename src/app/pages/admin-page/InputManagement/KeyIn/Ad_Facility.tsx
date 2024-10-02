@@ -118,6 +118,7 @@ export function Ad_Facility() {
   const [deleteFacilityId, setDeleteFacilityId] = useState<number | null>(null);
   const [newFacility, setNewFacility] = useState({ name: '', capacity: '', companyCode: '', items: [] as string[] });
   const [editFacility, setEditFacility] = useState({ id: '', name: '', capacity: '', companyCode: '', items: [] as string[] });
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   const fetchData = useCallback(async (companyCode: string) => {
     setLoading(true);
@@ -151,6 +152,38 @@ export function Ad_Facility() {
     }
   }, []);
 
+  const handleFetchData = useCallback(() => {
+    if (tempSelectedCompany) {
+      setSelectedCompany(tempSelectedCompany);
+      setFetchDataTrigger(true);
+    } else {
+      setError('사업회사를 선택해주세요.');
+    }
+  }, [tempSelectedCompany, setSelectedCompany, setFetchDataTrigger, setError]);
+
+  //권한 가져오는 useEffect
+  useEffect(() => {
+    const userInfoString = localStorage.getItem('kt-auth-react-v');
+    if (userInfoString) {
+      try {
+        const parsedData = JSON.parse(userInfoString);
+        const userInfo = parsedData?.userInfo; 
+        if (userInfo) {
+          setUserRole(userInfo.role); 
+        }
+      } catch (error) {
+        console.error('Error parsing JSON:', error);
+      }
+    }
+  }, []);
+
+  //자동조회 useEffect
+  useEffect(() => {
+    if (userRole === 'User' && tempSelectedCompany) {
+      handleFetchData(); // 페이지 로드 시 자동 조회
+    }
+  }, [userRole, tempSelectedCompany, handleFetchData]);
+
   useEffect(() => {
     if (fetchDataTrigger && tempSelectedCompany) {
       fetchData(tempSelectedCompany.code);
@@ -161,15 +194,6 @@ export function Ad_Facility() {
   const handleCompanyChange = (company: Company | null) => {
     setTempSelectedCompany(company);
     setFetchDataTrigger(false); 
-  };
-
-  const handleFetchData = () => {
-    if (tempSelectedCompany) { 
-      setSelectedCompany(tempSelectedCompany); 
-      setFetchDataTrigger(true); 
-    } else {
-      setError('사업회사를 선택해주세요.');
-    }
   };
 
   // const handleProductChange = (product: Product | null) => {
@@ -348,7 +372,13 @@ export function Ad_Facility() {
         <Button
           variant="contained"
           color="primary"
-          style={{ height: '35px', padding: '0 10px', fontSize: '14px', marginRight: '10px' }}
+          style={{
+            height: '35px',
+            padding: '0 10px',
+            fontSize: '14px',
+            marginRight: '10px',
+            display: userRole === 'User' ? 'none' : 'inline-block', // User 권한일 때 버튼 숨기기
+          }}
           onClick={handleFetchData}
         >
           조회
@@ -356,7 +386,12 @@ export function Ad_Facility() {
         <Button
           variant="contained"
           color="primary"
-          style={{ height: '35px', marginLeft: '20px', padding: '0 10px', fontSize: '14px' }}
+          style={{
+            height: '35px',
+            marginLeft: userRole === 'User' ? 0 : '20px', 
+            padding: '0 10px',
+            fontSize: '14px',
+          }}
           onClick={handleFacilityModalOpen}
           disabled={!selectedCompany}
         >

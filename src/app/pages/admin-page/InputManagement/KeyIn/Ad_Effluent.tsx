@@ -61,22 +61,21 @@ type OutputResponse = {
 };
 
 const columns: ColumnDef<Input>[] = [
-  { accessorKey: 'ids', header: '통합ID' },
   { accessorKey: 'inputType', header: '항목' },
   { accessorKey: 'unit', header: '단위' },
   { accessorKey: 'year', header: () => <div style={{ textAlign: 'right' }}>연도</div>},
-  { accessorKey: '1월', header: () => <div style={{ textAlign: 'right' }}>1월 (m3)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '2월', header: () => <div style={{ textAlign: 'right' }}>2월 (m3)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '3월', header: () => <div style={{ textAlign: 'right' }}>3월 (m3)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '4월', header: () => <div style={{ textAlign: 'right' }}>4월 (m3)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '5월', header: () => <div style={{ textAlign: 'right' }}>5월 (m3)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '6월', header: () => <div style={{ textAlign: 'right' }}>6월 (m3)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '7월', header: () => <div style={{ textAlign: 'right' }}>7월 (m3)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '8월', header: () => <div style={{ textAlign: 'right' }}>8월 (m3)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '9월', header: () => <div style={{ textAlign: 'right' }}>9월 (m3)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '10월', header: () => <div style={{ textAlign: 'right' }}>10월 (m3)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '11월', header: () => <div style={{ textAlign: 'right' }}>11월 (m3)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '12월', header: () => <div style={{ textAlign: 'right' }}>12월 (m3)</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '1월', header: () => <div style={{ textAlign: 'right' }}>1월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '2월', header: () => <div style={{ textAlign: 'right' }}>2월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '3월', header: () => <div style={{ textAlign: 'right' }}>3월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '4월', header: () => <div style={{ textAlign: 'right' }}>4월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '5월', header: () => <div style={{ textAlign: 'right' }}>5월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '6월', header: () => <div style={{ textAlign: 'right' }}>6월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '7월', header: () => <div style={{ textAlign: 'right' }}>7월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '8월', header: () => <div style={{ textAlign: 'right' }}>8월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '9월', header: () => <div style={{ textAlign: 'right' }}>9월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '10월', header: () => <div style={{ textAlign: 'right' }}>10월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '11월', header: () => <div style={{ textAlign: 'right' }}>11월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '12월', header: () => <div style={{ textAlign: 'right' }}>12월</div>, cell: info => numeral(info.getValue()).format('0,0') },
 ];
 
 const style = {

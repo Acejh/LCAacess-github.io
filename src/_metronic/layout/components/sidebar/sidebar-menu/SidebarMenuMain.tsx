@@ -36,7 +36,7 @@ const SidebarMenuMain = () => {
             to='/admin-page/InputManagement'
             title='데이터 관리'
             fontIcon='bi-chat-left'
-            icon='message-text-2'
+            icon='plus-circle'
           >
             <SidebarMenuItem to='/AdminClient' title='거래처 관리' hasBullet={true} />
             <SidebarMenuItem to='/CarsControl' title='차량 관리' hasBullet={true} />
@@ -51,7 +51,7 @@ const SidebarMenuMain = () => {
             to='/admin-page/EcoASManagement' 
             title='EcoAS 관리표' 
             fontIcon='bi-chat-left' 
-            icon='message-text-2'
+            icon='note-2'
           >
           <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='수집운반 관리표' fontIcon='bi-chat-left'>
             <SidebarMenuItem to='/CTMBasic' title='수집운반 관리표 원장' hasBullet={true} />
@@ -73,7 +73,7 @@ const SidebarMenuMain = () => {
             to='/admin-page/ProStatus'
             title='데이터 매핑'
             fontIcon='bi-chat-left'
-            icon='message-text-2'
+            icon='technology-4'
           >
             <SidebarMenuItem to='/DataStatus' title='데이터 매핑 현황' hasBullet={true} />
             <SidebarMenuItem to='/CTMapping' title='수집운반 매핑' hasBullet={true} />
@@ -85,7 +85,7 @@ const SidebarMenuMain = () => {
             to='/admin-page/AuthManagement'
             title='데이터 처리'
             fontIcon='bi-chat-left'
-            icon='message-text-2'
+            icon='verify'
           >
             <SidebarMenuItem to='/GTG_Data' title='GTG 결과' hasBullet={true} />
             <SidebarMenuItem to='/GTG_Data' title='온실효과 배출' hasBullet={true} />
@@ -104,7 +104,7 @@ const SidebarMenuMain = () => {
             to='/admin-page/InputManagement'
             title='데이터 관리'
             fontIcon='bi-chat-left'
-            icon='message-text-2'
+            icon='plus-circle'
           >
             <SidebarMenuItem to='/AdminClient' title='거래처 관리' hasBullet={true} />
             <SidebarMenuItem to='/CarsControl' title='차량 관리' hasBullet={true} />
@@ -120,7 +120,7 @@ const SidebarMenuMain = () => {
             to='/admin-page/EcoASManagement' 
             title='EcoAS 관리표' 
             fontIcon='bi-chat-left' 
-            icon='message-text-2'
+            icon='note-2'
           >
           <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='수집운반 관리표' fontIcon='bi-chat-left'>
             <SidebarMenuItem to='/CTMBasic' title='수집운반 관리표 원장' hasBullet={true} />
@@ -142,7 +142,7 @@ const SidebarMenuMain = () => {
             to='/admin-page/ProStatus'
             title='데이터 매핑'
             fontIcon='bi-chat-left'
-            icon='message-text-2'
+            icon='technology-4'
           >
             <SidebarMenuItem to='/DataStatus' title='데이터 매핑 현황' hasBullet={true} />
             <SidebarMenuItem to='/CTMapping' title='수집운반 매핑' hasBullet={true} />
@@ -154,7 +154,7 @@ const SidebarMenuMain = () => {
             to='/admin-page/AuthManagement'
             title='데이터 처리'
             fontIcon='bi-chat-left'
-            icon='message-text-2'
+            icon='verify'
           >
             <SidebarMenuItem to='/GTG_Data' title='GTG 결과' hasBullet={true} />
             <SidebarMenuItem to='/GTG_Data' title='온실효과 배출' hasBullet={true} />
@@ -164,7 +164,7 @@ const SidebarMenuMain = () => {
             to='/admin-page/AuthManagement'
             title='관리기능'
             fontIcon='bi-chat-left'
-            icon='message-text-2'
+            icon='setting-2'
           >
             <SidebarMenuItem to='/MemberControl' title='사업회원관리' hasBullet={true} />
             <SidebarMenuItem to='/UserControl' title='계정 관리' hasBullet={true} />
