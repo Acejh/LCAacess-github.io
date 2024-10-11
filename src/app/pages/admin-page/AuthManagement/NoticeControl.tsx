@@ -370,6 +370,9 @@ export function NoticeControl() {
 
   return (
     <div className="notice-control-container" style={{ padding: '0 30px' }}>
+      <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
+        공지사항 관리
+      </Typography>
       <div
         className="search-container"
         style={{

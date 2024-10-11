@@ -1,4 +1,4 @@
-import React, { useState, useEffect , useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import ClientType from '../../ComponentBox/ClientType';
@@ -64,6 +64,8 @@ type Client = {
   bizNo: string;
   address: string;
   distance: string;
+  latitude: number;  // 추가된 필드
+  longitude: number; // 추가된 필드
 };
 
 type ClientType = {
@@ -72,13 +74,17 @@ type ClientType = {
 };
 
 const columns: ColumnDef<Client>[] = [
-  { accessorKey: 'companyCode', header: '사업회원', },
-  { accessorKey: 'inOutType', header: '입출고 구분', },
-  { accessorKey: 'type', header: '거래처 구분', },
-  { accessorKey: 'name', header: '거래처명', },
-  { accessorKey: 'bizNo', header: '거래처 사업자번호', },
-  { accessorKey: 'address', header: '주소', },
-  { accessorKey: 'distance', header: () => <div style={{ textAlign: 'center' }}>거리 (km)</div>, cell: info => numeral(info.getValue()).format('0,0.000') },
+  { accessorKey: 'companyCode', header: '사업회원' },
+  { accessorKey: 'inOutType', header: '입출고 구분' },
+  { accessorKey: 'type', header: '거래처 구분' },
+  { accessorKey: 'name', header: '거래처명' },
+  { accessorKey: 'bizNo', header: '거래처 사업자번호' },
+  { accessorKey: 'address', header: '주소' },
+  {
+    accessorKey: 'distance',
+    header: () => <div style={{ textAlign: 'center' }}>거리 (km)</div>,
+    cell: (info) => numeral(info.getValue()).format('0,0.000'),
+  },
 ];
 
 const modalStyle = {
@@ -86,7 +92,7 @@ const modalStyle = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 600, 
+  width: 600,
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
@@ -107,46 +113,53 @@ export function AdminClient() {
   const [totalCount, setTotalCount] = useState(0);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [selectedType, setSelectedType] = useState<string>('');
-  const [selectedTypeInOut, setSelectedTypeInOut] = useState<string>(''); 
+  const [selectedTypeInOut, setSelectedTypeInOut] = useState<string>('');
   const [searchName, setSearchName] = useState<string>('');
   const [searchBizNo, setSearchBizNo] = useState<string>('');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [selectedStateFilter, setSelectedStateFilter] = useState<'All' | 'Addr' | 'NoAddr'>('All');
   const [searchParams, setSearchParams] = useState<{
     company: Company | null;
     type: string;
     inOutType: 'IN' | 'OUT' | '';
     name: string;
     bizNo: string;
+    state: 'All' | 'Addr' | 'NoAddr';
   }>({
     company: null,
     type: '',
     inOutType: '',
     name: '',
     bizNo: '',
+    state: 'All',
   });
   const [clientTypes, setClientTypes] = useState<ClientType[]>([]);
-  const [newMember, setNewMember] = useState<Omit<Client, 'id' >>({
-    companyCode:'',
+  const [newMember, setNewMember] = useState<Omit<Client, 'id'>>({
+    companyCode: '',
     inOutType: '',
     type: '',
     name: '',
     bizNo: '',
     address: '',
     distance: '',
+    latitude: 0,
+    longitude: 0,
   });
   const [editMember, setEditMember] = useState<Client>({
     id: 0,
     companyCode: '',
-    inOutType:'',
+    inOutType: '',
     type: '',
     name: '',
     bizNo: '',
     address: '',
     distance: '',
+    latitude: 0,
+    longitude: 0,
   });
-  
+
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
   const handleOpen = () => setOpen(true);
@@ -159,7 +172,7 @@ export function AdminClient() {
       setLoading(false);
       return;
     }
-  
+
     setLoading(true);
     try {
       let url = `https://lcaapi.acess.co.kr/Clients?&page=${pageIndex + 1}&pageSize=${pageSize}`;
@@ -178,17 +191,16 @@ export function AdminClient() {
       if (searchParams.bizNo) {
         url += `&bizNo=${searchParams.bizNo}`;
       }
-  
-      // console.log('Fetching data with URL:', url);
-  
+      if (searchParams.state !== 'All') {
+        url += `&state=${searchParams.state}`;
+      }
+
       const response = await axios.get(url);
       const { list, totalCount } = response.data;
-      // console.log('Response data:', response.data);
-  
-      // 데이터 변환
+
       const transformedData = list.map((client: Client) => {
-        const clientType = clientTypes.find(type => type.code === client.type);
-        const company = companies.find(c => c.code === client.companyCode);
+        const clientType = clientTypes.find((type) => type.code === client.type);
+        const company = companies.find((c) => c.code === client.companyCode);
         return {
           ...client,
           type: clientType ? clientType.title : client.type,
@@ -196,7 +208,7 @@ export function AdminClient() {
           inOutType: client.inOutType === 'IN' ? '입고' : client.inOutType === 'OUT' ? '출고' : '',
         };
       });
-  
+
       setData(transformedData);
       setTotalCount(totalCount);
       setLoading(false);
@@ -211,7 +223,7 @@ export function AdminClient() {
   }, [pageIndex, pageSize, fetchData, searchParams]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
-  //거래처 구분 데이터 변환
+
   useEffect(() => {
     const fetchClientTypes = async () => {
       try {
@@ -221,7 +233,7 @@ export function AdminClient() {
         console.error('Error fetching client types:', error);
       }
     };
-  
+
     fetchClientTypes();
   }, []);
 
@@ -230,9 +242,9 @@ export function AdminClient() {
     if (userInfoString) {
       try {
         const parsedData = JSON.parse(userInfoString);
-        const userInfo = parsedData?.userInfo;  // userInfo 객체 접근
+        const userInfo = parsedData?.userInfo;
         if (userInfo) {
-          setUserRole(userInfo.role);  // role 값 설정
+          setUserRole(userInfo.role);
         }
       } catch (error) {
         console.error('Error parsing JSON:', error);
@@ -240,55 +252,53 @@ export function AdminClient() {
     }
   }, []);
 
-  //사업회원 데이터 변환
   useEffect(() => {
-    axios.get('https://lcaapi.acess.co.kr/Companies')
-      .then(response => {
+    axios
+      .get('https://lcaapi.acess.co.kr/Companies')
+      .then((response) => {
         const sortedCompanies = response.data.list.sort((a: Company, b: Company) =>
           a.name.localeCompare(b.name)
         );
         setCompanies(sortedCompanies);
       })
-      .catch(error => {
+      .catch((error) => {
         console.error('There was an error fetching the data!', error);
       });
   }, []);
 
-  //주소검색
   const handleDaumPostCode = () => {
     const postcode = new window.daum.Postcode({
-      oncomplete: function(data: DaumPostcodeData) {
-        // console.log(data);
+      oncomplete: function (data: DaumPostcodeData) {
         const roadAddr = data.roadAddress;
         let extraRoadAddr = '';
-  
+
         if (data.bname !== '' && /[동|로|가]$/g.test(data.bname)) {
           extraRoadAddr += data.bname;
         }
         if (data.buildingName !== '' && data.apartment === 'Y') {
-          extraRoadAddr += (extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+          extraRoadAddr += extraRoadAddr !== '' ? ', ' + data.buildingName : data.buildingName;
         }
         if (extraRoadAddr !== '') {
           extraRoadAddr = ' (' + extraRoadAddr + ')';
         }
-  
-        setNewMember(prev => ({
+
+        setNewMember((prev) => ({
           ...prev,
           address: roadAddr + extraRoadAddr,
         }));
-  
-        setEditMember(prev => ({
+
+        setEditMember((prev) => ({
           ...prev,
           address: roadAddr + extraRoadAddr,
         }));
-      }
+      },
     });
     postcode.open();
   };
-  //데이터 추가
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setNewMember(prev => ({
+    setNewMember((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -296,7 +306,7 @@ export function AdminClient() {
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setEditMember(prev => ({
+    setEditMember((prev) => ({
       ...prev,
       [name]: value,
     }));
@@ -305,33 +315,34 @@ export function AdminClient() {
   const handleSubmit = () => {
     const newMemberData = {
       ...newMember,
-    };  
-  
-    // console.log("등록할 정보:", newMemberData); 
-  
-    axios.post('https://lcaapi.acess.co.kr/Clients', newMemberData)
-    .then(() => {
-      // console.log('Data posted successfully:', response.data);
-      fetchData(pageIndex, pageSize);
-    })
-    .catch(error => {
-      console.error('Error posting data:', error.response ? error.response.data : error.message);
-    });
-  
+    };
+
+    axios
+      .post('https://lcaapi.acess.co.kr/Clients', newMemberData)
+      .then(() => {
+        fetchData(pageIndex, pageSize);
+      })
+      .catch((error) => {
+        console.error('Error posting data:', error.response ? error.response.data : error.message);
+      });
+
     handleClose();
   };
 
-  //데이터 검사
   useEffect(() => {
-    const isValid = !!newMember.companyCode && !!newMember.type && !!newMember.name && !!newMember.bizNo && !!newMember.address;
+    const isValid =
+      !!newMember.companyCode &&
+      !!newMember.type &&
+      !!newMember.name &&
+      !!newMember.bizNo &&
+      !!newMember.address;
     setIsFormValid(isValid);
   }, [newMember]);
 
-  //데이터 수정 
   const handleEditOpen = (index: number) => {
     const row = table.getRowModel().rows[index];
     const member = row.original;
-  
+
     setEditMember({
       id: member.id,
       companyCode: member.companyCode,
@@ -341,6 +352,8 @@ export function AdminClient() {
       bizNo: member.bizNo,
       address: member.address,
       distance: member.distance,
+      latitude: member.latitude, // 추가된 필드
+      longitude: member.longitude, // 추가된 필드
     });
     setEditIndex(index);
     setEditOpen(true);
@@ -352,30 +365,27 @@ export function AdminClient() {
     if (editIndex !== null) {
       const updatedMemberData = {
         ...editMember,
-        // 추가 데이터 필드 변환 또는 정리
       };
-  
+
       const url = `https://lcaapi.acess.co.kr/Clients/${editMember.id}`;
-      // console.log("PUT URL:", url); 
-  
-      axios.put(url, updatedMemberData)
+
+      axios
+        .put(url, updatedMemberData)
         .then(() => {
-          // console.log('Data updated successfully:', response.data);
-          fetchData(pageIndex, pageSize);  // 데이터 갱신
+          fetchData(pageIndex, pageSize);
         })
-        .catch(error => {
+        .catch((error) => {
           console.error('Error updating data:', error);
         });
-  
+
       setEditOpen(false);
     }
   };
 
-  //데이터 삭제
   const handleDeleteOpen = (index: number) => {
     const row = table.getRowModel().rows[index];
     const memberToDelete = row.original;
-  
+
     if (memberToDelete) {
       setDeleteIndex(memberToDelete.id);
       setDeleteMemberName(memberToDelete.name);
@@ -384,23 +394,22 @@ export function AdminClient() {
       console.error(`No member found to delete at index: ${index}`);
     }
   };
-  
+
   const handleDeleteClose = () => setDeleteOpen(false);
-  
-  const handleDeleteSubmit = () => {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+
+  const handleDeleteSubmit = () => {
     if (deleteIndex !== null) {
       const url = `https://lcaapi.acess.co.kr/Clients/${deleteIndex}`;
-      // console.log("DELETE URL:", url); 
-  
-      axios.delete(url)
+
+      axios
+        .delete(url)
         .then(() => {
-          // console.log('Data deleted successfully:', response.data);
-          fetchData(pageIndex, pageSize); 
+          fetchData(pageIndex, pageSize);
         })
-        .catch(error => {
+        .catch((error) => {
           console.error('Error deleting data:', error);
         });
-  
+
       handleDeleteClose();
     }
   };
@@ -412,6 +421,7 @@ export function AdminClient() {
       inOutType: selectedTypeInOut as 'IN' | 'OUT' | '',
       name: searchName,
       bizNo: searchBizNo,
+      state: selectedStateFilter,
     });
     setPageIndex(0);
     setHasSearched(true);
@@ -422,13 +432,13 @@ export function AdminClient() {
       const newState = updater({ pageIndex, pageSize });
       setPageIndex(newState.pageIndex);
       setPageSize(newState.pageSize);
-      fetchData(newState.pageIndex, newState.pageSize); 
+      fetchData(newState.pageIndex, newState.pageSize);
     } else {
       const newPageIndex = updater.pageIndex ?? pageIndex;
       const newPageSize = updater.pageSize ?? pageSize;
       setPageIndex(newPageIndex);
       setPageSize(newPageSize);
-      fetchData(newPageIndex, newPageSize); 
+      fetchData(newPageIndex, newPageSize);
     }
   };
 
@@ -449,11 +459,10 @@ export function AdminClient() {
     autoResetPageIndex: false,
   });
 
-  // 페이지네이션
   const renderPageNumbers = () => {
     const startPage = Math.floor(pageIndex / 5) * 5;
     const endPage = Math.min(startPage + 5, totalPages);
-  
+
     return Array.from({ length: endPage - startPage }, (_, i) => startPage + i).map((number) => (
       <Button
         key={number}
@@ -471,7 +480,7 @@ export function AdminClient() {
 
   return (
     <div style={{ margin: '0 30px' }}>
-      <Typography variant="h5" gutterBottom style={{marginBottom: '20px'}}>
+      <Typography variant="h5" gutterBottom style={{ marginBottom: '20px' }}>
         거래처 관리
       </Typography>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
@@ -480,8 +489,8 @@ export function AdminClient() {
           selectedCode={selectedType}
           onChangeCode={setSelectedType}
           selectedInOutType={selectedTypeInOut}
-          onInOutTypeChange={setSelectedTypeInOut}  
-          formControlProps={{ sx: { width: '150px'} }}
+          onInOutTypeChange={setSelectedTypeInOut}
+          formControlProps={{ sx: { width: '150px' } }}
           selectSx={{ height: '45px' }}
         />
         <TextField
@@ -500,28 +509,38 @@ export function AdminClient() {
           style={{ width: '200px', marginRight: '10px' }}
           sx={{ '& .MuiInputBase-root': { height: '45px' } }}
         />
-        <Button 
-          variant="contained" 
-          color="primary" 
+        <Select
+          value={selectedStateFilter}
+          onChange={(e) => setSelectedStateFilter(e.target.value as 'All' | 'Addr' | 'NoAddr')}
+          style={{ height: '45px', marginLeft: '10px' }}
+        >
+          <MenuItem value="All">주소여부(전체)</MenuItem>
+          <MenuItem value="Addr">주소 있음</MenuItem>
+          <MenuItem value="NoAddr">주소 없음</MenuItem>
+        </Select>
+        <Button
+          variant="contained"
+          color="primary"
           style={{ width: '30px', height: '35px', marginLeft: '10px', fontSize: '12px' }}
           onClick={handleSearch}
         >
           조회
         </Button>
-        <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '50px', fontSize: '12px' }} onClick={handleOpen}>
+        <Button
+          variant="contained"
+          color="secondary"
+          style={{ height: '35px', marginLeft: '50px', fontSize: '12px' }}
+          onClick={handleOpen}
+        >
           거래처 등록
         </Button>
       </div>
-      <TableContainer
-        component={Paper}
-        style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
-      >
+      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }} className="custom-scrollbar">
         <Table stickyHeader>
           <TableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
-            {table.getHeaderGroups().map(headerGroup => (
+            {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map(header => (
+                {headerGroup.headers.map((header) => (
                   <TableCell key={header.id} style={{ backgroundColor: '#cfcfcf' }}>
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableCell>
@@ -547,18 +566,18 @@ export function AdminClient() {
                   </TableRow>
                 ) : table.getRowModel().rows.length > 0 ? (
                   table.getRowModel().rows.map((row, index) => {
-                    // 거리 값이 0인지 확인
-                    const distanceValue = parseFloat(row.original.distance);
-                    const isDistanceZero = distanceValue === 0;
+                    // 새로운 조건: 주소가 비어있고, latitude, longitude가 0인지 확인
+                    const isAddressInvalid =
+                      !row.original.address && row.original.latitude === 0 && row.original.longitude === 0;
 
                     return (
                       <TableRow
                         key={row.id}
                         style={{
-                          backgroundColor: isDistanceZero ? '#f5c6cb' : 'white', // 거리가 0인 경우 배경색 변경
+                          backgroundColor: isAddressInvalid ? '#f5c6cb' : 'white', // 주소가 비어있고 위도/경도가 0일 때만 색 변경
                         }}
                       >
-                        {row.getVisibleCells().map(cell => (
+                        {row.getVisibleCells().map((cell) => (
                           <TableCell
                             key={cell.id}
                             style={{
@@ -572,7 +591,12 @@ export function AdminClient() {
                           </TableCell>
                         ))}
                         <TableCell>
-                          <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)} style={{ padding: '2px' }}>
+                          <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={() => handleEditOpen(index)}
+                            style={{ padding: '2px' }}
+                          >
                             수정
                           </Button>
                           {userRole === 'Admin' && (
@@ -601,27 +625,69 @@ export function AdminClient() {
           </TableBody>
         </Table>
       </TableContainer>
-      <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div
+        style={{
+          marginTop: '10px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <div>
-          <Button onClick={() => table.setPageIndex(pageIndex - 1)} disabled={!table.getCanPreviousPage()} variant="contained" color="primary" style={{ marginRight: '10px' }}>
+          <Button
+            onClick={() => table.setPageIndex(pageIndex - 1)}
+            disabled={!table.getCanPreviousPage()}
+            variant="contained"
+            color="primary"
+            style={{ marginRight: '10px' }}
+          >
             이전
           </Button>
-          <Button onClick={() => table.setPageIndex(pageIndex + 1)} disabled={!table.getCanNextPage()} variant="contained" color="primary">
+          <Button
+            onClick={() => table.setPageIndex(pageIndex + 1)}
+            disabled={!table.getCanNextPage()}
+            variant="contained"
+            color="primary"
+          >
             다음
           </Button>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', marginTop: '10px' }}>
-          <Button onClick={() => table.setPageIndex(0)} disabled={pageIndex === 0} variant="contained" color="primary" style={{ marginRight: '10px', minWidth: '30px', padding: '5px', width: 50 }}>
+          <Button
+            onClick={() => table.setPageIndex(0)}
+            disabled={pageIndex === 0}
+            variant="contained"
+            color="primary"
+            style={{ marginRight: '10px', minWidth: '30px', padding: '5px', width: 50 }}
+          >
             처음
           </Button>
-          <Button onClick={() => table.setPageIndex(Math.max(0, pageIndex - 5))} disabled={pageIndex < 5} variant="contained" color="warning" style={{ marginRight: '15px', minWidth: '30px', padding: '5px' }}>
+          <Button
+            onClick={() => table.setPageIndex(Math.max(0, pageIndex - 5))}
+            disabled={pageIndex < 5}
+            variant="contained"
+            color="warning"
+            style={{ marginRight: '15px', minWidth: '30px', padding: '5px' }}
+          >
             -5
           </Button>
           {renderPageNumbers()}
-          <Button onClick={() => table.setPageIndex(Math.min(table.getPageCount() - 1, pageIndex + 5))} disabled={pageIndex >= table.getPageCount() - 5} variant="contained" color="warning" style={{ marginLeft: '10px', minWidth: '30px', padding: '5px' }}>
+          <Button
+            onClick={() => table.setPageIndex(Math.min(table.getPageCount() - 1, pageIndex + 5))}
+            disabled={pageIndex >= table.getPageCount() - 5}
+            variant="contained"
+            color="warning"
+            style={{ marginLeft: '10px', minWidth: '30px', padding: '5px' }}
+          >
             +5
           </Button>
-          <Button onClick={() => table.setPageIndex(table.getPageCount() - 1)} disabled={pageIndex === table.getPageCount() - 1} variant="contained" color="primary" style={{ marginLeft: '10px', minWidth: '30px', padding: '5px', width: 50 }}>
+          <Button
+            onClick={() => table.setPageIndex(table.getPageCount() - 1)}
+            disabled={pageIndex === table.getPageCount() - 1}
+            variant="contained"
+            color="primary"
+            style={{ marginLeft: '10px', minWidth: '30px', padding: '5px', width: 50 }}
+          >
             끝
           </Button>
         </div>
@@ -631,9 +697,9 @@ export function AdminClient() {
           </Typography>
           <Select
             value={table.getState().pagination.pageSize}
-            onChange={e => table.setPageSize(Number(e.target.value))}
+            onChange={(e) => table.setPageSize(Number(e.target.value))}
           >
-            {[1, 5 ,10, 20, 30, 40, 50].map(pageSize => (
+            {[1, 5, 10, 20, 30, 40, 50].map((pageSize) => (
               <MenuItem key={pageSize} value={pageSize}>
                 Show {pageSize}
               </MenuItem>
@@ -641,32 +707,29 @@ export function AdminClient() {
           </Select>
         </div>
       </div>
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-title"
-        aria-describedby="modal-description"
-      >
+      <Modal open={open} onClose={handleClose} aria-labelledby="modal-title" aria-describedby="modal-description">
         <Box sx={modalStyle}>
-          <Typography id="modal-title" variant="h5" component="h2" style={{ marginBottom: 20}}>
+          <Typography id="modal-title" variant="h5" component="h2" style={{ marginBottom: 20 }}>
             거래처 등록
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <UseCompany 
-                onCompanyChange={(company) => setNewMember(prev => ({ ...prev, companyCode: company ? company.code : '' }))}
+              <UseCompany
+                onCompanyChange={(company) =>
+                  setNewMember((prev) => ({ ...prev, companyCode: company ? company.code : '' }))
+                }
                 sx={{ width: '530px', marginRight: '10px' }}
-                selectSx={{ height: '51px', }}
+                selectSx={{ height: '51px' }}
                 showAllOption={false}
               />
             </Grid>
             <Grid item xs={12}>
               <ClientType
                 selectedCode={newMember.type}
-                onChangeCode={(code) => setNewMember(prev => ({ ...prev, type: code }))}
-                selectedInOutType={newMember.inOutType} 
-                onInOutTypeChange={(type) => setNewMember(prev => ({ ...prev, inOutType: type }))}
-                formControlProps={{ sx: { width: '350px', } }}
+                onChangeCode={(code) => setNewMember((prev) => ({ ...prev, type: code }))}
+                selectedInOutType={newMember.inOutType}
+                onInOutTypeChange={(type) => setNewMember((prev) => ({ ...prev, inOutType: type }))}
+                formControlProps={{ sx: { width: '350px' } }}
                 showAllOption={false}
               />
             </Grid>
@@ -697,13 +760,13 @@ export function AdminClient() {
                 variant="outlined"
                 fullWidth
                 value={newMember.address}
-                InputProps={{ 
-                  readOnly: true, 
-                  style: { 
-                    backgroundColor: '#f0f0f0', 
+                InputProps={{
+                  readOnly: true,
+                  style: {
+                    backgroundColor: '#f0f0f0',
                     pointerEvents: 'none',
                     textDecoration: 'none',
-                  }
+                  },
                 }}
               />
             </Grid>
@@ -720,13 +783,13 @@ export function AdminClient() {
                 fullWidth
                 value={newMember.distance}
                 onChange={handleChange}
-                InputProps={{ 
-                  readOnly: true, 
-                  style: { 
-                    backgroundColor: '#f0f0f0', 
+                InputProps={{
+                  readOnly: true,
+                  style: {
+                    backgroundColor: '#f0f0f0',
                     pointerEvents: 'none',
                     textDecoration: 'none',
-                  }
+                  },
                 }}
               />
             </Grid>
@@ -748,7 +811,7 @@ export function AdminClient() {
         aria-describedby="edit-modal-description"
       >
         <Box sx={modalStyle}>
-          <Typography id="edit-modal-title" variant="h5" component="h2" style={{ marginBottom: 20}}>
+          <Typography id="edit-modal-title" variant="h5" component="h2" style={{ marginBottom: 20 }}>
             거래처 수정
           </Typography>
           <Grid container spacing={2}>
@@ -830,13 +893,13 @@ export function AdminClient() {
                 variant="outlined"
                 fullWidth
                 value={editMember.address}
-                InputProps={{ 
-                  readOnly: true, 
-                  style: { 
-                    backgroundColor: '#f0f0f0', 
+                InputProps={{
+                  readOnly: true,
+                  style: {
+                    backgroundColor: '#f0f0f0',
                     pointerEvents: 'none',
                     textDecoration: 'none',
-                  }
+                  },
                 }}
               />
             </Grid>
@@ -853,13 +916,13 @@ export function AdminClient() {
                 fullWidth
                 value={editMember.distance}
                 onChange={handleEditChange}
-                InputProps={{ 
-                  readOnly: true, 
-                  style: { 
-                    backgroundColor: '#f0f0f0', 
+                InputProps={{
+                  readOnly: true,
+                  style: {
+                    backgroundColor: '#f0f0f0',
                     pointerEvents: 'none',
                     textDecoration: 'none',
-                  }
+                  },
                 }}
               />
             </Grid>

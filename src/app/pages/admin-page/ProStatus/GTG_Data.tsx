@@ -49,8 +49,8 @@ type GTGResult = {
   totalAmount: number;
   gtoGByItems: {
     item: {
-      itemCode: string;
-      itemName: string;
+      midItemCode: string;
+      midItemName: string;
     };
     amount: number;
   }[];
@@ -77,9 +77,9 @@ export function GTG_Data() {
 
   const columns: ColumnDef<GTGData>[] = [
     { 
-    accessorKey: 'type', 
-    header: '구분', 
-    cell: (info: CellContext<GTGData, unknown>) => lciTypeMap[info.getValue() as string] || info.getValue() 
+      accessorKey: 'type', 
+      header: '구분', 
+      cell: (info: CellContext<GTGData, unknown>) => lciTypeMap[info.getValue() as string] || info.getValue() 
     },
     { accessorKey: 'name', header: '이름' },
     { accessorKey: 'unit', header: '단위' },
@@ -87,9 +87,9 @@ export function GTG_Data() {
     ...data.length > 0
     ? Object.keys(data[0])
         .filter(key => !['type', 'name', 'unit', 'totalAmount'].includes(key))
-        .map(itemCode => ({
-          accessorKey: itemCode,
-          header: itemCode,
+        .map(midItemCode => ({
+          accessorKey: midItemCode,
+          header: midItemCode, // 여기서 midItemName으로 변환하여 출력하도록 수정
           cell: (info: CellContext<GTGData, unknown>) => {
             const value = info.getValue();
   
@@ -127,16 +127,16 @@ export function GTG_Data() {
       setLoading(false);
       return;
     }
-
+  
     setLoading(true); 
-
+  
     try {
       const url = `https://lcaapi.acess.co.kr/GToGResults?CompanyCode=${searchParams.company?.code}&Year=${searchParams.year}`;
       const response = await axios.get(url);
       console.log(response.data);  
-
+  
       const { gtoGResults, weightByItems }: { gtoGResults: GTGResult[]; weightByItems: WeightByItems[] } = response.data;
-
+  
       const transformedData = gtoGResults.map((item: GTGResult) => {
         const baseData: GTGData = {
           type: item.lciItem.type,
@@ -144,16 +144,16 @@ export function GTG_Data() {
           unit: item.lciItem.unit,
           totalAmount: item.totalAmount || 0,  
         };
-
+  
         if (Array.isArray(item.gtoGByItems)) {
           item.gtoGByItems.forEach((subItem) => {
-            baseData[subItem.item.itemName] = subItem.amount || 0;  
+            baseData[subItem.item.midItemName] = subItem.amount || 0;  // 여기서 midItemName을 사용하여 값을 설정
           });
         }
-
+  
         return baseData;
       });
-
+  
       const transformedWeightByItems = Array.isArray(weightByItems)
         ? weightByItems.map((item: WeightByItems) => ({
             itemName: item.itemName,
@@ -162,7 +162,7 @@ export function GTG_Data() {
             weight: item.weight,
           }))
         : [];
-
+  
       setData(transformedData);
       setWeightByItems(transformedWeightByItems);
     } catch (error) {

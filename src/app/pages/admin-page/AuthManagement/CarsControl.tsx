@@ -82,16 +82,19 @@ export function CarsControl() {
   const [hasSearched, setHasSearched] = useState(false);
   const [searchCarNo, setSearchCarNo] = useState('');
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [selectedSpecFilter, setSelectedSpecFilter] = useState<'All' | 'Spec' | 'NoSpec'>('All');  
   const [searchParams, setSearchParams] = useState<{
     company: Company | null;
     inOutType: 'IN' | 'OUT' | '';
     carNo: string;
-    year: number | null;  
+    year: number | null;
+    state: 'All' | 'Spec' | 'NoSpec'; 
   }>({
     company: null,
     inOutType: '',
     carNo: '',
     year: null,
+    state: 'All',  
   });
   const [newCar, setNewCar] = useState<Omit<Car, 'id'>>({
     companyCode: '',
@@ -127,6 +130,7 @@ export function CarsControl() {
     setLoading(true);
     try {
       let url = `https://lcaapi.acess.co.kr/Cars?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      
       if (searchParams.company) {
         url += `&companyCode=${searchParams.company.code}`;
       }
@@ -136,16 +140,20 @@ export function CarsControl() {
       if (searchParams.carNo) {
         url += `&carNo=${searchParams.carNo}`;
       }
-      if (searchParams.year) {  
+      if (searchParams.year) {
         url += `&year=${searchParams.year}`;
       }
+      
+      // state 필터 적용
+      if (searchParams.state) {
+        url += `&state=${searchParams.state}`;
+      }
   
-      // console.log('Fetching data with URL:', url);
-  
+      // 데이터 가져오기
       const response = await axios.get(url);
       const { list, totalCount } = response.data;
-      // console.log('Response data:', response.data);
   
+      // 데이터 변환
       const transformedData = list.map((car: Car) => {
         const company = companies.find(c => c.code === car.companyCode);
         return {
@@ -190,10 +198,10 @@ export function CarsControl() {
     if (userInfoString) {
       try {
         const parsedData = JSON.parse(userInfoString);
-        const userInfo = parsedData?.userInfo;  // userInfo 객체 접근
+        const userInfo = parsedData?.userInfo;  
         if (userInfo) {
-          console.log('Parsed Role:', userInfo.role);  // role 값 확인
-          setUserRole(userInfo.role);  // role 값 설정
+          // console.log('Parsed Role:', userInfo.role);  // role 값 확인
+          setUserRole(userInfo.role);
         }
       } catch (error) {
         console.error('Error parsing JSON:', error);
@@ -277,12 +285,12 @@ export function CarsControl() {
     if (editIndex !== null) {
       if (!editCar.carNo) {
         console.error('차량 번호는 필수입니다.');
-        return;  // 필수 필드가 없을 때 요청을 보내지 않음
+        return;  
       }
   
       const updatedCarData = {
         year: editCar.year,
-        inOutType: editCar.inOutType === '입고' ? 'IN' : 'OUT',  // 서버가 이해할 수 있는 값으로 변환
+        inOutType: editCar.inOutType === '입고' ? 'IN' : 'OUT', 
         carNo: editCar.carNo,
         spec: editCar.spec,
       };
@@ -290,7 +298,7 @@ export function CarsControl() {
       axios.put(`https://lcaapi.acess.co.kr/Cars/${editCar.id}`, updatedCarData)
         .then(() => {
           console.log('Data updated successfully');
-          fetchData(pageIndex, pageSize);  // 데이터 갱신
+          fetchData(pageIndex, pageSize); 
         })
         .catch(error => {
           console.error('Error updating data:', error.response ? error.response.data : error.message);
@@ -339,20 +347,16 @@ export function CarsControl() {
   };
 
   const handleSearch = () => {
-    // console.log('Search parameters:', {
-    //   company: selectedCompany,
-    //   inOutType: selectedTypeInOut,
-    // });
-    
     setSearchParams({
       company: selectedCompany,
       inOutType: selectedTypeInOut as 'IN' | 'OUT' | '',
       carNo: searchCarNo,
       year: selectedYear,
+      state: selectedSpecFilter,  
     });
     
     setPageIndex(0);
-    setHasSearched(true);  
+    setHasSearched(true);
   };
 
   const handlePaginationChange = (updater: Updater<PaginationState>) => {
@@ -455,6 +459,15 @@ export function CarsControl() {
             sx={{ '& .MuiInputBase-root': { height: '45px' } }}
           />
         </FormControl>
+        <Select
+          value={selectedSpecFilter}
+          onChange={(e) => setSelectedSpecFilter(e.target.value as 'All' | 'Spec' | 'NoSpec')}
+          style={{ height: '45px', marginLeft: '10px' }}
+        >
+          <MenuItem value="All">규격여부(전체)</MenuItem>
+          <MenuItem value="Spec">규격 있음</MenuItem>
+          <MenuItem value="NoSpec">규격 없음</MenuItem>
+        </Select>
         <Button
           variant="contained"
           color="primary"
@@ -720,7 +733,7 @@ export function CarsControl() {
                 }}
               />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12}>
               <FormControl fullWidth>
                 <InputLabel id="edit-year-label">연도</InputLabel>
                 <Select

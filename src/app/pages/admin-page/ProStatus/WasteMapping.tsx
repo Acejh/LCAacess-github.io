@@ -270,9 +270,9 @@ export function WasteMapping() {
 
   // 처리제품 모달 열기
   const handleProductModalOpen = (itemCodes: string[], rowId: number) => {
-    setSelectedItemCodes(itemCodes || []);  // itemCodes가 없을 경우 빈 배열 설정
-    setCurrentRowId(rowId);                 // 현재 row의 ID 저장
-    setProductModalOpen(true);              // 모달 열기
+    setSelectedItemCodes(itemCodes || []);  
+    setCurrentRowId(rowId);                 
+    setProductModalOpen(true);              
   };
 
   // 처리제품 모달 닫기
@@ -282,7 +282,7 @@ export function WasteMapping() {
 
   // 제품 선택이 변경될 때 호출되는 함수
   const handleProductChange = (selectedCodes: string[]) => {
-    setSelectedItemCodes(selectedCodes); // 선택된 itemCodes 업데이트
+    setSelectedItemCodes(selectedCodes);
   };
 
   // 연도 선택 핸들러
@@ -348,11 +348,11 @@ export function WasteMapping() {
       try {
         const payload = {
           id: currentRowId,
-          itemCodes: selectedItemCodes,  // 선택한 itemCodes를 payload로 전송
+          itemCodes: selectedItemCodes, 
         };
-        await axios.post('https://lcaapi.acess.co.kr/WasteMaps/ItemCodes', payload); // 서버에 데이터 저장
+        await axios.post('https://lcaapi.acess.co.kr/WasteMaps/ItemCodes', payload); 
         setProductModalOpen(false);
-        fetchData();  // 데이터를 다시 불러와서 테이블 갱신
+        fetchData();  
       } catch (error) {
         console.error('Error saving item codes:', error);
       }
@@ -403,11 +403,11 @@ export function WasteMapping() {
           return (
             <Typography
               style={{
-                color: userRole === 'User' ? 'black' : 'blue',  // User일 경우 검은색, Admin일 경우 파란색
-                cursor: userRole === 'User' ? 'default' : 'pointer',  // User일 경우 클릭 불가
+                color: userRole === 'User' ? 'black' : 'blue',  
+                cursor: userRole === 'User' ? 'default' : 'pointer',  
               }}
               onClick={() => {
-                if (userRole !== 'User') {  // User가 아닐 때만 클릭 가능
+                if (userRole !== 'User') {  
                   info.row.original.onItemClick(lciItem);
                 }
               }}
@@ -419,11 +419,11 @@ export function WasteMapping() {
           return (
             <Typography
               style={{
-                color: userRole === 'User' ? 'black' : 'red',  // User일 경우 검은색, Admin일 경우 빨간색
-                cursor: userRole === 'User' ? 'default' : 'pointer',  // User일 경우 클릭 불가
+                color: userRole === 'User' ? 'black' : 'red',  
+                cursor: userRole === 'User' ? 'default' : 'pointer',  
               }}
               onClick={() => {
-                if (userRole !== 'User') {  // User가 아닐 때만 클릭 가능
+                if (userRole !== 'User') {  
                   handleMappingClick(info.row.original);
                 }
               }}
@@ -438,16 +438,16 @@ export function WasteMapping() {
       accessorKey: 'itemCodes',
       header: '처리제품',
       cell: (info: CellContext<WasteMappingData, unknown>) => {
-        const itemCodes = info.row.original.itemCodes || []; // itemCodes가 없으면 빈 배열로 처리
+        const itemCodes = info.row.original.itemCodes || [];
         const displayText = itemCodes.length > 0 ? '매핑완료' : '매핑필요';
     
         return (
           <Typography
             style={{ 
-              color: itemCodes.length > 0 ? 'blue' : 'red',  // 매핑필요일 경우 Material-UI의 error 색상 사용
+              color: itemCodes.length > 0 ? 'blue' : 'red', 
               cursor: 'pointer' 
             }}
-            onClick={() => handleProductModalOpen(itemCodes, info.row.original.id)}  // 모달 열기
+            onClick={() => handleProductModalOpen(itemCodes, info.row.original.id)}  
           >
             {displayText}
           </Typography>
@@ -469,7 +469,7 @@ export function WasteMapping() {
       </Typography>
 
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-        <UseCompany onCompanyChange={setSelectedCompany} />
+        <UseCompany onCompanyChange={setSelectedCompany} showAllOption={false} />
         <FormControl style={{ marginRight: '10px' }}>
           <Select
             id="year-select"

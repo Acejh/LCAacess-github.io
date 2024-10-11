@@ -63,8 +63,8 @@ const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListC
           updatedAt: null
         };
         sortedCompanies.unshift(allCompany);
-        setSelectedCompany(allCompany); // "전체"를 기본 선택값으로 설정
-        onCompanyChange(allCompany); // "전체"를 외부로도 전달
+        setSelectedCompany(allCompany); 
+        onCompanyChange(allCompany); 
       }
   
       setCompanies(sortedCompanies);
