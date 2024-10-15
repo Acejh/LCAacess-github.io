@@ -26,7 +26,6 @@ import {
   Box,
   TextField,
   Grid,
-  // Chip,
   IconButton,
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
@@ -180,7 +179,7 @@ export function Ad_Facility() {
   //자동조회 useEffect
   useEffect(() => {
     if (userRole === 'User' && tempSelectedCompany) {
-      handleFetchData(); // 페이지 로드 시 자동 조회
+      handleFetchData(); 
     }
   }, [userRole, tempSelectedCompany, handleFetchData]);
 
@@ -377,7 +376,7 @@ export function Ad_Facility() {
             padding: '0 10px',
             fontSize: '14px',
             marginRight: '10px',
-            display: userRole === 'User' ? 'none' : 'inline-block', // User 권한일 때 버튼 숨기기
+            display: userRole === 'User' ? 'none' : 'inline-block', 
           }}
           onClick={handleFetchData}
         >
@@ -414,16 +413,16 @@ export function Ad_Facility() {
             <TableRow>
               <TableCell colSpan={2} style={{ ...stickyHeaderStyle2(), textAlign: 'center', left: 0, zIndex: 3 }}>설비용량(Kw) →</TableCell>
               {facilities.map(facility => (
-                <TableCell key={facility.id} colSpan={1} style={{ ...stickyHeaderStyle2(), textAlign: 'right' }}>{numeral(facility.capacity).format('0.0')}</TableCell> 
+                <TableCell key={facility.id} colSpan={1} style={{ ...stickyHeaderStyle2(), textAlign: 'center' }}>{numeral(facility.capacity).format('0.0')}</TableCell>
               ))}
             </TableRow>
 
             {/* 두 번째 헤더 줄: 품목군, 제품명, 설비명 */}
             <TableRow>
-              <TableCell style={{ ...stickyHeaderStyle(), left: 0, zIndex: 3 }}>품목군</TableCell>
-              <TableCell style={{ ...stickyHeaderStyle(), left: '130px', zIndex: 3 }}>제품명</TableCell>
+              <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'left', left: 0, zIndex: 3 }}>품목군</TableCell>
+              <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'left', left: '130px', zIndex: 3 }}>제품명</TableCell>
               {facilities.map(facility => (
-                <TableCell key={facility.id} style={stickyHeaderStyle()}>{facility.name}</TableCell>
+                <TableCell key={facility.id} style={{ ...stickyHeaderStyle(), textAlign: 'center' }}>{facility.name}</TableCell>
               ))}
             </TableRow>
           </TableHead>
@@ -443,20 +442,20 @@ export function Ad_Facility() {
                 </TableRow>
               ) : (
                 table.getRowModel().rows.map((row) => {
-                  const uniqueKey = uuidv4(); // 여전히 고유한 키로 사용
+                  const uniqueKey = uuidv4();
                   return (
                     <TableRow key={uniqueKey}>
-                      {row.getVisibleCells().map((cell, index) => {  // index 추가
+                      {row.getVisibleCells().map((cell, index) => {
                         const isCategoryOrProduct = ['categoryName', 'itemName'].includes(cell.column.id);
-                        // row.id, cell.id, index를 함께 사용하여 고유한 key 생성
+
                         return (
                           <TableCell
-                            key={`row-${row.id}_cell-${cell.id}_index-${index}`}  // index 추가로 고유한 key 생성
+                            key={`row-${row.id}_cell-${cell.id}_index-${index}`}
                             style={{
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              textAlign: isCategoryOrProduct ? 'left' : 'center',
+                              textAlign: isCategoryOrProduct ? 'left' : 'center',  // 품목군, 제품명은 왼쪽 정렬, 나머지는 중앙 정렬
                               position: isCategoryOrProduct ? 'sticky' : 'static',
                               left: cell.column.id === 'categoryName' ? 0 : cell.column.id === 'itemName' ? '130px' : undefined,
                               zIndex: isCategoryOrProduct ? 2 : 1,

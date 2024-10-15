@@ -57,6 +57,7 @@ type GTGResult = {
 };
 
 type WeightByItems = {
+  midItemName: string;
   itemName: string;
   ratio: number;
   totalWeight: number;
@@ -89,7 +90,7 @@ export function GTG_Data() {
         .filter(key => !['type', 'name', 'unit', 'totalAmount'].includes(key))
         .map(midItemCode => ({
           accessorKey: midItemCode,
-          header: midItemCode, // 여기서 midItemName으로 변환하여 출력하도록 수정
+          header: midItemCode, 
           cell: (info: CellContext<GTGData, unknown>) => {
             const value = info.getValue();
   
@@ -147,7 +148,7 @@ export function GTG_Data() {
   
         if (Array.isArray(item.gtoGByItems)) {
           item.gtoGByItems.forEach((subItem) => {
-            baseData[subItem.item.midItemName] = subItem.amount || 0;  // 여기서 midItemName을 사용하여 값을 설정
+            baseData[subItem.item.midItemName] = subItem.amount || 0;  
           });
         }
   
@@ -157,6 +158,7 @@ export function GTG_Data() {
       const transformedWeightByItems = Array.isArray(weightByItems)
         ? weightByItems.map((item: WeightByItems) => ({
             itemName: item.itemName,
+            midItemName: item.midItemName, 
             ratio: item.ratio,
             totalWeight: item.totalWeight,
             weight: item.weight,
@@ -270,7 +272,7 @@ export function GTG_Data() {
                     zIndex: 0,
                   }}
                 >
-                  {item.itemName}
+                  {item.midItemName}
                 </TableCell>
               ))}
             </TableRow>
