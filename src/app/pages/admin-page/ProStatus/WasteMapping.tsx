@@ -320,7 +320,7 @@ export function WasteMapping() {
       } catch (error) {
         console.error('Error fetching LCI items for mapping:', error);
       }
-    }, 300); // 300ms 딜레이 적용
+    }, 100); // 300ms 딜레이 적용
   };
 
   // Client 클릭 시 모달 열기

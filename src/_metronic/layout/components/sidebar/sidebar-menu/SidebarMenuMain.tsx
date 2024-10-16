@@ -77,8 +77,8 @@ const SidebarMenuMain = () => {
           >
             <SidebarMenuItem to='/DataStatus' title='데이터 매핑 현황' hasBullet={true} />
             <SidebarMenuItem to='/CTMapping' title='수집운반 매핑' hasBullet={true} />
-            <SidebarMenuItem to='/SupMapping' title='공급(유가물) 매핑' hasBullet={true} />
-            <SidebarMenuItem to='/DisMapping' title='폐기 매핑' hasBullet={true} />
+            {/* <SidebarMenuItem to='/SupMapping' title='공급(유가물) 매핑' hasBullet={true} />
+            <SidebarMenuItem to='/DisMapping' title='폐기 매핑' hasBullet={true} /> */}
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub
@@ -146,8 +146,8 @@ const SidebarMenuMain = () => {
           >
             <SidebarMenuItem to='/DataStatus' title='데이터 매핑 현황' hasBullet={true} />
             <SidebarMenuItem to='/CTMapping' title='수집운반 매핑' hasBullet={true} />
-            <SidebarMenuItem to='/SupMapping' title='공급(유가물) 매핑' hasBullet={true} />
-            <SidebarMenuItem to='/DisMapping' title='폐기 매핑' hasBullet={true} />
+            {/* <SidebarMenuItem to='/SupMapping' title='공급(유가물) 매핑' hasBullet={true} />
+            <SidebarMenuItem to='/DisMapping' title='폐기 매핑' hasBullet={true} /> */}
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub
