@@ -79,7 +79,7 @@ type WasteMappingData = {
   wasteMethod: string;
   lciItem: LciItem;
   itemCodes: string[];
-  onItemClick: (lciItem: LciItem) => void;
+  onItemClick: (lciItem: LciItem, rowId: number) => void; 
   onClientClick: (client: Client) => void;
 };
 
@@ -253,10 +253,11 @@ export function WasteMapping() {
   // 매핑 모달 열기
   const handleMappingClick = async (row: WasteMappingData) => {
     setCurrentRowId(row.id);
+    
     try {
       const response = await axios.get(`https://lcaapi.acess.co.kr/WasteMaps/LciItems?year=${searchParams.year}`);
       setMappingItems(response.data.lciItems);
-      setMappingModalOpen(true);
+      setMappingModalOpen(true);  // 모달 열기
     } catch (error) {
       console.error('Error fetching LCI items:', error);
     }
@@ -291,9 +292,35 @@ export function WasteMapping() {
   };
 
   // LCI 아이템 클릭 시 모달 열기
-  const handleLciItemClick = (lciItem: LciItem) => {
+  const handleLciItemClick = async (lciItem: LciItem, rowId: number) => {
+    setCurrentRowId(rowId);  // 선택한 행의 ID를 설정
     setLciModalData(lciItem);
     setLciModalOpen(true);
+  
+    try {
+      const response = await axios.get(`https://lcaapi.acess.co.kr/WasteMaps/LciItems?year=${lciItem.year}`);
+      setMappingItems(response.data.lciItems);
+    } catch (error) {
+      console.error('Error fetching LCI items:', error);
+      setMappingItems([]); // 실패 시 빈 배열을 설정
+    }
+  };
+
+  // LCI 모달 닫고 매핑 모달 열기
+  const handleOpenMappingModal = async () => {
+    handleCloseLciModal(); // LCI 모달 닫기
+
+    setTimeout(async () => {
+      try {
+        const response = await axios.get(`https://lcaapi.acess.co.kr/WasteMaps/LciItems?year=${searchParams.year}`);
+        setMappingItems(response.data.lciItems);
+
+        // 매핑 모달 열기
+        setMappingModalOpen(true);
+      } catch (error) {
+        console.error('Error fetching LCI items for mapping:', error);
+      }
+    }, 300); // 300ms 딜레이 적용
   };
 
   // Client 클릭 시 모달 열기
@@ -383,7 +410,15 @@ export function WasteMapping() {
       accessorKey: 'wasteMethod',
       header: '처리방법',
       cell: (info: CellContext<WasteMappingData, unknown>) => {
+        const lciItem = info.row.original.lciItem;
         const wasteMethod = info.row.original.wasteMethod;
+        
+        if (lciItem.name === '폐기물(제외)') {
+          return (
+            <Typography style={{ color: 'gray' }}>매핑 불필요</Typography>
+          );
+        }
+        
         return (
           <Typography
             style={{ color: wasteMethod ? 'blue' : 'red', cursor: 'pointer' }}
@@ -403,12 +438,13 @@ export function WasteMapping() {
           return (
             <Typography
               style={{
-                color: userRole === 'User' ? 'black' : 'blue',  
-                cursor: userRole === 'User' ? 'default' : 'pointer',  
+                color: userRole === 'User' ? 'black' : 'blue',
+                cursor: userRole === 'User' ? 'default' : 'pointer',
               }}
               onClick={() => {
-                if (userRole !== 'User') {  
-                  info.row.original.onItemClick(lciItem);
+                if (userRole !== 'User') {
+                  // 두 인수를 전달: lciItem, rowId
+                  info.row.original.onItemClick(lciItem, info.row.original.id);
                 }
               }}
             >
@@ -419,11 +455,11 @@ export function WasteMapping() {
           return (
             <Typography
               style={{
-                color: userRole === 'User' ? 'black' : 'red',  
-                cursor: userRole === 'User' ? 'default' : 'pointer',  
+                color: userRole === 'User' ? 'black' : 'red',
+                cursor: userRole === 'User' ? 'default' : 'pointer',
               }}
               onClick={() => {
-                if (userRole !== 'User') {  
+                if (userRole !== 'User') {
                   handleMappingClick(info.row.original);
                 }
               }}
@@ -438,16 +474,20 @@ export function WasteMapping() {
       accessorKey: 'itemCodes',
       header: '처리제품',
       cell: (info: CellContext<WasteMappingData, unknown>) => {
+        const lciItem = info.row.original.lciItem;
         const itemCodes = info.row.original.itemCodes || [];
         const displayText = itemCodes.length > 0 ? '매핑완료' : '매핑필요';
     
+        if (lciItem.name === '폐기물(제외)') {
+          return (
+            <Typography style={{ color: 'gray' }}>매핑 불필요</Typography>
+          );
+        }
+        
         return (
           <Typography
-            style={{ 
-              color: itemCodes.length > 0 ? 'blue' : 'red', 
-              cursor: 'pointer' 
-            }}
-            onClick={() => handleProductModalOpen(itemCodes, info.row.original.id)}  
+            style={{ color: itemCodes.length > 0 ? 'blue' : 'red', cursor: 'pointer' }}
+            onClick={() => handleProductModalOpen(itemCodes, info.row.original.id)}
           >
             {displayText}
           </Typography>
@@ -552,17 +592,19 @@ export function WasteMapping() {
                   </TableRow>
                 ) : table.getRowModel().rows.length > 0 ? (
                   table.getRowModel().rows.map((row) => {
-                    // 처리방법, LCI 품목 매핑, 처리제품 중 하나라도 매핑이 안되어 있는지 확인
+                
                     const isMappingIncomplete = 
-                      !row.original.wasteMethod ||  // 처리방법이 없는 경우
-                      !row.original.lciItem ||      // LCI 품목 매핑이 없는 경우
-                      !(row.original.itemCodes && row.original.itemCodes.length > 0);  // 처리제품 매핑이 없는 경우
+                      row.original.lciItem?.name !== '폐기물(제외)' && ( 
+                        !row.original.wasteMethod || 
+                        !row.original.lciItem ||    
+                        !(row.original.itemCodes && row.original.itemCodes.length > 0) 
+                      );
               
                     return (
                       <TableRow
                         key={row.id}
                         style={{
-                          backgroundColor: isMappingIncomplete ? '#f5c6cb' : 'white', // 매핑이 안된 경우 배경색 적용
+                          backgroundColor: isMappingIncomplete ? '#f5c6cb' : 'white', 
                         }}
                       >
                         {row.getVisibleCells().map((cell) => (
@@ -597,8 +639,8 @@ export function WasteMapping() {
       <Dialog 
         open={lciModalOpen} 
         onClose={handleCloseLciModal} 
-        maxWidth="md" // 모달 크기를 더 크게 설정
-        fullWidth={true} // 전체 너비 사용
+        maxWidth="md" 
+        fullWidth={true}
       >
         <DialogTitle>LCI 품목 상세 정보</DialogTitle>
         <DialogContent>
@@ -625,12 +667,9 @@ export function WasteMapping() {
         </DialogContent>
         <DialogActions style={{ justifyContent: 'space-between' }}>
           <Button
-            onClick={() => {
-              handleCloseLciModal(); 
-              const selectedRow = data.find(row => row.id === currentRowId);
-              if (selectedRow) {
-                handleMappingClick(selectedRow); 
-              }
+            onClick={async () => {
+              // 이제 handleOpenMappingModal로 교체합니다.
+              await handleOpenMappingModal();
             }}
             color="secondary"
           >
@@ -699,13 +738,17 @@ export function WasteMapping() {
         <DialogTitle>LCI 품목 매핑</DialogTitle>
         <DialogContent>
           <div style={{ marginTop: '20px' }}>
-            <Autocomplete
-              options={mappingItems}
-              getOptionLabel={(option) => option.name}
-              renderInput={(params) => <TextField {...params} label="LCI 품목 선택" variant="outlined" />}
-              value={selectedMappingItem}
-              onChange={(event, newValue) => setSelectedMappingItem(newValue)}
-            />
+            {mappingItems.length > 0 ? (
+              <Autocomplete
+                options={mappingItems}
+                getOptionLabel={(option) => option.name}
+                renderInput={(params) => <TextField {...params} label="LCI 품목 선택" variant="outlined" />}
+                value={selectedMappingItem}
+                onChange={(event, newValue) => setSelectedMappingItem(newValue)}
+              />
+            ) : (
+              <Typography>매핑할 항목이 없습니다.</Typography>
+            )}
           </div>
         </DialogContent>
         <DialogActions>
@@ -725,8 +768,8 @@ export function WasteMapping() {
         <DialogTitle>처리제품 매핑</DialogTitle>
         <DialogContent>
           <UseProduct
-            selectedProducts={selectedItemCodes}  // 선택된 itemCodes 전달
-            onProductChange={handleProductChange}  // itemCode 변경 시 호출되는 함수
+            selectedProducts={selectedItemCodes}  
+            onProductChange={handleProductChange}  
           />
         </DialogContent>
         <DialogActions>
