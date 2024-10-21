@@ -93,9 +93,9 @@ export function GTG_Data() {
           header: midItemCode, 
           cell: (info: CellContext<GTGData, unknown>) => {
             const value = info.getValue();
-  
-            if (typeof value === 'number' && value.toString().includes('e')) {
-              return parseFloat(value.toFixed(10));
+            
+            if (typeof value === 'number') {
+              return value.toFixed(10); 
             }
   
             return numeral(value).format('0,0.0000000000');

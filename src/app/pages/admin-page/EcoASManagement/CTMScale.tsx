@@ -150,12 +150,12 @@ export function CTMScale() {
 
   //엑셀다운
   const handleDownloadExcel = async () => {
-    setDownloading(true); // 다운로드 중 상태 설정
+    setDownloading(true);
     
     // 3분(180초) 타임아웃 설정
     const countdownTimeout = setTimeout(() => {
-      setDownloading(false); // 3분 후 다운로드 중 상태 해제
-    }, 180000); // 3분 후 해제
+      setDownloading(false); 
+    }, 180000);
   
     try {
       let url = `https://lcaapi.acess.co.kr/EcoasTrans/Export-Scaled?page=${pageIndex + 1}&pageSize=${pageSize}`;
@@ -174,7 +174,7 @@ export function CTMScale() {
   
       const response = await axios.get(url, {
         responseType: 'blob',
-        timeout: 180000, // 3분 타임아웃 설정
+        timeout: 180000, 
       });
   
       // 서버에서 전달된 파일 이름 추출
@@ -206,8 +206,8 @@ export function CTMScale() {
     } catch (error) {
       console.error('Error downloading Excel file:', error);
     } finally {
-      clearTimeout(countdownTimeout); // 타임아웃 클리어
-      setDownloading(false); // 다운로드가 완료되면 다시 원래 상태로 돌림
+      clearTimeout(countdownTimeout); 
+      setDownloading(false); 
     }
   };
 
