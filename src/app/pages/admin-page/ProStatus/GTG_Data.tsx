@@ -201,7 +201,7 @@ export function GTG_Data() {
       <Button
         variant="contained"
         color="secondary"
-        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px', display: 'none' }}
+        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px',}}
         // onClick={handleDownloadExcel}
       >
         엑셀 다운로드
