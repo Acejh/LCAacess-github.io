@@ -302,25 +302,25 @@ export function WasteMapping() {
       setMappingItems(response.data.lciItems);
     } catch (error) {
       console.error('Error fetching LCI items:', error);
-      setMappingItems([]); // 실패 시 빈 배열을 설정
+      setMappingItems([]); 
     }
   };
 
   // LCI 모달 닫고 매핑 모달 열기
   const handleOpenMappingModal = async () => {
-    handleCloseLciModal(); // LCI 모달 닫기
+    handleCloseLciModal(); 
 
     setTimeout(async () => {
       try {
         const response = await axios.get(`https://lcaapi.acess.co.kr/WasteMaps/LciItems?year=${searchParams.year}`);
         setMappingItems(response.data.lciItems);
 
-        // 매핑 모달 열기
+      
         setMappingModalOpen(true);
       } catch (error) {
         console.error('Error fetching LCI items for mapping:', error);
       }
-    }, 100); // 300ms 딜레이 적용
+    }, 100); 
   };
 
   // Client 클릭 시 모달 열기
@@ -390,7 +390,7 @@ export function WasteMapping() {
   const columns: ColumnDef<WasteMappingData>[] = [
     {
       accessorKey: 'client.name',
-      header: '사업회원',
+      header: '거래처',
       cell: (info: CellContext<WasteMappingData, unknown>) => {
         const client = info.row.original.client;
         return (
@@ -683,11 +683,11 @@ export function WasteMapping() {
 
       {/* Client 상세 정보 모달 */}
       <Dialog open={clientModalOpen} onClose={handleCloseClientModal}>
-        <DialogTitle>사업회원 상세 정보</DialogTitle>
+        <DialogTitle>거래처 상세 정보</DialogTitle>
         <DialogContent>
           {clientModalData ? (
             <>
-              <Typography variant="body1"><strong>사업회원명:</strong> {clientModalData.name}</Typography>
+              <Typography variant="body1"><strong>거래처명:</strong> {clientModalData.name}</Typography>
               <Typography variant="body1"><strong>사업자 번호:</strong> {clientModalData.bizNo}</Typography>
               <Typography variant="body1"><strong>주소:</strong> {clientModalData.address}</Typography>
               <Typography variant="body1"><strong>거리:</strong> {clientModalData.distance} km</Typography>
