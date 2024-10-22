@@ -93,11 +93,13 @@ export function GTG_Data() {
           header: midItemCode, 
           cell: (info: CellContext<GTGData, unknown>) => {
             const value = info.getValue();
-            
+
             if (typeof value === 'number') {
-              return value.toFixed(10); 
+              // 숫자인 경우 toLocaleString으로 포맷
+              return value.toLocaleString(undefined, { minimumFractionDigits: 10, maximumFractionDigits: 10 });
             }
-  
+
+            // 숫자가 아닌 경우 numeral로 포맷
             return numeral(value).format('0,0.0000000000');
           },
         }))
