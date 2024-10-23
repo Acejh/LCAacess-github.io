@@ -133,11 +133,11 @@ export function ProductsScale() {
   }, [data]);
 
   const handleDownloadExcel = async () => {
-    setDownloading(true); // 다운로드 중 상태 설정
+    setDownloading(true); 
   
     const countdownInterval = setTimeout(() => {
-      setDownloading(false); // 3분 후 다운로드 중 상태 해제
-    }, 180000); // 3분(180초) 후 해제
+      setDownloading(false); 
+    }, 180000); 
   
     try {
       let url = `https://lcaapi.acess.co.kr/MonthlyWeights/export-compensated?`;
@@ -150,7 +150,7 @@ export function ProductsScale() {
   
       const response = await axios.get(url, {
         responseType: 'blob',
-        timeout: 180000, // 3분 타임아웃 설정
+        timeout: 180000, 
       });
   
       // 서버에서 전달된 파일 이름 추출
@@ -182,8 +182,8 @@ export function ProductsScale() {
     } catch (error) {
       console.error('Error downloading Excel file:', error);
     } finally {
-      clearTimeout(countdownInterval); // 타임아웃 클리어
-      setDownloading(false); // 다운로드가 완료되면 다시 원래 상태로 돌림
+      clearTimeout(countdownInterval); 
+      setDownloading(false); 
     }
   };
 
@@ -219,7 +219,7 @@ export function ProductsScale() {
         color="secondary"
         style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
         onClick={handleDownloadExcel}
-        disabled={!hasSearched || !selectedCompany || !year || downloading}
+        disabled={!selectedCompany || !year || downloading}
       >
         {downloading ? '다운로드 중...' : '엑셀 다운로드'}
       </Button>

@@ -150,36 +150,29 @@ export function CTMScale() {
 
   //엑셀다운
   const handleDownloadExcel = async () => {
-    setDownloading(true);
-    
-    // 3분(180초) 타임아웃 설정
-    const countdownTimeout = setTimeout(() => {
-      setDownloading(false); 
-    }, 180000);
+    if (!selectedCompany || selectedCompany.code === '전체') {
+      // 사업회원이 전체로 선택된 경우 경고 메시지
+      alert('사업회원을 선택해 주세요.');
+      return;
+    }
+  
+    if (!year) {
+      console.error('연도를 선택해 주세요.');
+      return;
+    }
+  
+    setDownloading(true); // 다운로드 시작
   
     try {
-      let url = `https://lcaapi.acess.co.kr/EcoasTrans/Export-Scaled?page=${pageIndex + 1}&pageSize=${pageSize}`;
-      if (searchQuery) {
-        url += `&transNo=${searchQuery}`;
-      }
-      if (selectedCompany) {
-        url += `&companyCode=${selectedCompany.code}`;
-      }
-      if (year) {
-        url += `&year=${year}`;
-      }
-      if (month) {
-        url += `&month=${month}`;
-      }
-  
+      const url = `https://lcaapi.acess.co.kr/EcoasTrans/Export-Scaled?page=${pageIndex + 1}&pageSize=${pageSize}&companyCode=${selectedCompany.code}&year=${year}&month=${month || ''}`;
+      
       const response = await axios.get(url, {
         responseType: 'blob',
-        timeout: 180000, 
+        timeout: 180000, // 3분 타임아웃 설정
       });
   
-      // 서버에서 전달된 파일 이름 추출
       const contentDisposition = response.headers['content-disposition'];
-      let filename = '수집운반_보정중량.xlsx'; 
+      let filename = '수집운반_보정중량.xlsx'; // 기본 파일 이름
   
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename\*?=['"]?UTF-8['"]?''(.+?)['"]?(;|$)/);
@@ -193,20 +186,18 @@ export function CTMScale() {
         }
       }
   
-      // Blob 생성 및 파일 다운로드
       const blob = new Blob([response.data]);
       const urlBlob = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = urlBlob;
-      link.setAttribute('download', filename); 
+      link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
       link.parentNode?.removeChild(link);
-  
     } catch (error) {
-      console.error('Error downloading Excel file:', error);
+      console.error('엑셀 파일 다운로드 중 오류 발생:', error);
+      alert('단일 사업회원을 선택하여주십시오.');
     } finally {
-      clearTimeout(countdownTimeout); 
       setDownloading(false); 
     }
   };
@@ -295,7 +286,7 @@ export function CTMScale() {
         color="secondary"
         style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
         onClick={handleDownloadExcel}
-        disabled={!hasSearched || !selectedCompany || !year || downloading} 
+        disabled={!selectedCompany || !year || downloading} 
       >
         {downloading ? '다운로드 중...' : '엑셀 다운로드'}
       </Button>

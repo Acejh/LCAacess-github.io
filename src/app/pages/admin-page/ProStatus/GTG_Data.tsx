@@ -71,8 +71,7 @@ export function GTG_Data() {
   const [loading, setLoading] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [lciTypeMap, setLciTypeMap] = useState<{ [key: string]: string }>({});
-  const [downloading, setDownloading] = useState(false); 
-  const [hasSearched, setHasSearched] = useState(false); 
+  const [downloading, setDownloading] = useState(false);
   const [searchParams, setSearchParams] = useState({
     company: null as Company | null,
     year: '',
@@ -179,17 +178,16 @@ export function GTG_Data() {
   }, [searchParams]);
 
   useEffect(() => {
-    if (hasSearched) {
+    if (selectedCompany && year) {  
       fetchGTGData(); 
     }
-  }, [searchParams, fetchGTGData, hasSearched]);
+  }, [searchParams, fetchGTGData, selectedCompany, year]);
 
   const handleSearch = () => {
     setSearchParams({
       company: selectedCompany,
       year,
     });
-    setHasSearched(true); 
   };
 
   const handleDownloadExcel = async () => {
@@ -259,9 +257,9 @@ export function GTG_Data() {
         color="secondary"
         style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
         onClick={handleDownloadExcel}
-        disabled={!hasSearched || !selectedCompany || !year || downloading} 
+        disabled={!selectedCompany || !year || downloading}  
       >
-        {downloading ? '다운로드 중...' : '엑셀 다운로드'} 
+        {downloading ? '다운로드 중...' : '엑셀 다운로드'}
       </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} showAllOption={false} />
