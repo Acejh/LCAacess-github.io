@@ -34,8 +34,8 @@ import { Ad_UseFacility } from '../pages/admin-page/InputManagement/KeyIn/Ad_Use
 import { Ad_Waste } from '../pages/admin-page/InputManagement/KeyIn/Ad_Waste'
 import { CTMapping } from '../pages/admin-page/ProStatus/CTMapping'
 import { DataStatus } from '../pages/admin-page/ProStatus/DataStatus'
-import { SupMapping } from '../pages/admin-page/ProStatus/SupMapping'
-import { DisMapping } from '../pages/admin-page/ProStatus/DisMapping'
+// import { SupMapping } from '../pages/admin-page/ProStatus/SupMapping'
+// import { DisMapping } from '../pages/admin-page/ProStatus/DisMapping'
 import { NonTargetWeights } from '../pages/admin-page/EcoASManagement/NonTargetWeights'
 import { ProductsScale } from '../pages/admin-page/EcoASManagement/ProductsScale'
 import { SupplyScale } from '../pages/admin-page/EcoASManagement/SupplyScale'
@@ -51,6 +51,8 @@ import { GWP_Item } from '../pages/admin-page/InputManagement/KeyIn/GWP_Item'
 import { GTG_Data } from '../pages/admin-page/ProStatus/GTG_Data'
 import { ValuableMapping } from '../pages/admin-page/ProStatus/ValuableMapping'
 import { WasteMapping } from '../pages/admin-page/ProStatus/WasteMapping'
+import { LCI_Data } from '../pages/admin-page/ProStatus/LCI_Data'
+import { LCI_Com_Data } from '../pages/admin-page/ProStatus/LCI_Com_Data'
 
 const PrivateRoutes = () => {
     const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
@@ -61,19 +63,19 @@ const PrivateRoutes = () => {
   return (
     <Routes>
       <Route element={<MasterLayout />}>
-        {/* 로그인, 회원가입 경로 */}
+        {/* 로그인, 회원가입, 공통 */}
         <Route path="/Login" element={<Login />} />
         <Route path="/ForgotPassword" element={<ForgotPassword />} />
         <Route path="/Registration" element={<Registration />} />
         <Route path="/Dashboard" element={<Ad_Dashboard />} />
-        <Route path="/ValuableMapping" element={< ValuableMapping/>} />
-        <Route path="/WasteMapping" element={< WasteMapping/>} />
 
-        {/* 유저 기능 */}
+        {/* 데이터 관리 */}
         <Route path="/Input-Info" element={<InputInfo />} />
         <Route path="/Effluent" element={<Effluent />} />
         <Route path="/Pro-Facility" element={<ProFacility />} />
         <Route path="/Pro-Products" element={<ProProducts />} />
+        <Route path="/ValuableMapping" element={< ValuableMapping/>} />
+        <Route path="/WasteMapping" element={< WasteMapping/>} />
 
         {/* 유저 조회 */}
         <Route path="/MaterialPos" element={<MaterialPos />} />
@@ -118,9 +120,12 @@ const PrivateRoutes = () => {
         {/* 데이터 처리 */}
         <Route path='/DataStatus' element={<DataStatus />} />
         <Route path='/CTMapping' element={<CTMapping />} />
-        <Route path='/SupMapping' element={<SupMapping />} />
-        <Route path='/DisMapping' element={<DisMapping />} />
+        {/* <Route path='/SupMapping' element={<SupMapping />} />
+        <Route path='/DisMapping' element={<DisMapping />} /> */}
         <Route path='/GTG_Data' element={<GTG_Data />} />
+        <Route path='/LCI_Data' element={<LCI_Data />} />
+        <Route path='/LCI_Com_Data' element={<LCI_Com_Data/>} />
+
 
         {/* Lazy Modules */}
         <Route

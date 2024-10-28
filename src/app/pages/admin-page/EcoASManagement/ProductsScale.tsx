@@ -219,7 +219,7 @@ export function ProductsScale() {
         color="secondary"
         style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
         onClick={handleDownloadExcel}
-        disabled={!selectedCompany || !year || downloading}
+        disabled={!selectedCompany || !year || downloading} // hasSearched를 삭제
       >
         {downloading ? '다운로드 중...' : '엑셀 다운로드'}
       </Button>
