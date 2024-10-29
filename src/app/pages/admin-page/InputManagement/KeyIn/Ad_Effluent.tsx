@@ -64,18 +64,18 @@ const columns: ColumnDef<Input>[] = [
   { accessorKey: 'inputType', header: '항목' },
   { accessorKey: 'unit', header: '단위' },
   { accessorKey: 'year', header: () => <div style={{ textAlign: 'right' }}>연도</div>},
-  { accessorKey: '1월', header: () => <div style={{ textAlign: 'right' }}>1월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '2월', header: () => <div style={{ textAlign: 'right' }}>2월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '3월', header: () => <div style={{ textAlign: 'right' }}>3월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '4월', header: () => <div style={{ textAlign: 'right' }}>4월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '5월', header: () => <div style={{ textAlign: 'right' }}>5월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '6월', header: () => <div style={{ textAlign: 'right' }}>6월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '7월', header: () => <div style={{ textAlign: 'right' }}>7월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '8월', header: () => <div style={{ textAlign: 'right' }}>8월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '9월', header: () => <div style={{ textAlign: 'right' }}>9월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '10월', header: () => <div style={{ textAlign: 'right' }}>10월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '11월', header: () => <div style={{ textAlign: 'right' }}>11월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '12월', header: () => <div style={{ textAlign: 'right' }}>12월</div>, cell: info => numeral(info.getValue()).format('0,0') },
+  { accessorKey: '1월', header: () => <div style={{ textAlign: 'right' }}>1월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
+  { accessorKey: '2월', header: () => <div style={{ textAlign: 'right' }}>2월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
+  { accessorKey: '3월', header: () => <div style={{ textAlign: 'right' }}>3월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
+  { accessorKey: '4월', header: () => <div style={{ textAlign: 'right' }}>4월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
+  { accessorKey: '5월', header: () => <div style={{ textAlign: 'right' }}>5월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
+  { accessorKey: '6월', header: () => <div style={{ textAlign: 'right' }}>6월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
+  { accessorKey: '7월', header: () => <div style={{ textAlign: 'right' }}>7월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
+  { accessorKey: '8월', header: () => <div style={{ textAlign: 'right' }}>8월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
+  { accessorKey: '9월', header: () => <div style={{ textAlign: 'right' }}>9월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
+  { accessorKey: '10월', header: () => <div style={{ textAlign: 'right' }}>10월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
+  { accessorKey: '11월', header: () => <div style={{ textAlign: 'right' }}>11월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
+  { accessorKey: '12월', header: () => <div style={{ textAlign: 'right' }}>12월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
 ];
 
 const style = {
@@ -134,7 +134,7 @@ export function Ad_Effluent() {
         const apiResponse: OutputResponse[] = response.data.outputs;
 
         const formattedData: Input[] = apiResponse.map((output: OutputResponse) => ({
-            ids: output.ids[0], // ids 값을 저장합니다.
+            ids: output.ids[0], 
             inputType: "수계배출물",
             unit: output.unit,
             year: output.year,
@@ -244,7 +244,7 @@ export function Ad_Effluent() {
             // 해당 월에 맞는 ID 추출
             if (typeof month === 'number' && ids.length > 0) {
                 const id = ids[month - 1]; // 해당 월의 ID 가져오기
-                console.log(`Updating ID for month ${month}:`, id); // 업데이트할 ID 로그
+                // console.log(`Updating ID for month ${month}:`, id); // 업데이트할 ID 로그
 
                 if (id) {
                     const updateUrl = `https://lcaapi.acess.co.kr/Outputs/Water/${id}`;
@@ -259,7 +259,7 @@ export function Ad_Effluent() {
                     // console.log('Update Payload:', updatePayload); // 업데이트 페이로드 로그
 
                     const updateResponse = await axios.put(updateUrl, updatePayload);
-                    console.log('Update Response:', updateResponse.data); // 업데이트 결과 로그
+                    console.log('Update Response:', updateResponse.data);
                 } else {
                     throw new Error('해당 월의 ID를 찾을 수 없습니다.');
                 }
@@ -274,11 +274,11 @@ export function Ad_Effluent() {
                 amount: Number(amount),
             };
 
-            console.log('Create URL:', createUrl); // 등록 URL 로그
-            console.log('Create Payload:', createPayload); // 등록 페이로드 로그
+            // console.log('Create URL:', createUrl); // 등록 URL 로그
+            // console.log('Create Payload:', createPayload); // 등록 페이로드 로그
 
             const createResponse = await axios.post(createUrl, createPayload);
-            console.log('Create Response:', createResponse.data); // 등록 결과 로그
+            console.log('Create Response:', createResponse.data); 
         }
 
         handleClose();

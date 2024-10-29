@@ -88,7 +88,7 @@ const SidebarMenuMain = () => {
             icon='verify'
           >
             <SidebarMenuItem to='/GTG_Data' title='GTG 결과' hasBullet={true} />
-            <SidebarMenuItem to='/LCI_Data' title='온실효과 배출' hasBullet={true} />
+            <SidebarMenuItem to='/LCI_Data' title='LCI 결과' hasBullet={true} />
           </SidebarMenuItemWithSub>
         </>
       )}
@@ -157,8 +157,8 @@ const SidebarMenuMain = () => {
             icon='verify'
           >
             <SidebarMenuItem to='/GTG_Data' title='GTG 결과' hasBullet={true} />
-            <SidebarMenuItem to='/LCI_Data' title='온실효과 배출(종합,사업회원)' hasBullet={true} />
-            <SidebarMenuItem to='/LCI_Com_Data' title='온실효과 배출(품목)' hasBullet={true} />
+            <SidebarMenuItem to='/LCI_Data' title='LCI 결과(종합,사업회원)' hasBullet={true} />
+            <SidebarMenuItem to='/LCI_Com_Data' title='LCI 결과(품목)' hasBullet={true} />
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub

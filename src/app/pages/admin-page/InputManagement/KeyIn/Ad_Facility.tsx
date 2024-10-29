@@ -135,7 +135,7 @@ export function Ad_Facility() {
         };
   
         facilitiesData.forEach((facility: Facl) => {
-          row[facility.name] = item.facilityPresence[facility.id] ? 'O' : 'X';
+          row[facility.name] = item.facilityPresence[facility.id] ? 'O' : '-';
         });
   
         return row;

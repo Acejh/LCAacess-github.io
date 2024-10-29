@@ -227,13 +227,13 @@ export function Ad_Input() {
   
           // console.log('API 응답:', response.data);
   
-          setIsExist(isExist); // isExist 상태 업데이트
+          setIsExist(isExist); 
   
           if (isExist) {
             // 가져온 amount 값을 투입량 필드에 설정
             setNewInput(prevState => ({
               ...prevState,
-              amount: amount.toFixed(5), // 소수점 5자리까지
+              amount: amount.toFixed(5), 
             }));
             // console.log('투입량 업데이트:', amount.toFixed(5));
           } else {
@@ -296,13 +296,13 @@ export function Ad_Input() {
   
           // console.log('API 응답:', response.data);
   
-          setIsExist(isExist); // isExist 상태 업데이트
+          setIsExist(isExist); 
   
           if (isExist) {
             // 가져온 amount 값을 투입량 필드에 설정
             setNewInput(prevState => ({
               ...prevState,
-              amount: amount.toFixed(5), // 소수점 5자리까지
+              amount: amount.toFixed(5), 
             }));
             // console.log('투입량 업데이트:', amount.toFixed(5));
           } else {
@@ -319,8 +319,8 @@ export function Ad_Input() {
       }
     };
   
-    fetchAmount(); // 모달을 열 때 데이터를 가져옴.
-    setOpen(true); // 모달 열기
+    fetchAmount(); 
+    setOpen(true); 
   };
 
   const handleClose = () => {
@@ -388,8 +388,8 @@ export function Ad_Input() {
         // console.log('데이터 확인 API 호출 경로:', fetchUrl);
   
         try {
-          const response = await axios.get<ApiResponse[]>(fetchUrl); // 여기서 타입 명시
-          const inputData = response.data.find((item: ApiResponse) => item.lciItemId === Number(lciItemId)); // 'item'의 타입 명시
+          const response = await axios.get<ApiResponse[]>(fetchUrl); 
+          const inputData = response.data.find((item: ApiResponse) => item.lciItemId === Number(lciItemId)); 
   
           if (!inputData) {
             throw new Error('선택한 조건에 맞는 데이터가 없습니다.');
@@ -441,7 +441,7 @@ export function Ad_Input() {
       }
   
       handleClose();
-      fetchData(selectedCompany, selectedYear); // 새로 데이터를 불러옴
+      fetchData(selectedCompany, selectedYear); 
     } catch (error) {
       console.error('데이터 등록 중 오류 발생:', error);
     }

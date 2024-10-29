@@ -196,18 +196,18 @@ export function LCI_Data() {
       return;
     }
   
-    setDownloading(true); // 다운로드 시작
+    setDownloading(true); 
   
     try {
       const url = `https://lcaapi.acess.co.kr/GtoGResults/Export?CompanyCode=${selectedCompany.code}&Year=${year}`;
       
       const response = await axios.get(url, {
         responseType: 'blob',
-        timeout: 180000, // 3분 타임아웃 설정
+        timeout: 180000, 
       });
   
       const contentDisposition = response.headers['content-disposition'];
-      let filename = 'GTG_결과.xlsx'; // 기본 파일 이름
+      let filename = 'GTG_결과.xlsx'; 
   
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename\*?=['"]?UTF-8['"]?''(.+?)['"]?(;|$)/);
@@ -232,7 +232,7 @@ export function LCI_Data() {
     } catch (error) {
       console.error('엑셀 파일 다운로드 중 오류 발생:', error);
     } finally {
-      setDownloading(false); // 다운로드 완료
+      setDownloading(false); 
     }
   };
 
@@ -250,7 +250,7 @@ export function LCI_Data() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        GTG 결과
+        LCI 결과(종합,사업회원)
       </Typography>
       <Button
         variant="contained"
