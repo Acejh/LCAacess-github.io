@@ -379,17 +379,16 @@ export function Ad_Input() {
     try {
       const { companyCode, lciItemId, year, month, amount } = newInput;
   
-      if (!companyCode || !lciItemId || !year || !month || !amount) {
+      if (!companyCode || !lciItemId || !year || !month || amount === '' || amount === null) {
         throw new Error('모든 필드를 입력해 주세요.');
       }
   
       if (isExist) {
         const fetchUrl = `https://lcaapi.acess.co.kr/Inputs?year=${year}&companyCode=${companyCode}`;
-        // console.log('데이터 확인 API 호출 경로:', fetchUrl);
   
         try {
           const response = await axios.get<ApiResponse[]>(fetchUrl); 
-          const inputData = response.data.find((item: ApiResponse) => item.lciItemId === Number(lciItemId)); 
+          const inputData = response.data.find((item: ApiResponse) => item.lciItemId === Number(lciItemId));
   
           if (!inputData) {
             throw new Error('선택한 조건에 맞는 데이터가 없습니다.');
@@ -407,11 +406,8 @@ export function Ad_Input() {
             lciItemId: Number(lciItemId),
             year: Number(year),
             month: Number(month),
-            amount: Number(amount),
+            amount: Number(amount), 
           };
-  
-          // console.log('PUT 요청 URL:', putUrl);
-          // console.log('PUT 요청 데이터:', putPayload);
   
           const putResponse = await axios.put(putUrl, putPayload);
           console.log('PUT 응답:', putResponse.data);
@@ -426,11 +422,8 @@ export function Ad_Input() {
           companyCode: companyCode,
           year: Number(year),
           month: Number(month),
-          amount: Number(amount),
+          amount: Number(amount), // amount가 0이어도 정상 처리
         };
-  
-        // console.log('POST 요청 URL:', postUrl);
-        // console.log('POST 요청 데이터:', postPayload);
   
         try {
           const postResponse = await axios.post(postUrl, postPayload);
@@ -440,7 +433,6 @@ export function Ad_Input() {
         }
       }
   
-      handleClose();
       fetchData(selectedCompany, selectedYear); 
     } catch (error) {
       console.error('데이터 등록 중 오류 발생:', error);
@@ -694,7 +686,7 @@ export function Ad_Input() {
           </Grid>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
             <Button variant="contained" color="secondary" onClick={handleClose} style={{ marginRight: '10px' }}>
-              취소
+              뒤로
             </Button>
             <Button variant="contained" color="primary" onClick={handleSubmit}>
               등록

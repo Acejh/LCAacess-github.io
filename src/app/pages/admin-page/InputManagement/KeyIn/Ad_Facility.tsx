@@ -133,11 +133,12 @@ export function Ad_Facility() {
           categoryName: item.categoryName,
           itemName: item.itemName,
         };
-  
+      
         facilitiesData.forEach((facility: Facl) => {
-          row[facility.name] = item.facilityPresence[facility.id] ? 'O' : '-';
+          const cleanName = `${facility.id}_${facility.name}`.replace(/\./g, '_');
+          row[cleanName] = item.facilityPresence[facility.id] ? 'V' : '-';
         });
-  
+      
         return row;
       });
   
@@ -341,10 +342,13 @@ export function Ad_Facility() {
   // 동적으로 columns 설정
   const dynamicColumns: ColumnDef<TableData>[] = [
     ...columns,
-    ...facilities.map(facility => ({
-      accessorKey: facility.name,
-      header: `${facility.name} (${facility.capacity})`,
-    })),
+    ...facilities.map((facility) => {
+      const cleanName = `${facility.id}_${facility.name}`.replace(/\./g, '_'); 
+      return {
+        accessorKey: cleanName,
+        header: `${facility.id}_${facility.name} (${facility.capacity})`,
+      };
+    }),
   ];
 
   const table = useReactTable({
@@ -422,7 +426,9 @@ export function Ad_Facility() {
               <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'left', left: 0, zIndex: 3 }}>품목군</TableCell>
               <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'left', left: '130px', zIndex: 3 }}>제품명</TableCell>
               {facilities.map(facility => (
-                <TableCell key={facility.id} style={{ ...stickyHeaderStyle(), textAlign: 'center' }}>{facility.name}</TableCell>
+                <TableCell key={facility.id} style={{ ...stickyHeaderStyle(), textAlign: 'center' }}>
+                  {`${facility.id}_${facility.name}`}
+                </TableCell>
               ))}
             </TableRow>
           </TableHead>
@@ -499,7 +505,7 @@ export function Ad_Facility() {
                   const uniqueKey = `facility-${facility.id}-${facility.name}`;
                   return (
                     <TableRow key={uniqueKey}> 
-                      <TableCell>{facility.name}</TableCell>
+                      <TableCell>{`${facility.id}_${facility.name}`}</TableCell>
                       <TableCell>{numeral(facility.capacity).format('0.0')}</TableCell>
                       <TableCell>
                         <IconButton onClick={() => handleEditModalOpen(facility)}>

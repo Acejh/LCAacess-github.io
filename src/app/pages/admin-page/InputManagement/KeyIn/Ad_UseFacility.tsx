@@ -135,8 +135,8 @@ export function Ad_UseFacility() {
         const facility = facilities.find((f) => f.id === item.facilityId);
         return {
           facilityId: item.facilityId,
-          facilityName: item.facilityName,
-          capacity: facility ? facility.capacity : 0,  
+          facilityName: `${item.facilityId}_${item.facilityName}`,  // 수정된 부분
+          capacity: facility ? facility.capacity : 0,
           year: item.year,
           '1월': item.monthlyOpTime[0],
           '2월': item.monthlyOpTime[1],
@@ -248,12 +248,12 @@ export function Ad_UseFacility() {
       const checkUrl = `https://lcaapi.acess.co.kr/FacilityOpTimes/Exist?facilityId=${facilityId}&year=${year}&month=${month}`;
       
       // Log the check request URL
-      console.log('Checking if record exists with URL:', checkUrl);
+      // console.log('Checking if record exists with URL:', checkUrl);
       
       const checkResponse = await axios.get(checkUrl);
       
       // Log the check response details
-      console.log('Check response:', checkResponse.data);
+      // console.log('Check response:', checkResponse.data);
       
       const exists = checkResponse.data.isExist;
   
@@ -265,8 +265,8 @@ export function Ad_UseFacility() {
         };
   
         // Log the update request URL and payload
-        console.log('Updating existing record with URL:', updateUrl);
-        console.log('Update payload:', updatePayload);
+        // console.log('Updating existing record with URL:', updateUrl);
+        // console.log('Update payload:', updatePayload);
   
         const updateResponse = await axios.put(updateUrl, updatePayload);
   
@@ -283,8 +283,8 @@ export function Ad_UseFacility() {
         };
   
         // Log the create request URL and payload
-        console.log('Creating new record with URL:', createUrl);
-        console.log('Create payload:', createPayload);
+        // console.log('Creating new record with URL:', createUrl);
+        // console.log('Create payload:', createPayload);
   
         const createResponse = await axios.post(createUrl, createPayload);
   
@@ -498,20 +498,22 @@ export function Ad_UseFacility() {
             설비 가동시간 등록
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <FormControl fullWidth variant="outlined" margin="normal">
-                <InputLabel>설비</InputLabel>
-                <Select
-                  value={newInput.facilityId}
-                  onChange={(e) => handleSelectChange(e as SelectChangeEvent<number>, 'facilityId')}
-                  label="설비"
-                >
-                  {facilities.map((facility) => (
-                    <MenuItem key={facility.id} value={facility.id}>{facility.name}</MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth variant="outlined" margin="normal">
+              <InputLabel>설비</InputLabel>
+              <Select
+                value={newInput.facilityId}
+                onChange={(e) => handleSelectChange(e as SelectChangeEvent<number>, 'facilityId')}
+                label="설비"
+              >
+                {facilities.map((facility) => (
+                  <MenuItem key={facility.id} value={facility.id}>
+                    {`${facility.id}_${facility.name}`}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth variant="outlined" margin="normal">
                 <InputLabel>연도</InputLabel>
