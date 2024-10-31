@@ -26,12 +26,13 @@ interface UseCompanyProps extends FormControlProps {
   onCompanyChange: (company: Company | null) => void;
   onCompanyListChange?: (companies: Company[]) => void; 
   showAllOption?: boolean;
+  showGeneralOption?: boolean; // 종합 옵션 추가
   sx?: SxProps<Theme>;
   selectSx?: SxProps<Theme>;
   selectedCompany?: Company | null;
 }
 
-const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListChange, showAllOption = true, sx, selectSx, ...rest }) => {
+const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListChange, showAllOption = true, showGeneralOption = false, sx, selectSx, ...rest }) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const hasFetchedData = useRef(false);
@@ -43,7 +44,29 @@ const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListC
         a.name.localeCompare(b.name)
       );
   
-      if (showAllOption) {
+      if (showGeneralOption) {
+        const generalCompany = {
+          id: -2,
+          code: '000',
+          name: '종합',
+          bizNo: '',
+          ecoasCode: '',
+          zipCode: '',
+          address: '',
+          addressDetail: null,
+          managerName: '',
+          tel: '',
+          longitude: 0,
+          latitude: 0,
+          createdBy: '',
+          createdAt: '',
+          updatedBy: null,
+          updatedAt: null
+        };
+        sortedCompanies.unshift(generalCompany);
+        setSelectedCompany(generalCompany); 
+        onCompanyChange(generalCompany); 
+      } else if (showAllOption) {
         const allCompany = {
           id: -1,
           code: '',
@@ -86,7 +109,7 @@ const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListC
     } catch (error) {
       console.error('There was an error fetching the data!', error);
     }
-  }, [showAllOption, onCompanyListChange, onCompanyChange]);
+  }, [showAllOption, showGeneralOption, onCompanyListChange, onCompanyChange]);
 
   useEffect(() => {
     if (!hasFetchedData.current) {

@@ -89,7 +89,7 @@ export function LCI_Data() {
     { 
       accessorKey: 'functionalunit', 
       header: 'functionalunit', 
-      cell: () => (Math.random() * 100).toExponential(2)  // 모든 행에서 임의의 지수형 값 추가
+      cell: () => (Math.random() * 100).toExponential(2)  
     },
   
     { accessorKey: 'unit', header: '단위' },
@@ -97,19 +97,19 @@ export function LCI_Data() {
     { 
       accessorKey: 'simplified배출계수', 
       header: 'simplified배출계수', 
-      cell: () => (Math.random() * 0.1 + 0.0001).toFixed(4)  // 모든 행에서 작은 값 소수점 4자리까지 표시
+      cell: () => (Math.random() * 0.1 + 0.0001).toFixed(4)  
     },
   
     { 
       accessorKey: 'w_benefit', 
       header: 'w/_benefit', 
-      cell: () => (Math.random() * 1000).toExponential(2)  // 모든 행에서 임의의 지수형 값 추가
+      cell: () => (Math.random() * 1000).toExponential(2) 
     },
   
     { 
       accessorKey: 'w_obenefit', 
       header: 'w/o_benefit', 
-      cell: () => (Math.random() * 1000).toExponential(2)  // 모든 행에서 임의의 지수형 값 추가
+      cell: () => (Math.random() * 1000).toExponential(2)  
     },
   
     ...data.length > 0
@@ -118,7 +118,7 @@ export function LCI_Data() {
           .map(midItemCode => ({
             accessorKey: midItemCode,
             header: midItemCode,
-            cell: () => (Math.random() * 1000).toFixed(10)  // 모든 행에서 임의의 값 소수점 10자리까지 표시
+            cell: () => (Math.random() * 1000).toFixed(10) 
           }))
       : [],
   ];
@@ -278,7 +278,7 @@ export function LCI_Data() {
         {downloading ? '다운로드 중...' : '엑셀 다운로드'}
       </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-        <UseCompany onCompanyChange={setSelectedCompany} showAllOption={true} />
+        <UseCompany onCompanyChange={setSelectedCompany} showGeneralOption={true} />
         <FormControl style={{ marginRight: '10px' }}>
           <Select
             id="year-select"
