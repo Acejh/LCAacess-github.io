@@ -250,7 +250,7 @@ export function LCI_Com_Data() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        LCI 결과(품목)
+        LCA 결과(품목)
       </Typography>
       <Button
         variant="contained"

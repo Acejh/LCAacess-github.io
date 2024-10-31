@@ -84,27 +84,43 @@ export function LCI_Data() {
       cell: (info: CellContext<GTGData, unknown>) => lciTypeMap[info.getValue() as string] || info.getValue() 
     },
     { accessorKey: 'name', header: '이름' },
-    { accessorKey: 'unit', header: '단위' },
     { accessorKey: 'totalAmount', header: '총값', cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0') },
+  
+    { 
+      accessorKey: 'functionalunit', 
+      header: 'functionalunit', 
+      cell: () => (Math.random() * 100).toExponential(2)  // 모든 행에서 임의의 지수형 값 추가
+    },
+  
+    { accessorKey: 'unit', header: '단위' },
+  
+    { 
+      accessorKey: 'simplified배출계수', 
+      header: 'simplified배출계수', 
+      cell: () => (Math.random() * 0.1 + 0.0001).toFixed(4)  // 모든 행에서 작은 값 소수점 4자리까지 표시
+    },
+  
+    { 
+      accessorKey: 'w_benefit', 
+      header: 'w/_benefit', 
+      cell: () => (Math.random() * 1000).toExponential(2)  // 모든 행에서 임의의 지수형 값 추가
+    },
+  
+    { 
+      accessorKey: 'w_obenefit', 
+      header: 'w/o_benefit', 
+      cell: () => (Math.random() * 1000).toExponential(2)  // 모든 행에서 임의의 지수형 값 추가
+    },
+  
     ...data.length > 0
-    ? Object.keys(data[0])
-        .filter(key => !['type', 'name', 'unit', 'totalAmount'].includes(key))
-        .map(midItemCode => ({
-          accessorKey: midItemCode,
-          header: midItemCode, 
-          cell: (info: CellContext<GTGData, unknown>) => {
-            const value = info.getValue();
-
-            if (typeof value === 'number') {
-              // 숫자인 경우 toLocaleString으로 포맷
-              return value.toLocaleString(undefined, { minimumFractionDigits: 10, maximumFractionDigits: 10 });
-            }
-
-            // 숫자가 아닌 경우 numeral로 포맷
-            return numeral(value).format('0,0.0000000000');
-          },
-        }))
-    : [],
+      ? Object.keys(data[0])
+          .filter(key => !['type', 'name', 'unit', 'totalAmount', 'functionalunit', 'simplified배출계수', 'w_benefit', 'w_obenefit'].includes(key))
+          .map(midItemCode => ({
+            accessorKey: midItemCode,
+            header: midItemCode,
+            cell: () => (Math.random() * 1000).toFixed(10)  // 모든 행에서 임의의 값 소수점 10자리까지 표시
+          }))
+      : [],
   ];
 
   const fetchLciTypes = async () => {
@@ -250,7 +266,7 @@ export function LCI_Data() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        LCI 결과(종합,사업회원)
+        LCA 결과(종합,사업회원)
       </Typography>
       <Button
         variant="contained"
@@ -262,7 +278,7 @@ export function LCI_Data() {
         {downloading ? '다운로드 중...' : '엑셀 다운로드'}
       </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-        <UseCompany onCompanyChange={setSelectedCompany} showAllOption={false} />
+        <UseCompany onCompanyChange={setSelectedCompany} showAllOption={true} />
         <FormControl style={{ marginRight: '10px' }}>
           <Select
             id="year-select"
@@ -295,117 +311,10 @@ export function LCI_Data() {
       <TableContainer component={Paper} style={{ maxHeight: 600, overflowY: 'auto', overflowX: 'auto' }} className="custom-scrollbar">
         <Table stickyHeader>
           <TableHead>
-            <TableRow>
-              <TableCell
-                colSpan={4}
-                style={{
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  backgroundColor: '#cfcfcf',
-                  position: 'sticky',
-                  left: 0,
-                  zIndex: 5,
-                  width: '200px',
-                }}
-              >
-                처리제품
-              </TableCell>
-              {weightByItems.map((item, index) => (
-                <TableCell
-                  key={index}
-                  style={{
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    backgroundColor: '#cfcfcf',
-                    width: '200px',
-                    zIndex: 0,
-                  }}
-                >
-                  {item.midItemName}
-                </TableCell>
-              ))}
-            </TableRow>
-            <TableRow>
-              <TableCell
-                colSpan={4}
-                style={{
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  backgroundColor: '#cfcfcf',
-                  position: 'sticky',
-                  left: 0,
-                  zIndex: 5,
-                  width: '200px',
-                }}
-              >
-                처리비율(%)
-              </TableCell>
-              {weightByItems.map((item, index) => (
-                <TableCell
-                  key={index}
-                  style={{
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    backgroundColor: '#cfcfcf',
-                    width: '200px',
-                    zIndex: 0,
-                  }}
-                >
-                  {/* 처리비율 값 포맷팅 적용 */}
-                  {item.ratio.toFixed(10)}
-                </TableCell>
-              ))}
-            </TableRow>
-            <TableRow>
-              <TableCell
-                colSpan={4}
-                style={{
-                  textAlign: 'center',
-                  fontWeight: 'bold',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  backgroundColor: '#cfcfcf',
-                  position: 'sticky',
-                  left: 0,
-                  zIndex: 5,
-                  width: '200px',
-                }}
-              >
-                총 처리 중량(kg)
-              </TableCell>
-              {weightByItems.map((item, index) => (
-                <TableCell
-                  key={index}
-                  style={{
-                    textAlign: 'center',
-                    whiteSpace: 'nowrap',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    backgroundColor: '#cfcfcf',
-                    width: '200px',
-                    zIndex: 0,
-                  }}
-                >
-                  {numeral(item.weight).format('0,0.00000')}
-                </TableCell>
-              ))}
-            </TableRow>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header, index) => {
-                  const leftValues = [0, 66, 271, 338]; 
+                  const leftValues = [0, 66, 271, 338];
                   return (
                     <TableCell
                       key={header.id}
@@ -416,11 +325,11 @@ export function LCI_Data() {
                         textAlign: 'center',
                         backgroundColor: '#cfcfcf',
                         fontWeight: 'bold',
-                        position: 'sticky', 
-                        top: 0, 
-                        left: index < 4 ? leftValues[index] : 'auto', 
-                        width: index === 0 ? '150px' : index === 1 ? '200px' : index === 2 ? '100px' : '120px', 
-                        zIndex: index < 4 ? 100 : 1, 
+                        position: 'sticky',
+                        top: 0,
+                        left: index < 4 ? leftValues[index] : 'auto',
+                        zIndex: index < 4 ? 100 : 1,
+                        width: index === 0 ? '150px' : index === 1 ? '200px' : index === 2 ? '100px' : '120px',
                       }}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}
@@ -431,6 +340,19 @@ export function LCI_Data() {
             ))}
           </TableHead>
           <TableBody>
+            {/* 임의의 맨 위 행 추가 */}
+            <TableRow>
+              <TableCell>투입물</TableCell>
+              <TableCell>합산 계산</TableCell>
+              <TableCell>합산</TableCell>
+              <TableCell>합산</TableCell>
+              <TableCell>kg</TableCell>
+              <TableCell></TableCell>
+              <TableCell>합산</TableCell>
+              <TableCell>합산</TableCell>
+              {/* 필요한 추가 셀 */}
+            </TableRow>
+            {/* 실제 데이터 행 */}
             {loading ? (
               <TableRow>
                 <TableCell colSpan={weightByItems.length + 3} style={{ textAlign: 'center' }}>
@@ -443,7 +365,7 @@ export function LCI_Data() {
                   {row.getVisibleCells().map((cell, index) => {
                     const isRightAligned = cell.column.id === 'totalAmount' || !['type', 'name', 'unit', 'totalAmount'].includes(cell.column.id);
                     const leftValues = [0, 66, 271, 338];
-                    
+
                     return (
                       <TableCell
                         key={cell.id}
@@ -453,6 +375,7 @@ export function LCI_Data() {
                           textOverflow: 'ellipsis',
                           textAlign: isRightAligned ? 'right' : 'left',
                           position: index < 4 ? 'sticky' : 'static',
+                          top: 55,
                           left: leftValues[index],
                           width: index === 0 ? '150px' : index === 1 ? '200px' : index === 2 ? '100px' : '120px',
                           backgroundColor: '#fff',
