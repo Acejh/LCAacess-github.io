@@ -79,49 +79,74 @@ export function LCI_Data() {
 
   const columns: ColumnDef<GTGData>[] = [
     { 
+      id: 'type',  
       accessorKey: 'type', 
       header: '구분', 
       cell: (info: CellContext<GTGData, unknown>) => lciTypeMap[info.getValue() as string] || info.getValue() 
     },
-    { accessorKey: 'name', header: '이름' },
-    { accessorKey: 'totalAmount', header: '총값', cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0') },
-  
+    { id: 'name', accessorKey: 'name', header: '이름' },
+    { id: 'totalAmount', accessorKey: 'totalAmount', header: '총값', cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0') },
+    
     { 
+      id: 'functionalunit',
       accessorKey: 'functionalunit', 
       header: 'functionalunit', 
       cell: () => (Math.random() * 100).toExponential(2)  
     },
-  
-    { accessorKey: 'unit', header: '단위' },
-  
+    
+    { id: 'unit', accessorKey: 'unit', header: '단위' },
+    
     { 
-      accessorKey: 'simplified배출계수', 
-      header: 'simplified배출계수', 
+      id: '유가물재활용공정', 
+      accessorKey: '유가물재활용공정', 
+      header: () => (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span>GWP</span>
+          <span style={{ whiteSpace: 'nowrap' }}>유가물 재활용 공정</span>
+        </div>
+      ),
       cell: () => (Math.random() * 0.1 + 0.0001).toFixed(4)  
     },
-  
+
     { 
+      id: 'GWP유가물대체효과',
+      accessorKey: 'GWP유가물대체효과', 
+      header: () => (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span>GWP</span>
+          <span style={{ whiteSpace: 'nowrap' }}>유가물 대체효과</span>
+        </div>
+      ),  
+      cell: () => (Math.random() * 0.1 + 0.0001).toFixed(4)  
+    },
+    
+    { 
+      id: 'w_benefit',  
       accessorKey: 'w_benefit', 
-      header: 'w/_benefit', 
+      header: '배출량\nw/_benefit', 
       cell: () => (Math.random() * 1000).toExponential(2) 
     },
-  
+    
     { 
+      id: 'w_obenefit',  
       accessorKey: 'w_obenefit', 
-      header: 'w/o_benefit', 
+      header: '배출량\nw/o_benefit', 
       cell: () => (Math.random() * 1000).toExponential(2)  
     },
   
+    // 추가적인 컬럼 정의 (데이터에 있는 다른 키를 컬럼으로 사용)
     ...data.length > 0
       ? Object.keys(data[0])
-          .filter(key => !['type', 'name', 'unit', 'totalAmount', 'functionalunit', 'simplified배출계수', 'w_benefit', 'w_obenefit'].includes(key))
+          .filter(key => !['type', 'name', 'unit', 'totalAmount', 'functionalunit', 'GWP유가물대체효과', '유가물재활용공정', 'w_benefit', 'w_obenefit'].includes(key))
           .map(midItemCode => ({
+            id: midItemCode,  
             accessorKey: midItemCode,
             header: midItemCode,
             cell: () => (Math.random() * 1000).toFixed(10) 
           }))
       : [],
   ];
+
 
   const fetchLciTypes = async () => {
     try {
@@ -319,7 +344,9 @@ export function LCI_Data() {
                     <TableCell
                       key={header.id}
                       style={{
-                        whiteSpace: 'nowrap',
+                        whiteSpace: ['GWP유가물대체효과', 'w_benefit', 'w_obenefit'].includes(header.column.id as string) 
+                          ? 'pre-line' 
+                          : 'nowrap', 
                         overflow: 'hidden',
                         textOverflow: 'ellipsis',
                         textAlign: 'center',
@@ -342,14 +369,15 @@ export function LCI_Data() {
           <TableBody>
             {/* 임의의 맨 위 행 추가 */}
             <TableRow>
-              <TableCell>투입물</TableCell>
-              <TableCell>합산 계산</TableCell>
-              <TableCell>합산</TableCell>
-              <TableCell>합산</TableCell>
+              <TableCell>All</TableCell>
+              <TableCell>합산 계산 컬럼</TableCell>
+              <TableCell align="right">합산</TableCell>
+              <TableCell align="right">합산</TableCell>
               <TableCell>kg</TableCell>
-              <TableCell></TableCell>
-              <TableCell>합산</TableCell>
-              <TableCell>합산</TableCell>
+              <TableCell align="right">합산</TableCell>
+              <TableCell align="right">합산</TableCell>
+              <TableCell align="right">합산</TableCell>
+              <TableCell align="right">합산</TableCell>
               {/* 필요한 추가 셀 */}
             </TableRow>
             {/* 실제 데이터 행 */}
