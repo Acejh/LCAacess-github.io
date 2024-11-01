@@ -28,8 +28,8 @@ import {
 } from '@mui/material';
 
 type GTGData = {
-  type: string;
-  category: string;
+  category: string;             
+  flow: string;                  
   amount: number;
   functionalUnit: number;
   unit: string;
@@ -57,9 +57,8 @@ type LCAResult = {
   year: number;
   companyCode: string;
   companyName: string;
-  type: string;
-  category: string;
-  flow: string;
+  category: string;             
+  flow: string;                 
   amount: number;
   functionalUnit: number;
   unit: string;
@@ -83,9 +82,24 @@ export function LCI_Data() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
   const columns: ColumnDef<GTGData>[] = [
-    { id: 'type', accessorKey: 'type', header: '구분' },
-    { id: 'category', accessorKey: 'category', header: '이름' },
-    { id: 'amount', accessorKey: 'amount', header: '총값', cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0.00000') },
+    { 
+      id: 'category', 
+      accessorKey: 'category', 
+      header: '구분',
+      cell: (info: CellContext<GTGData, unknown>) => <div style={{ textAlign: 'left' }}>{info.getValue() as React.ReactNode}</div>
+    },
+    { 
+      id: 'flow', 
+      accessorKey: 'flow', 
+      header: 'Flow',
+      cell: (info: CellContext<GTGData, unknown>) => <div style={{ textAlign: 'left' }}>{info.getValue() as React.ReactNode}</div>
+    },
+    { 
+      id: 'amount', 
+      accessorKey: 'amount', 
+      header: '총값', 
+      cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0.00000')
+    },
     { 
       id: 'functionalUnit', 
       accessorKey: 'functionalUnit', 
@@ -93,14 +107,18 @@ export function LCI_Data() {
       cell: (info: CellContext<GTGData, unknown>) => {
         const value = info.getValue();
         if (typeof value === 'number') {
-          // 숫자인 경우 toLocaleString으로 포맷
           return value.toLocaleString(undefined, { minimumFractionDigits: 10, maximumFractionDigits: 10 });
         }
-        // 숫자가 아닌 경우 numeral로 포맷
         return numeral(value).format('0,0.0000000000');
       }
     },
-    { id: 'unit', accessorKey: 'unit', header: '단위' },
+    { 
+      id: 'unit', 
+      accessorKey: 'unit', 
+      header: '단위',
+      cell: (info: CellContext<GTGData, unknown>) => <div style={{ textAlign: 'left' }}>{info.getValue() as React.ReactNode}</div>
+    },
+    // 이하 GWP, 배출량 열들은 오른쪽 정렬
     { 
       id: 'gwp', 
       accessorKey: 'gwp', 
@@ -165,8 +183,8 @@ export function LCI_Data() {
 
       const transformedData = lcaResults.map((item: LCAResult) => {
         const baseData: GTGData = {
-          type: item.type,
-          category: item.category,
+          category: item.category,       // 구분
+          flow: item.flow,               // Flow
           amount: item.amount,
           functionalUnit: item.functionalUnit,
           unit: item.unit,
@@ -175,15 +193,15 @@ export function LCI_Data() {
           emissionWithBenefit: item.emissionWithBenefit,
           emissionWithoutBenefit: item.emissionWithoutBenefit,
         };
-        
+      
         midItems.forEach(({ midItemCode }) => {
           baseData[midItemCode] = 0;
         });
-
+      
         item.lcaItems.forEach((subItem: LCAItem) => {
           baseData[subItem.midItemCode] = subItem.amount;
         });
-        
+      
         return baseData;
       });
 
