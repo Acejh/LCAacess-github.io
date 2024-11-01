@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import numeral from 'numeral';
@@ -29,256 +29,179 @@ import {
 
 type GTGData = {
   type: string;
-  name: string;
+  category: string;
+  amount: number;
+  functionalUnit: number;
   unit: string;
-  totalAmount: number;
+  gwp: number;
+  gwpAlt: number;
+  emissionWithBenefit: number;
+  emissionWithoutBenefit: number;
   [key: string]: string | number;
 };
 
-// type GTGItem = {
-//   itemCode: string;
-//   amount: number;
-// };
-
-type GTGResult = {
-  lciItem: {
-    type: string;
-    name: string;
-    unit: string;
-  };
-  totalAmount: number;
-  gtoGByItems: {
-    item: {
-      midItemCode: string;
-      midItemName: string;
-    };
-    amount: number;
-  }[];
+type MidItem = {
+  midItemCode: string;
+  midItemName: string;
 };
 
-type WeightByItems = {
+type LCAItem = {
+  id: number;
+  midItemCode: string;
   midItemName: string;
-  itemName: string;
-  ratio: number;
-  totalWeight: number;
-  weight: number;
+  amount: number;
+};
+
+type LCAResult = {
+  id: number;
+  year: number;
+  companyCode: string;
+  companyName: string;
+  type: string;
+  category: string;
+  flow: string;
+  amount: number;
+  functionalUnit: number;
+  unit: string;
+  gwp: number;
+  gwpAlt: number;
+  emissionWithBenefit: number;
+  emissionWithoutBenefit: number;
+  lcaItems: LCAItem[];
+};
+
+type APIResponse = {
+  midItems: MidItem[];
+  lcaResults: LCAResult[];
 };
 
 export function LCI_Data() {
   const [data, setData] = useState<GTGData[]>([]);
-  const [weightByItems, setWeightByItems] = useState<WeightByItems[]>([]);
+  const [midItems, setMidItems] = useState<MidItem[]>([]);
   const [year, setYear] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [lciTypeMap, setLciTypeMap] = useState<{ [key: string]: string }>({});
-  const [downloading, setDownloading] = useState(false);
-  const [searchParams, setSearchParams] = useState({
-    company: null as Company | null,
-    year: '',
-  });
 
   const columns: ColumnDef<GTGData>[] = [
+    { id: 'type', accessorKey: 'type', header: '구분' },
+    { id: 'category', accessorKey: 'category', header: '이름' },
+    { id: 'amount', accessorKey: 'amount', header: '총값', cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0.00000') },
     { 
-      id: 'type',  
-      accessorKey: 'type', 
-      header: '구분', 
-      cell: (info: CellContext<GTGData, unknown>) => lciTypeMap[info.getValue() as string] || info.getValue() 
-    },
-    { id: 'name', accessorKey: 'name', header: '이름' },
-    { id: 'totalAmount', accessorKey: 'totalAmount', header: '총값', cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0') },
-    
-    { 
-      id: 'functionalunit',
-      accessorKey: 'functionalunit', 
+      id: 'functionalUnit', 
+      accessorKey: 'functionalUnit', 
       header: 'functionalunit', 
-      cell: () => (Math.random() * 100).toExponential(2)  
+      cell: (info: CellContext<GTGData, unknown>) => {
+        const value = info.getValue();
+        if (typeof value === 'number') {
+          // 숫자인 경우 toLocaleString으로 포맷
+          return value.toLocaleString(undefined, { minimumFractionDigits: 10, maximumFractionDigits: 10 });
+        }
+        // 숫자가 아닌 경우 numeral로 포맷
+        return numeral(value).format('0,0.0000000000');
+      }
     },
-    
     { id: 'unit', accessorKey: 'unit', header: '단위' },
-    
     { 
-      id: '유가물재활용공정', 
-      accessorKey: '유가물재활용공정', 
+      id: 'gwp', 
+      accessorKey: 'gwp', 
       header: () => (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span>GWP</span>
           <span style={{ whiteSpace: 'nowrap' }}>유가물 재활용 공정</span>
         </div>
       ),
-      cell: () => (Math.random() * 0.1 + 0.0001).toFixed(4)  
+      cell: (info: CellContext<GTGData, unknown>) => (Number(info.getValue()) || 0).toFixed(5)
     },
-
     { 
-      id: 'GWP유가물대체효과',
-      accessorKey: 'GWP유가물대체효과', 
+      id: 'gwpAlt', 
+      accessorKey: 'gwpAlt', 
       header: () => (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span>GWP</span>
           <span style={{ whiteSpace: 'nowrap' }}>유가물 대체효과</span>
         </div>
-      ),  
-      cell: () => (Math.random() * 0.1 + 0.0001).toFixed(4)  
+      ),
+      cell: (info: CellContext<GTGData, unknown>) => (Number(info.getValue()) || 0).toFixed(5) 
     },
-    
     { 
-      id: 'w_benefit',  
-      accessorKey: 'w_benefit', 
-      header: '배출량\nw/_benefit', 
-      cell: () => (Math.random() * 1000).toExponential(2) 
+      id: 'emissionWithBenefit',  
+      accessorKey: 'emissionWithBenefit', 
+      header: () => (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span>배출량</span>
+          <span style={{ whiteSpace: 'nowrap' }}>w/_benefit</span>
+        </div>
+      ),
+      cell: (info: CellContext<GTGData, unknown>) => (Number(info.getValue()) || 0).toExponential(5) 
     },
-    
     { 
-      id: 'w_obenefit',  
-      accessorKey: 'w_obenefit', 
-      header: '배출량\nw/o_benefit', 
-      cell: () => (Math.random() * 1000).toExponential(2)  
+      id: 'emissionWithoutBenefit',  
+      accessorKey: 'emissionWithoutBenefit', 
+      header: () => (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span>배출량</span>
+          <span style={{ whiteSpace: 'nowrap' }}>w/o_benefit</span>
+        </div>
+      ), 
+      cell: (info: CellContext<GTGData, unknown>) => (Number(info.getValue()) || 0).toExponential(5) 
     },
-  
-    // 추가적인 컬럼 정의 (데이터에 있는 다른 키를 컬럼으로 사용)
-    ...data.length > 0
-      ? Object.keys(data[0])
-          .filter(key => !['type', 'name', 'unit', 'totalAmount', 'functionalunit', 'GWP유가물대체효과', '유가물재활용공정', 'w_benefit', 'w_obenefit'].includes(key))
-          .map(midItemCode => ({
-            id: midItemCode,  
-            accessorKey: midItemCode,
-            header: midItemCode,
-            cell: () => (Math.random() * 1000).toFixed(10) 
-          }))
-      : [],
+    ...midItems.map((item) => ({
+      id: item.midItemCode,
+      accessorKey: item.midItemCode,
+      header: item.midItemName,
+      cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0.00000')
+    }))
   ];
 
+  const fetchData = useCallback(async () => {
+    if (!selectedCompany || !year) return;
 
-  const fetchLciTypes = async () => {
+    setLoading(true);
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/LciItems/LciTypes');
-      const lciTypes = response.data.reduce((acc: { [key: string]: string }, item: { key: string; value: string }) => {
-        acc[item.key] = item.value;
-        return acc;
-      }, {});
-      setLciTypeMap(lciTypes);
-    } catch (error) {
-      console.error('Error fetching LCI types:', error);
-    }
-  };
-  
-  useEffect(() => {
-    fetchLciTypes();
-  }, []);
+      const url = `https://lcaapi.acess.co.kr/LcaResults?companyCode=${selectedCompany.code}&year=${year}`;
+      const response = await axios.get<APIResponse>(url);  
+      
+      const { midItems, lcaResults } = response.data;
 
-  const fetchGTGData = useCallback(async () => {
-    if (!searchParams.company || !searchParams.year) {
-      setData([]);
-      setWeightByItems([]);
-      setLoading(false);
-      return;
-    }
-  
-    setLoading(true); 
-  
-    try {
-      const url = `https://lcaapi.acess.co.kr/GToGResults?CompanyCode=${searchParams.company?.code}&Year=${searchParams.year}`;
-      const response = await axios.get(url);
-      console.log(response.data);  
-  
-      const { gtoGResults, weightByItems }: { gtoGResults: GTGResult[]; weightByItems: WeightByItems[] } = response.data;
-  
-      const transformedData = gtoGResults.map((item: GTGResult) => {
+      const transformedData = lcaResults.map((item: LCAResult) => {
         const baseData: GTGData = {
-          type: item.lciItem.type,
-          name: item.lciItem.name,
-          unit: item.lciItem.unit,
-          totalAmount: item.totalAmount || 0,  
+          type: item.type,
+          category: item.category,
+          amount: item.amount,
+          functionalUnit: item.functionalUnit,
+          unit: item.unit,
+          gwp: item.gwp,
+          gwpAlt: item.gwpAlt,
+          emissionWithBenefit: item.emissionWithBenefit,
+          emissionWithoutBenefit: item.emissionWithoutBenefit,
         };
-  
-        if (Array.isArray(item.gtoGByItems)) {
-          item.gtoGByItems.forEach((subItem) => {
-            baseData[subItem.item.midItemName] = subItem.amount || 0;  
-          });
-        }
-  
+        
+        midItems.forEach(({ midItemCode }) => {
+          baseData[midItemCode] = 0;
+        });
+
+        item.lcaItems.forEach((subItem: LCAItem) => {
+          baseData[subItem.midItemCode] = subItem.amount;
+        });
+        
         return baseData;
       });
-  
-      const transformedWeightByItems = Array.isArray(weightByItems)
-        ? weightByItems.map((item: WeightByItems) => ({
-            itemName: item.itemName,
-            midItemName: item.midItemName, 
-            ratio: item.ratio,
-            totalWeight: item.totalWeight,
-            weight: item.weight,
-          }))
-        : [];
-  
+
       setData(transformedData);
-      setWeightByItems(transformedWeightByItems);
+      setMidItems(midItems);
     } catch (error) {
-      console.error('Error fetching GTG data:', error);
+      console.error('Error fetching data:', error);
     } finally {
-      setLoading(false);  
+      setLoading(false);
     }
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (selectedCompany && year) {  
-      fetchGTGData(); 
-    }
-  }, [searchParams, fetchGTGData, selectedCompany, year]);
-
-  const handleSearch = () => {
-    setSearchParams({
-      company: selectedCompany,
-      year,
-    });
-  };
-
-  const handleDownloadExcel = async () => {
-    if (!selectedCompany || !year) {
-      console.error('회사 또는 연도를 선택해 주세요.');
-      return;
-    }
-  
-    setDownloading(true); 
-  
-    try {
-      const url = `https://lcaapi.acess.co.kr/GtoGResults/Export?CompanyCode=${selectedCompany.code}&Year=${year}`;
-      
-      const response = await axios.get(url, {
-        responseType: 'blob',
-        timeout: 180000, 
-      });
-  
-      const contentDisposition = response.headers['content-disposition'];
-      let filename = 'GTG_결과.xlsx'; 
-  
-      if (contentDisposition) {
-        const filenameMatch = contentDisposition.match(/filename\*?=['"]?UTF-8['"]?''(.+?)['"]?(;|$)/);
-        if (filenameMatch && filenameMatch[1]) {
-          filename = decodeURIComponent(filenameMatch[1]);
-        } else {
-          const simpleFilenameMatch = contentDisposition.match(/filename="?(.+?)['"]?(;|$)/);
-          if (simpleFilenameMatch && simpleFilenameMatch[1]) {
-            filename = simpleFilenameMatch[1];
-          }
-        }
-      }
-  
-      const blob = new Blob([response.data]);
-      const urlBlob = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = urlBlob;
-      link.setAttribute('download', filename);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
-    } catch (error) {
-      console.error('엑셀 파일 다운로드 중 오류 발생:', error);
-    } finally {
-      setDownloading(false); 
-    }
-  };
+  }, [selectedCompany, year]);
 
   const handleYearChange = (event: SelectChangeEvent<string>) => {
     setYear(event.target.value as string);
+  };
+
+  const handleSearch = () => {
+    fetchData();
   };
 
   const table = useReactTable<GTGData>({
@@ -293,15 +216,6 @@ export function LCI_Data() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         LCA 결과(종합,사업회원)
       </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
-        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
-        onClick={handleDownloadExcel}
-        disabled={!selectedCompany || !year || downloading}  
-      >
-        {downloading ? '다운로드 중...' : '엑셀 다운로드'}
-      </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} showGeneralOption={true} />
         <FormControl style={{ marginRight: '10px' }}>
@@ -338,87 +252,56 @@ export function LCI_Data() {
           <TableHead>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header, index) => {
-                  const leftValues = [0, 66, 271, 338];
-                  return (
-                    <TableCell
-                      key={header.id}
-                      style={{
-                        whiteSpace: ['GWP유가물대체효과', 'w_benefit', 'w_obenefit'].includes(header.column.id as string) 
-                          ? 'pre-line' 
-                          : 'nowrap', 
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        textAlign: 'center',
-                        backgroundColor: '#cfcfcf',
-                        fontWeight: 'bold',
-                        position: 'sticky',
-                        top: 0,
-                        left: index < 4 ? leftValues[index] : 'auto',
-                        zIndex: index < 4 ? 100 : 1,
-                        width: index === 0 ? '150px' : index === 1 ? '200px' : index === 2 ? '100px' : '120px',
-                      }}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableCell>
-                  );
-                })}
+                {headerGroup.headers.map((header) => (
+                  <TableCell
+                    key={header.id}
+                    style={{
+                      whiteSpace: 'nowrap', 
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      textAlign: 'center',
+                      backgroundColor: '#cfcfcf',
+                      fontWeight: 'bold',
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 100,
+                    }}
+                  >
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                  </TableCell>
+                ))}
               </TableRow>
             ))}
           </TableHead>
           <TableBody>
-            {/* 임의의 맨 위 행 추가 */}
-            <TableRow>
-              <TableCell>All</TableCell>
-              <TableCell>합산 계산 컬럼</TableCell>
-              <TableCell align="right">합산</TableCell>
-              <TableCell align="right">합산</TableCell>
-              <TableCell>kg</TableCell>
-              <TableCell align="right">합산</TableCell>
-              <TableCell align="right">합산</TableCell>
-              <TableCell align="right">합산</TableCell>
-              <TableCell align="right">합산</TableCell>
-              {/* 필요한 추가 셀 */}
-            </TableRow>
-            {/* 실제 데이터 행 */}
             {loading ? (
               <TableRow>
-                <TableCell colSpan={weightByItems.length + 3} style={{ textAlign: 'center' }}>
+                <TableCell colSpan={columns.length} style={{ textAlign: 'center' }}>
                   <CircularProgress />
                 </TableCell>
               </TableRow>
             ) : table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell, index) => {
-                    const isRightAligned = cell.column.id === 'totalAmount' || !['type', 'name', 'unit', 'totalAmount'].includes(cell.column.id);
-                    const leftValues = [0, 66, 271, 338];
-
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        style={{
-                          whiteSpace: 'nowrap',
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          textAlign: isRightAligned ? 'right' : 'left',
-                          position: index < 4 ? 'sticky' : 'static',
-                          top: 55,
-                          left: leftValues[index],
-                          width: index === 0 ? '150px' : index === 1 ? '200px' : index === 2 ? '100px' : '120px',
-                          backgroundColor: '#fff',
-                          zIndex: 1,
-                        }}
-                      >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    );
-                  })}
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        textAlign: 'right',
+                        backgroundColor: '#fff',
+                      }}
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={weightByItems.length + 3} style={{ textAlign: 'center', color: 'red' }}>
+                <TableCell colSpan={columns.length} style={{ textAlign: 'center', color: 'red' }}>
                   데이터가 없습니다.
                 </TableCell>
               </TableRow>
