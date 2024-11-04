@@ -378,7 +378,7 @@ export function DataStatus() {
             <TableBody>
               <TableRow>
                 <TableCell colSpan={14} style={{ textAlign: 'center', color: 'red' }}>
-                  사업회원을 선택하여 조회하여주십시오.
+                  조회하여 주십시오.
                 </TableCell>
               </TableRow>
             </TableBody>

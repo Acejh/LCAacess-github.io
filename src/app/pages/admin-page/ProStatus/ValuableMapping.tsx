@@ -82,7 +82,7 @@ export function ValuableMapping() {
   const [typeMapping, setTypeMapping] = useState<Record<string, string>>({});
   const [categoryMapping, setCategoryMapping] = useState<Record<string, Record<string, string>>>({});
 
-  const [isMappingTestMode, setIsMappingTestMode] = useState(false); // 테스트 삭제예정
+  const [isMappingTestMode, setIsMappingTestMode] = useState(false); 
 
   const [mappingModalOpen, setMappingModalOpen] = useState(false);
   const [mappingItems, setMappingItems] = useState<{ id: number, name: string }[]>([]);
@@ -209,14 +209,14 @@ export function ValuableMapping() {
 
   // 매핑 모달 열기
   const handleMappingClick = async (row: ValuableMappingData) => {
-    setCurrentRowId(row.id);  // 선택된 row의 id 저장
+    setCurrentRowId(row.id); 
 
     try {
       // lciItem이 없으면 searchParams.year 사용
       const year = row.lciItem ? row.lciItem.year : searchParams.year;
 
       const response = await axios.get(`https://lcaapi.acess.co.kr/ValuableMaps/LciItems?Year=${year}`);
-      setMappingItems(response.data.lciItems);  // API로부터 가져온 lciItems 설정
+      setMappingItems(response.data.lciItems);  
       setMappingModalOpen(true);
     } catch (error) {
       console.error('Error fetching LCI items:', error);
@@ -243,7 +243,7 @@ export function ValuableMapping() {
         await axios.post('https://lcaapi.acess.co.kr/ValuableMaps', payload);
         setMappingModalOpen(false);
         alert('매핑이 완료되었습니다.');
-        fetchData();  // 데이터 새로 고침
+        fetchData();  
       } catch (error) {
         console.error('Error saving mapping:', error);
         alert('매핑 저장에 실패했습니다.');
@@ -409,7 +409,7 @@ export function ValuableMapping() {
                 {!hasSearched && initialLoad ? (
                   <TableRow>
                     <TableCell colSpan={13} style={{ textAlign: 'center', color: 'red' }}>
-                      사업회원 및 연도를 선택하여 조회해주십시오.
+                      조회하여 주십시오.
                     </TableCell>
                   </TableRow>
                 ) : loading ? (

@@ -40,10 +40,8 @@ const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListC
   const fetchCompanies = useCallback(async () => {
     try {
       const response = await axios.get('https://lcaapi.acess.co.kr/Companies');
-      const sortedCompanies: Company[] = response.data.list.sort((a: Company, b: Company) =>
-        a.name.localeCompare(b.name)
-      );
-  
+      const companies: Company[] = response.data.list; // 정렬 없이 가져온 순서대로 사용
+    
       if (showGeneralOption) {
         const generalCompany = {
           id: -2,
@@ -63,7 +61,7 @@ const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListC
           updatedBy: null,
           updatedAt: null
         };
-        sortedCompanies.unshift(generalCompany);
+        companies.unshift(generalCompany);
         setSelectedCompany(generalCompany); 
         onCompanyChange(generalCompany); 
       } else if (showAllOption) {
@@ -85,23 +83,23 @@ const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListC
           updatedBy: null,
           updatedAt: null
         };
-        sortedCompanies.unshift(allCompany);
+        companies.unshift(allCompany);
         setSelectedCompany(allCompany); 
         onCompanyChange(allCompany); 
       }
-  
-      setCompanies(sortedCompanies);
-  
+    
+      setCompanies(companies);
+    
       if (onCompanyListChange) {
-        onCompanyListChange(sortedCompanies);
+        onCompanyListChange(companies);
       }
-  
+    
       const authString = localStorage.getItem('kt-auth-react-v');
       if (authString) {
         const auth = JSON.parse(authString);
         const userInfo = auth.userInfo;
         if (userInfo && userInfo.role === 'User') {
-          const userCompany = sortedCompanies.find((company: Company) => company.code === userInfo.companyCode);
+          const userCompany = companies.find((company: Company) => company.code === userInfo.companyCode);
           setSelectedCompany(userCompany || null);
           onCompanyChange(userCompany || null);
         }

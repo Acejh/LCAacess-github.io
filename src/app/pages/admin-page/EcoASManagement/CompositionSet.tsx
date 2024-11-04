@@ -148,8 +148,8 @@ export function CompositionSet() {
   
       // Content-Disposition에서 filename 추출
       const contentDisposition = response.headers['content-disposition'];
-      let filename = 'download.xlsx'; // 기본 파일 이름
-  
+      let filename = 'download.xlsx'; 
+      
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename\*=UTF-8''(.+?)($|;|\s)/);
         if (filenameMatch?.[1]) {
@@ -293,7 +293,7 @@ export function CompositionSet() {
                 {!hasSearched && initialLoad ? (
                   <TableRow>
                     <TableCell colSpan={15} style={{ textAlign: 'center', color: 'red' }}>
-                      연도를 선택하여 조회해주십시오.
+                      조회하여 주십시오.
                     </TableCell>
                   </TableRow>
                 ) : loading ? (

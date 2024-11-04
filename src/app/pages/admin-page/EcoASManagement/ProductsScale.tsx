@@ -313,7 +313,7 @@ export function ProductsScale() {
                 {!hasSearched && initialLoad ? (
                   <TableRow>
                     <TableCell colSpan={15} style={{ textAlign: 'center', color: 'red' }}>
-                      사업회원 및 연도를 선택하여 조회해주십시오.
+                      조회하여 주십시오.
                     </TableCell>
                   </TableRow>
                 ) : loading ? (

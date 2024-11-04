@@ -165,6 +165,13 @@ export function AdminClient() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  const formatBizNo = (value: string) => {
+    const onlyNums = value.replace(/\D/g, ''); 
+    if (onlyNums.length <= 3) return onlyNums;
+    if (onlyNums.length <= 5) return `${onlyNums.slice(0, 3)}-${onlyNums.slice(3)}`;
+    return `${onlyNums.slice(0, 3)}-${onlyNums.slice(3, 5)}-${onlyNums.slice(5, 10)}`;
+  };
+
   const fetchData = useCallback(async (pageIndex: number, pageSize: number) => {
     if (!searchParams.company) {
       setData([]);
@@ -296,6 +303,11 @@ export function AdminClient() {
     postcode.open();
   };
 
+  const handleBizNoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedValue = formatBizNo(e.target.value);
+    setNewMember((prev) => ({ ...prev, bizNo: formattedValue }));
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setNewMember((prev) => ({
@@ -306,17 +318,19 @@ export function AdminClient() {
 
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    
     setEditMember((prev) => ({
       ...prev,
-      [name]: value,
+      [name]: name === 'bizNo' ? formatBizNo(value) : value,
     }));
   };
 
   const handleSubmit = () => {
     const newMemberData = {
       ...newMember,
+      bizNo: newMember.bizNo.replace(/\D/g, ''), 
     };
-
+  
     axios
       .post('https://lcaapi.acess.co.kr/Clients', newMemberData)
       .then(() => {
@@ -325,7 +339,7 @@ export function AdminClient() {
       .catch((error) => {
         console.error('Error posting data:', error.response ? error.response.data : error.message);
       });
-
+  
     handleClose();
   };
 
@@ -365,10 +379,11 @@ export function AdminClient() {
     if (editIndex !== null) {
       const updatedMemberData = {
         ...editMember,
+        bizNo: editMember.bizNo.replace(/\D/g, ''), 
       };
-
+  
       const url = `https://lcaapi.acess.co.kr/Clients/${editMember.id}`;
-
+  
       axios
         .put(url, updatedMemberData)
         .then(() => {
@@ -377,7 +392,7 @@ export function AdminClient() {
         .catch((error) => {
           console.error('Error updating data:', error);
         });
-
+  
       setEditOpen(false);
     }
   };
@@ -561,7 +576,7 @@ export function AdminClient() {
                 {!hasSearched ? (
                   <TableRow>
                     <TableCell colSpan={12} style={{ textAlign: 'center', color: 'red' }}>
-                      사업회원을 선택하여 조회하십시오.
+                      조회하여 주십시오.
                     </TableCell>
                   </TableRow>
                 ) : table.getRowModel().rows.length > 0 ? (
@@ -750,7 +765,7 @@ export function AdminClient() {
                 variant="outlined"
                 fullWidth
                 value={newMember.bizNo}
-                onChange={handleChange}
+                onChange={handleBizNoChange}
               />
             </Grid>
             <Grid item xs={8}>

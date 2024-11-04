@@ -321,7 +321,7 @@ export function Ad_UseFacility() {
 
   const columns: ColumnDef<Input>[] = [
     { accessorKey: 'facilityName', header: '설비명' },
-    { accessorKey: 'capacity', header: () => <div style={{ textAlign: 'center' }}>용량(Kw)</div> },
+    { accessorKey: 'capacity', header: () => <div style={{ textAlign: 'center' }}>용량(KW)</div> },
     { accessorKey: 'year', header: () => <div style={{ textAlign: 'center' }}>연도</div> },
     ...['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].map((month) => ({
       accessorKey: month,
@@ -480,7 +480,7 @@ export function Ad_UseFacility() {
             <TableBody>
               <TableRow>
                 <TableCell colSpan={columns.length} style={{ textAlign: 'center', color: 'red' }}>
-                  사업회원 및 연도를 선택하여 조회하십시오.
+                  조회하여 주십시오.
                 </TableCell>
               </TableRow>
             </TableBody>
@@ -545,15 +545,29 @@ export function Ad_UseFacility() {
               </FormControl>
             </Grid>
             <Grid item xs={12}>
-              <TextField
-                name="opTime"
-                label="가동시간"
-                variant="outlined"
-                type="number"
-                fullWidth
-                value={newInput.opTime}
-                onChange={handleInputChange}
-              />
+            <TextField
+              name="opTime"
+              label="가동시간"
+              variant="outlined"
+              type="number"
+              fullWidth
+              value={newInput.opTime}
+              onChange={handleInputChange}
+              InputProps={{
+                inputProps: { 
+                  style: { MozAppearance: 'textfield' }, 
+                },
+                sx: {
+                  '& input[type=number]': {
+                    MozAppearance: 'textfield', 
+                  },
+                  '& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button': {
+                    WebkitAppearance: 'none', 
+                    margin: 0,
+                  },
+                },
+              }}
+            />
             </Grid>
           </Grid>
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>

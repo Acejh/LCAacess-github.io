@@ -1,5 +1,5 @@
 import React from 'react';
-import { Line } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -32,7 +32,7 @@ export function LineChart() {
           7.39923e-03, // 2024
         ],
         borderColor: 'rgba(75,192,192,1)',
-        backgroundColor: 'rgba(75,192,192,0.2)',
+        backgroundColor: 'rgba(79, 218, 218, 0.637)',
         fill: true,
         tension: 0.1, // 선을 부드럽게
       },
@@ -48,7 +48,7 @@ export function LineChart() {
       },
       tooltip: {
         callbacks: {
-          label: function (context: TooltipItem<'line'>) { // TooltipItem<'line'> 타입 명시
+          label: function (context: TooltipItem<'bar'>) { // TooltipItem<'line'> 타입 명시
             let label = context.dataset.label || '';
             if (label) {
               label += ': ';
@@ -77,7 +77,7 @@ export function LineChart() {
 
   return (
     <div style={{ width: '100%', height: '310px' }}>
-      <Line data={data} options={options} />
+      <Bar data={data} options={options} />
     </div>
   );
 }

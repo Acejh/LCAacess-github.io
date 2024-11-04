@@ -82,7 +82,7 @@ export function LCI_Item() {
   // 수정 및 등록 모달 관리
   const [openModal, setOpenModal] = useState(false);
   const [editItem, setEditItem] = useState<LciItem | null>(null);
-  const [isEditing, setIsEditing] = useState(false); // 수정 모드인지 등록 모드인지 구분
+  const [isEditing, setIsEditing] = useState(false); 
 
   // 삭제 모달 관리
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -226,13 +226,13 @@ export function LCI_Item() {
           gwpAlt: editItem.gwpAlt,
         };
 
-        console.log('수정할 데이터:', postData);
+        // console.log('수정할 데이터:', postData);
         await axios.put(`https://lcaapi.acess.co.kr/LciItems/${editItem.id}`, postData);
 
         // 데이터 업데이트
         await fetchData();
         setOpenModal(false);
-        console.log('모달 닫힘');
+        // console.log('모달 닫힘');
       } catch (error) {
         if (error instanceof AxiosError) {
           console.error('수정 실패:', error.response ? error.response.data : error.message);
@@ -257,13 +257,13 @@ export function LCI_Item() {
           gwpAlt: editItem.gwpAlt,
         };
 
-        console.log('등록할 데이터:', postData);
+        // console.log('등록할 데이터:', postData);
         await axios.post('https://lcaapi.acess.co.kr/LciItems', postData);
 
         // 데이터 업데이트
         await fetchData();
         setOpenModal(false);
-        console.log('모달 닫힘');
+        // console.log('모달 닫힘');
       } catch (error) {
         if (error instanceof AxiosError) {
           console.error('등록 실패 (AxiosError):', error.response ? error.response.data : error.message);
@@ -284,9 +284,9 @@ export function LCI_Item() {
   const handleDeleteConfirm = async () => {
     if (deleteItemId) {
       try {
-        console.log(`삭제할 항목 ID: ${deleteItemId}`);
+        // console.log(`삭제할 항목 ID: ${deleteItemId}`);
         await axios.delete(`https://lcaapi.acess.co.kr/LciItems/${deleteItemId}`);
-        console.log('삭제 완료');
+        // console.log('삭제 완료');
 
         // 데이터 업데이트
         await fetchData();
@@ -499,7 +499,7 @@ export function LCI_Item() {
                 {!hasSearched && initialLoad ? (
                   <TableRow>
                     <TableCell colSpan={15} style={{ textAlign: 'center', color: 'red' }}>
-                      연도를 선택하여 조회해주십시오.
+                      조회하여 주십시오.
                     </TableCell>
                   </TableRow>
                 ) : table.getRowModel().rows.length > 0 ? (
@@ -551,12 +551,12 @@ export function LCI_Item() {
                   <InputLabel id="year-select-label">연도 선택</InputLabel>
                   <Select
                     labelId="year-select-label"
-                    value={editItem.year.toString()}  // value를 string으로 변환하여 전달
-                    onChange={(e) => setEditItem({ ...editItem, year: parseInt(e.target.value) })}  // string을 number로 변환하여 처리
+                    value={editItem.year.toString()}  
+                    onChange={(e) => setEditItem({ ...editItem, year: parseInt(e.target.value) })}  
                   >
                     {/* 현재 연도 기준으로 5년간의 연도 목록 생성 */}
                     {Array.from({ length: 5 }, (_, i) => (new Date().getFullYear() - i)).map((year) => (
-                      <MenuItem key={year} value={year.toString()}>  {/* value를 string으로 변환 */}
+                      <MenuItem key={year} value={year.toString()}>
                         {year}
                       </MenuItem>
                     ))}

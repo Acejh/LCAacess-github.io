@@ -494,7 +494,7 @@ export function CarsControl() {
                     {flexRender(header.column.columnDef.header, header.getContext())}
                   </TableCell>
                 ))}
-                <TableCell style={{ backgroundColor: '#cfcfcf' }}>수정</TableCell>
+                <TableCell style={{ backgroundColor: '#cfcfcf', textAlign: 'center' }}>수정</TableCell>
               </TableRow>
             ))}
           </TableHead>
@@ -510,7 +510,7 @@ export function CarsControl() {
                 {!hasSearched ? (
                   <TableRow>
                     <TableCell colSpan={12} style={{ textAlign: 'center', color: 'red' }}>
-                      사업회원을 선택하여 조회하십시오.
+                      조회하여 주십시오.
                     </TableCell>
                   </TableRow>
                 ) : table.getRowModel().rows.length > 0 ? (
@@ -532,14 +532,14 @@ export function CarsControl() {
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              textAlign: ['spec'].includes(cell.column.id) ? 'right' : 'left',
+                              textAlign: ['spec'].includes(cell.column.id) ? 'center' : 'left',
                             }}
                           >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
                         ))}
                         <TableCell>
-                          <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)} style={{ padding: '2px' }}>
+                          <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)} style={{ padding: '5px' }}>
                             수정
                           </Button>
                           {userRole === 'Admin' && (
@@ -547,7 +547,7 @@ export function CarsControl() {
                               variant="contained"
                               color="secondary"
                               onClick={() => handleDeleteOpen(index)}
-                              style={{ marginLeft: '10px', padding: '2px' }}
+                              style={{ marginLeft: '10px', padding: '5px' }}
                             >
                               삭제
                             </Button>

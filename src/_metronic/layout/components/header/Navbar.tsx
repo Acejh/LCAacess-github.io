@@ -3,6 +3,7 @@ import {KTIcon, toAbsoluteUrl} from '../../../helpers'
 import { HeaderUserMenu,  } from '../../../partials'
 // ThemeModeSwitcherHeaderNotificationsMenu,Search,
 import {useLayout} from '../../core'
+import { useEffect, useState } from 'react'
 
 const itemClass = 'ms-1 ms-md-4'
 // const btnClass =
@@ -12,6 +13,26 @@ const btnIconClass = 'fs-2'
 
 const Navbar = () => {
   const {config} = useLayout()
+  const [userName,setUserName] = useState()
+
+  useEffect(() => {
+    const userInfoString = localStorage.getItem('kt-auth-react-v');
+    
+    if (userInfoString) {
+      try {
+        const parsedData = JSON.parse(userInfoString);
+        const userInfo = parsedData?.userInfo;  
+        if (userInfo) {
+          setUserName(userInfo.companyName);
+        }
+      } catch (error) {
+        console.error('Error parsing JSON:', error);
+      }
+    } else {
+      console.error('No user info found in localStorage');
+    }
+  }, []);
+
   return (
     <div className='app-navbar flex-shrink-0'>
       {/* <div className={clsx('app-navbar-item align-items-stretch', itemClass)}>
@@ -48,6 +69,7 @@ const Navbar = () => {
       </div> */}
 
       <div className={clsx('app-navbar-item', itemClass)}>
+        <div style={{marginRight: '10px'}}>{userName}</div>
         <div
           className={clsx('cursor-pointer symbol', userAvatarClass)}
           data-kt-menu-trigger="{default: 'click'}"

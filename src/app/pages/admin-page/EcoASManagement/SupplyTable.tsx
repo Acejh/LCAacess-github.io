@@ -354,7 +354,7 @@ export function SupplyTable() {
                     {!hasSearched ? (
                       <TableRow>
                         <TableCell colSpan={19} style={{ textAlign: 'center', color: 'red' }}>
-                          사업회원을 선택하여 조회하십시오.
+                          조회하여 주십시오.
                         </TableCell>
                       </TableRow>
                     ) : table.getRowModel().rows.length > 0 ? (

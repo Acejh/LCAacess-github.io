@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
 import UseProduct from '../../../ComponentBox/UseProduct';
@@ -27,6 +27,9 @@ import {
   TextField,
   Grid,
   IconButton,
+  FormGroup,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import * as XLSX from 'xlsx';
@@ -115,6 +118,7 @@ export function Ad_Facility() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleteFacilityId, setDeleteFacilityId] = useState<number | null>(null);
+  const [categoryFilters, setCategoryFilters] = useState<Record<string, boolean>>({});
   const [newFacility, setNewFacility] = useState({ name: '', capacity: '', companyCode: '', items: [] as string[] });
   const [editFacility, setEditFacility] = useState({ id: '', name: '', capacity: '', companyCode: '', items: [] as string[] });
   const [userRole, setUserRole] = useState<string | null>(null);
@@ -133,17 +137,24 @@ export function Ad_Facility() {
           categoryName: item.categoryName,
           itemName: item.itemName,
         };
-      
+  
         facilitiesData.forEach((facility: Facl) => {
           const cleanName = `${facility.id}_${facility.name}`.replace(/\./g, '_');
           row[cleanName] = item.facilityPresence[facility.id] ? 'V' : '-';
         });
-      
+  
         return row;
       });
   
-      // console.log('Fetched Data:', tableData); 
       setData(tableData);
+  
+      const categories = Array.from(new Set(tableData.map((item: TableData) => item.categoryName))) as string[];
+        setCategoryFilters(
+          categories.reduce<Record<string, boolean>>((acc, category) => {
+            acc[category] = true;
+            return acc;
+          }, {})
+        );
     } catch (error) {
       console.error('데이터를 불러오는데 실패했습니다:', error);
       setError('데이터를 불러오는데 실패했습니다.');
@@ -161,6 +172,13 @@ export function Ad_Facility() {
     }
   }, [tempSelectedCompany, setSelectedCompany, setFetchDataTrigger, setError]);
 
+  const handleCategoryFilterChange = (category: string) => {
+    setCategoryFilters((prev) => ({
+      ...prev,
+      [category]: !prev[category],
+    }));
+  };
+
   //권한 가져오는 useEffect
   useEffect(() => {
     const userInfoString = localStorage.getItem('kt-auth-react-v');
@@ -176,6 +194,18 @@ export function Ad_Facility() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (data.length > 0) {
+      const categories = Array.from(new Set(data.map((item: TableData) => item.categoryName))) as string[];
+      setCategoryFilters(
+        categories.reduce<Record<string, boolean>>((acc, category) => {
+          acc[category] = true;
+          return acc;
+        }, {})
+      );
+    }
+  }, [data]);
 
   //자동조회 useEffect
   useEffect(() => {
@@ -351,8 +381,12 @@ export function Ad_Facility() {
     }),
   ];
 
+  const filteredData = useMemo(() => {
+    return data.filter((item) => categoryFilters[item.categoryName]);
+  }, [data, categoryFilters]);
+
   const table = useReactTable({
-    data,
+    data: filteredData,  // 필터링된 데이터 사용
     columns: dynamicColumns,
     getCoreRowModel: getCoreRowModel(),
   });
@@ -400,6 +434,21 @@ export function Ad_Facility() {
         >
           설비 관리
         </Button>
+
+        <FormGroup row style={{ marginLeft: '20px' }}>
+          {Object.keys(categoryFilters).map((category) => (
+            <FormControlLabel
+              key={category}
+              control={
+                <Checkbox
+                  checked={categoryFilters[category]}
+                  onChange={() => handleCategoryFilterChange(category)}
+                />
+              }
+              label={category}
+            />
+          ))}
+        </FormGroup>
       </div>
       {error && (
         <Typography variant="body1" color="error" style={{ marginBottom: '20px' }}>
@@ -415,7 +464,7 @@ export function Ad_Facility() {
           <TableHead>
             {/* 첫 번째 헤더 줄: 설비 용량 */}
             <TableRow>
-              <TableCell colSpan={2} style={{ ...stickyHeaderStyle2(), textAlign: 'center', left: 0, zIndex: 3 }}>설비용량(Kw) →</TableCell>
+              <TableCell colSpan={2} style={{ ...stickyHeaderStyle2(), textAlign: 'center', left: 0, zIndex: 3 }}>설비용량(KW) →</TableCell>
               {facilities.map(facility => (
                 <TableCell key={facility.id} colSpan={1} style={{ ...stickyHeaderStyle2(), textAlign: 'center' }}>{numeral(facility.capacity).format('0.0')}</TableCell>
               ))}
@@ -423,8 +472,8 @@ export function Ad_Facility() {
 
             {/* 두 번째 헤더 줄: 품목군, 제품명, 설비명 */}
             <TableRow>
-              <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'left', left: 0, zIndex: 3 }}>품목군</TableCell>
-              <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'left', left: '130px', zIndex: 3 }}>제품명</TableCell>
+              <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'center', left: 0, zIndex: 3 }}>품목군</TableCell>
+              <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'center', left: '130px', zIndex: 3 }}>제품명</TableCell>
               {facilities.map(facility => (
                 <TableCell key={facility.id} style={{ ...stickyHeaderStyle(), textAlign: 'center' }}>
                   {`${facility.id}_${facility.name}`}
@@ -461,7 +510,7 @@ export function Ad_Facility() {
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              textAlign: isCategoryOrProduct ? 'left' : 'center',  // 품목군, 제품명은 왼쪽 정렬, 나머지는 중앙 정렬
+                              textAlign: isCategoryOrProduct ? 'center' : 'center',  // 품목군, 제품명은 왼쪽 정렬, 나머지는 중앙 정렬
                               position: isCategoryOrProduct ? 'sticky' : 'static',
                               left: cell.column.id === 'categoryName' ? 0 : cell.column.id === 'itemName' ? '130px' : undefined,
                               zIndex: isCategoryOrProduct ? 2 : 1,
@@ -479,7 +528,7 @@ export function Ad_Facility() {
             ) : (
               <TableRow>
                 <TableCell colSpan={facilities.length + 2} style={{ textAlign: 'center', color: 'red' }}>
-                  사업회원을 선택하여 조회하십시오.
+                  조회하여 주십시오.
                 </TableCell>
               </TableRow>
             )}
@@ -496,7 +545,7 @@ export function Ad_Facility() {
               <TableHead>
                 <TableRow>
                   <TableCell style={stickyHeaderStyle()}>설비명</TableCell>
-                  <TableCell style={stickyHeaderStyle()}>용량(Kw)</TableCell>
+                  <TableCell style={stickyHeaderStyle()}>용량(KW)</TableCell>
                   <TableCell style={stickyHeaderStyle()}>수정/삭제</TableCell>
                 </TableRow>
               </TableHead>
@@ -571,7 +620,7 @@ export function Ad_Facility() {
             <Grid item xs={12}>
               <TextField
                 name="capacity"
-                label="설비용량(Kw)"
+                label="설비용량(KW)"
                 variant="outlined"
                 fullWidth
                 value={newFacility.capacity}
@@ -633,7 +682,7 @@ export function Ad_Facility() {
             <Grid item xs={12}>
               <TextField
                 name="capacity"
-                label="설비용량(Kw)"
+                label="설비용량(KW)"
                 variant="outlined"
                 fullWidth
                 value={editFacility.capacity}
