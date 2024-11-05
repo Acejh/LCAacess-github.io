@@ -128,11 +128,21 @@ export function ValuableDeduction() {
   // 테이블 컬럼 정의
   const columns: ColumnDef<ValuableDeductionData>[] = [
     { 
+      id: 'id', 
+      accessorKey: 'id', 
+      header: 'ID',
+      cell: (info: CellContext<ValuableDeductionData, unknown>) => (
+        <div style={{ textAlign: 'center' }}>
+          {info.getValue() as React.ReactNode}
+        </div>
+      ),
+    },
+    { 
       id: 'companyCode', 
       accessorKey: 'companyCode', 
       header: '사업회원',
       cell: (info: CellContext<ValuableDeductionData, unknown>) => (
-        <div style={{ textAlign: 'left' }}>
+        <div style={{ textAlign: 'center' }}>
           {companyMap[info.getValue() as string] || '알 수 없음'}
         </div>
       )
@@ -144,15 +154,9 @@ export function ValuableDeduction() {
       cell: (info: CellContext<ValuableDeductionData, unknown>) => <div style={{ textAlign: 'center' }}>{info.getValue() as React.ReactNode}</div>
     },
     { 
-      id: 'lciItemId', 
-      accessorKey: 'lciItemId', 
-      header: '재질번호',
-      cell: (info: CellContext<ValuableDeductionData, unknown>) => <div style={{ textAlign: 'center' }}>{info.getValue() as React.ReactNode}</div>
-    },
-    { 
       id: 'lciItemName', 
       accessorKey: 'lciItemName', 
-      header: '재질명',
+      header: 'LCI 항목명',
       cell: (info: CellContext<ValuableDeductionData, unknown>) => <div style={{ textAlign: 'center' }}>{info.getValue() as React.ReactNode}</div>
     },
     { 
@@ -381,7 +385,7 @@ export function ValuableDeduction() {
               onChange={(e) => setSelectedComponent(e.target.value)}
               displayEmpty
             >
-              <MenuItem value="" disabled>재질 선택</MenuItem>
+              <MenuItem value="" disabled>LCI 항목 선택</MenuItem>
               {components.map((component) => (
                 <MenuItem key={component.id} value={component.id.toString()}>{component.name}</MenuItem>
               ))}
@@ -411,7 +415,7 @@ export function ValuableDeduction() {
             년도: {currentRow?.year}
           </Typography>
           <Typography style={{ marginBottom: '10px' }}>
-            재질명: {currentRow?.lciItemName}
+            LCI 항목명: {currentRow?.lciItemName}
           </Typography>
           <TextField
             label="차감량"
