@@ -610,10 +610,10 @@ export function Ad_Facility() {
                 value={newFacility.name}
                 onChange={handleChange}
               />
-              <Typography variant="body2" color="textSecondary" style={{ marginTop: '5px', marginLeft: '5px', color: 'black'}}>
+              <Typography variant="body2" color="textSecondary" style={{ fontSize: '12px', marginTop: '2px', marginLeft: '5px', color: 'black'}}>
                 전기를 사용하는 주요 설비명을 기재해 주세요. (예시 : 파쇄시설, 분쇄시설, 자력선별시설, 근적외선선별시설, 중력선별시설, 성형시설, 냉매회수시설 등)
               </Typography>
-              <Typography variant="body2" color="textSecondary" style={{ marginTop: '5px', marginLeft: '5px', color: 'red'}}>
+              <Typography variant="body2" color="textSecondary" style={{ fontSize: '12px', marginTop: '2px', marginLeft: '5px', color: 'red'}}>
                 (수작업의 경우) 수작업으로 처리하는 부분은 기재하지 마세요. "전기를 사용하는 설비"에 대해서만 입력해 주세요.
               </Typography>
             </Grid>

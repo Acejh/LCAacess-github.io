@@ -19,6 +19,7 @@ interface UseProductProps extends FormControlProps {
   onProductListChange?: (products: Product[]) => void;
   selectedProducts?: string[]; // 선택된 제품의 itemCode 목록
   sx?: SxProps<Theme>;
+  chipFontSize?: string; // Chip의 폰트 크기를 조절하기 위한 prop
 }
 
 const UseProduct: React.FC<UseProductProps> = ({
@@ -26,6 +27,7 @@ const UseProduct: React.FC<UseProductProps> = ({
   onProductListChange,
   selectedProducts = [],
   sx,
+  chipFontSize = '10px', // 기본 폰트 크기 설정
   ...rest
 }) => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -90,17 +92,18 @@ const UseProduct: React.FC<UseProductProps> = ({
         const allSelected = categoryProducts.every(product => selectedProducts.includes(product.itemCode));
 
         return (
-          <div key={categoryName} style={{ marginBottom: '2px'}}>
-            <Typography variant="h6" gutterBottom sx={{ fontSize: '13px' }}>
+          <div key={categoryName} style={{ marginBottom: '0px'}}>
+            <Typography variant="h6" gutterBottom sx={{ fontSize: '12px' }}>
               {categoryName}
               <Chip
                 label="All"
                 onClick={() => handleSelectAll(categoryProducts)}
-                style={{
+                sx={{
                   marginLeft: '8px',
                   backgroundColor: allSelected ? '#1976d2' : '#e0e0e0',
                   color: allSelected ? '#fff' : '#000',
                   cursor: 'pointer',
+                  fontSize: chipFontSize, // Chip 폰트 크기 적용
                 }}
               />
             </Typography>
@@ -110,10 +113,11 @@ const UseProduct: React.FC<UseProductProps> = ({
                   <Chip
                     label={product.itemName}
                     onClick={() => handleProductToggle(product.itemCode)}
-                    style={{
+                    sx={{
                       backgroundColor: selectedProducts.includes(product.itemCode) ? '#1976d2' : '#e0e0e0',
                       color: selectedProducts.includes(product.itemCode) ? '#fff' : '#000',
                       cursor: 'pointer',
+                      fontSize: chipFontSize, // Chip 폰트 크기 적용
                     }}
                   />
                 </Grid>
