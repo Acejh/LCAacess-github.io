@@ -315,7 +315,7 @@ export function ValuableMapping() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        유가물 품목 매핑 관리
+        유가물 품목&middot;매핑 관리
       </Typography>
       <Button
         variant="contained"

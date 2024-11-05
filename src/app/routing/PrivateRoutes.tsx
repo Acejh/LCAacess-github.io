@@ -53,6 +53,7 @@ import { ValuableMapping } from '../pages/admin-page/ProStatus/ValuableMapping'
 import { WasteMapping } from '../pages/admin-page/ProStatus/WasteMapping'
 import { LCI_Data } from '../pages/admin-page/ProStatus/LCI_Data'
 import { LCI_Com_Data } from '../pages/admin-page/ProStatus/LCI_Com_Data'
+import { ValuableDeduction } from '../pages/admin-page/ProStatus/ValuableDeduction'
 
 const PrivateRoutes = () => {
     const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
@@ -76,6 +77,7 @@ const PrivateRoutes = () => {
         <Route path="/Pro-Products" element={<ProProducts />} />
         <Route path="/ValuableMapping" element={< ValuableMapping/>} />
         <Route path="/WasteMapping" element={< WasteMapping/>} />
+        <Route path="/ValuableDeduction" element={< ValuableDeduction/>} />
 
         {/* 유저 조회 */}
         <Route path="/MaterialPos" element={<MaterialPos />} />
