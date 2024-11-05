@@ -45,7 +45,7 @@ const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListC
       if (showGeneralOption) {
         const generalCompany = {
           id: -2,
-          code: '000',
+          code: 'ALL',
           name: '종합',
           bizNo: '',
           ecoasCode: '',
