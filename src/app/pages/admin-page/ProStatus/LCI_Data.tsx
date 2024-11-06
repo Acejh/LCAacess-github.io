@@ -161,12 +161,12 @@ export function LCI_Data() {
       }
     },
     { 
-      id: 'emissionWithBenefit',  
-      accessorKey: 'emissionWithBenefit', 
+      id: 'emissionWithoutBenefit',  
+      accessorKey: 'emissionWithoutBenefit', 
       header: () => (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span>배출량</span>
-          <span style={{ whiteSpace: 'nowrap' }}>w/_benefit(A)</span>
+          <span style={{ whiteSpace: 'nowrap' }}>w/o_benefit(B)</span>
         </div>
       ),
       cell: (info: CellContext<GTGData, unknown>) => {
@@ -175,12 +175,12 @@ export function LCI_Data() {
       }
     },
     { 
-      id: 'emissionWithoutBenefit',  
-      accessorKey: 'emissionWithoutBenefit', 
+      id: 'emissionWithBenefit',  
+      accessorKey: 'emissionWithBenefit', 
       header: () => (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span>배출량</span>
-          <span style={{ whiteSpace: 'nowrap' }}>w/o_benefit(B)</span>
+          <span style={{ whiteSpace: 'nowrap' }}>w/_benefit(A)</span>
         </div>
       ),
       cell: (info: CellContext<GTGData, unknown>) => {
