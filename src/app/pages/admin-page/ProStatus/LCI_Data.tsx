@@ -28,8 +28,8 @@ import {
 } from '@mui/material';
 
 type GTGData = {
-  category: string;             
-  flow: string;                  
+  category: string;
+  flow: string;
   amount: number;
   functionalUnit: number;
   unit: string;
@@ -37,6 +37,7 @@ type GTGData = {
   gwpAlt: number;
   emissionWithBenefit: number;
   emissionWithoutBenefit: number;
+  reductionEffect: number; 
   [key: string]: string | number;
 };
 
@@ -57,8 +58,8 @@ type LCAResult = {
   year: number;
   companyCode: string;
   companyName: string;
-  category: string;             
-  flow: string;                 
+  category: string;
+  flow: string;
   amount: number;
   functionalUnit: number;
   unit: string;
@@ -66,6 +67,7 @@ type LCAResult = {
   gwpAlt: number;
   emissionWithBenefit: number;
   emissionWithoutBenefit: number;
+  reductionEffect: number; 
   lcaItems: LCAItem[];
 };
 
@@ -97,25 +99,36 @@ export function LCI_Data() {
     { 
       id: 'amount', 
       accessorKey: 'amount', 
-      header: '총값', 
-      cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0.00000')
+      header: 'SUM', 
+      cell: (info: CellContext<GTGData, unknown>) => {
+        const value = info.getValue();
+        return Number(value) === 0 ? '-' : numeral(value).format('0,0.00000');
+      }
     },
     { 
       id: 'functionalUnit', 
       accessorKey: 'functionalUnit', 
-      header: 'functionalunit', 
+      header: () => (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span>Functional</span>
+          <span style={{ whiteSpace: 'nowrap' }}>Unit</span>
+        </div>
+      ),
       cell: (info: CellContext<GTGData, unknown>) => {
         const value = info.getValue();
-        if (typeof value === 'number') {
-          return value.toLocaleString(undefined, { minimumFractionDigits: 10, maximumFractionDigits: 10 });
+        if (typeof value === 'number' && value === 0) {
+          return '-';
         }
-        return numeral(value).format('0,0.0000000000');
+        if (typeof value === 'number') {
+          return value.toExponential(5); // 지수 표기로 변환, 소수점 이하 5자리 표시
+        }
+        return value; // 숫자가 아닌 경우 그대로 반환
       }
     },
     { 
       id: 'unit', 
       accessorKey: 'unit', 
-      header: '단위',
+      header: 'Unit',
       cell: (info: CellContext<GTGData, unknown>) => <div style={{ textAlign: 'left' }}>{info.getValue() as React.ReactNode}</div>
     },
     // 이하 GWP, 배출량 열들은 오른쪽 정렬
@@ -128,7 +141,10 @@ export function LCI_Data() {
           <span style={{ whiteSpace: 'nowrap' }}>유가물 재활용 공정</span>
         </div>
       ),
-      cell: (info: CellContext<GTGData, unknown>) => (Number(info.getValue()) || 0).toFixed(5)
+      cell: (info: CellContext<GTGData, unknown>) => {
+        const value = info.getValue();
+        return Number(value) === 0 ? '-' : (Number(value) || 0).toFixed(5);
+      }
     },
     { 
       id: 'gwpAlt', 
@@ -139,7 +155,10 @@ export function LCI_Data() {
           <span style={{ whiteSpace: 'nowrap' }}>유가물 대체효과</span>
         </div>
       ),
-      cell: (info: CellContext<GTGData, unknown>) => (Number(info.getValue()) || 0).toFixed(5) 
+      cell: (info: CellContext<GTGData, unknown>) => {
+        const value = info.getValue();
+        return Number(value) === 0 ? '-' : (Number(value) || 0).toFixed(5);
+      }
     },
     { 
       id: 'emissionWithBenefit',  
@@ -147,10 +166,13 @@ export function LCI_Data() {
       header: () => (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span>배출량</span>
-          <span style={{ whiteSpace: 'nowrap' }}>w/_benefit</span>
+          <span style={{ whiteSpace: 'nowrap' }}>w/_benefit(A)</span>
         </div>
       ),
-      cell: (info: CellContext<GTGData, unknown>) => (Number(info.getValue()) || 0).toExponential(5) 
+      cell: (info: CellContext<GTGData, unknown>) => {
+        const value = info.getValue();
+        return Number(value) === 0 ? '-' : (Number(value) || 0).toExponential(5);
+      }
     },
     { 
       id: 'emissionWithoutBenefit',  
@@ -158,17 +180,37 @@ export function LCI_Data() {
       header: () => (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span>배출량</span>
-          <span style={{ whiteSpace: 'nowrap' }}>w/o_benefit</span>
+          <span style={{ whiteSpace: 'nowrap' }}>w/o_benefit(B)</span>
         </div>
-      ), 
-      cell: (info: CellContext<GTGData, unknown>) => (Number(info.getValue()) || 0).toExponential(5) 
+      ),
+      cell: (info: CellContext<GTGData, unknown>) => {
+        const value = info.getValue();
+        return Number(value) === 0 ? '-' : (Number(value) || 0).toExponential(5);
+      }
+    },
+    { 
+      id: 'reductionEffect', 
+      accessorKey: 'reductionEffect', 
+      header: () => (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span>탄소배출</span>
+          <span style={{ whiteSpace: 'nowrap' }}>저감효과(A-B)</span>
+        </div>
+      ),
+      cell: (info: CellContext<GTGData, unknown>) => {
+        const value = info.getValue();
+        return Number(value) === 0 ? '-' : (Number(value) || 0).toFixed(5);
+      }
     },
     ...midItems.map((item) => ({
-      id: item.midItemCode,
-      accessorKey: item.midItemCode,
-      header: item.midItemName,
-      cell: (info: CellContext<GTGData, unknown>) => numeral(info.getValue()).format('0,0.00000')
-    }))
+  id: item.midItemCode,
+  accessorKey: item.midItemCode,
+  header: item.midItemName,
+  cell: (info: CellContext<GTGData, unknown>) => {
+    const value = info.getValue();
+    return Number(value) === 0 ? '-' : numeral(value).format('0,0.00000');
+  }
+}))
   ];
 
   const fetchData = useCallback(async () => {
@@ -192,6 +234,7 @@ export function LCI_Data() {
           gwpAlt: item.gwpAlt,
           emissionWithBenefit: item.emissionWithBenefit,
           emissionWithoutBenefit: item.emissionWithoutBenefit,
+          reductionEffect: item.reductionEffect,
         };
       
         midItems.forEach(({ midItemCode }) => {
