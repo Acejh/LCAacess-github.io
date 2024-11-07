@@ -89,6 +89,7 @@ export function LCI_Com_Data() {
   const [companyNames, setCompanyNames] = useState<string[]>([]);
   const [year, setYear] = useState('');
   const [loading, setLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
   const columns: ColumnDef<GTGData>[] = [
     { 
@@ -305,6 +306,55 @@ export function LCI_Com_Data() {
     }
   }, [selectedMidItem, year]);
 
+  const handleDownloadExcel = async () => {
+    if (!year) {
+      console.error('연도를 선택해 주세요.');
+      return;
+    }
+  
+    setDownloading(true);
+  
+    try {
+      // `midItemCode` 파라미터를 조건에 따라 추가
+      const url = selectedMidItem 
+        ? `https://lcaapi.acess.co.kr/LcaResults/mid-item/export?midItemCode=${selectedMidItem.midItemCode}&year=${year}`
+        : `https://lcaapi.acess.co.kr/LcaResults/mid-item/export?year=${year}`;
+  
+      const response = await axios.get(url, {
+        responseType: 'blob',
+        timeout: 180000,
+      });
+  
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = 'LCA_결과.xlsx'; 
+  
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename\*?=['"]?UTF-8['"]?''(.+?)['"]?(;|$)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = decodeURIComponent(filenameMatch[1]);
+        } else {
+          const simpleFilenameMatch = contentDisposition.match(/filename="?(.+?)['"]?(;|$)/);
+          if (simpleFilenameMatch && simpleFilenameMatch[1]) {
+            filename = simpleFilenameMatch[1];
+          }
+        }
+      }
+  
+      const blob = new Blob([response.data]);
+      const urlBlob = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = urlBlob;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error('엑셀 파일 다운로드 중 오류 발생:', error);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const handleYearChange = (event: SelectChangeEvent<string>) => {
     setYear(event.target.value as string);
   };
@@ -325,6 +375,15 @@ export function LCI_Com_Data() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         LCA 결과(품목별)
       </Typography>
+      <Button
+        variant="contained"
+        color="secondary"
+        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
+        onClick={handleDownloadExcel}
+        disabled={!selectedMidItem || !year || downloading} 
+      >
+        {downloading ? '다운로드 중...' : '엑셀 다운로드'}
+      </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
       <Autocomplete
         options={midItems}

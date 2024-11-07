@@ -82,6 +82,7 @@ export function LCI_Data() {
   const [year, setYear] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   const columns: ColumnDef<GTGData>[] = [
     { 
@@ -257,6 +258,52 @@ export function LCI_Data() {
     }
   }, [selectedCompany, year]);
 
+  const handleDownloadExcel = async () => {
+    if (!selectedCompany || !year) {
+      console.error('회사 또는 연도를 선택해 주세요.');
+      return;
+    }
+  
+    setDownloading(true); // 다운로드 시작
+  
+    try {
+      const url = `https://lcaapi.acess.co.kr/LcaResults/export?companyCode=${selectedCompany.code}&year=${year}`;
+  
+      const response = await axios.get(url, {
+        responseType: 'blob',
+        timeout: 180000, // 3분 타임아웃 설정
+      });
+  
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = 'LCA_결과.xlsx'; // 기본 파일 이름
+  
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename\*?=['"]?UTF-8['"]?''(.+?)['"]?(;|$)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = decodeURIComponent(filenameMatch[1]);
+        } else {
+          const simpleFilenameMatch = contentDisposition.match(/filename="?(.+?)['"]?(;|$)/);
+          if (simpleFilenameMatch && simpleFilenameMatch[1]) {
+            filename = simpleFilenameMatch[1];
+          }
+        }
+      }
+  
+      const blob = new Blob([response.data]);
+      const urlBlob = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = urlBlob;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error('엑셀 파일 다운로드 중 오류 발생:', error);
+    } finally {
+      setDownloading(false); // 다운로드 완료
+    }
+  };
+
   const handleYearChange = (event: SelectChangeEvent<string>) => {
     setYear(event.target.value as string);
   };
@@ -277,6 +324,15 @@ export function LCI_Data() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         LCA 결과(종합,사업회원)
       </Typography>
+      <Button
+        variant="contained"
+        color="secondary"
+        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
+        onClick={handleDownloadExcel}
+        disabled={!selectedCompany || !year || downloading}
+      >
+        {downloading ? '다운로드 중...' : '엑셀 다운로드'}
+      </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} showGeneralOption={true} />
         <FormControl style={{ marginRight: '10px' }}>
