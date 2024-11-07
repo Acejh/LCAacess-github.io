@@ -36,8 +36,10 @@ type GTGData = {
   unit: string;
   gwp: number;
   gwpAlt: number;
+  refEmissionCoefficient: number;
   emissionWithBenefit: number;
   emissionWithoutBenefit: number;
+  refEmissionScenario: number;
   reductionEffect: number; 
   [key: string]: string | number;
 };
@@ -67,8 +69,10 @@ type ItemLcaResult = {
   unit: string;
   gwp: number;
   gwpAlt: number;
+  refEmissionCoefficient: number;
   emissionWithBenefit: number;
   emissionWithoutBenefit: number;
+  refEmissionScenario: number;
   reductionEffect: number;
   itemLcaCompanies: ItemLcaCompany[];
 };
@@ -163,6 +167,20 @@ export function LCI_Com_Data() {
         return Number(value) === 0 ? '-' : (Number(value) || 0).toFixed(5);
       }
     },
+    {
+      id: 'refEmissionCoefficient',
+      accessorKey: 'refEmissionCoefficient',
+      header: () => (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span>냉매배출 시나리오</span>
+          <span style={{ whiteSpace: 'nowrap' }}>(without)</span>
+        </div>
+      ),
+      cell: (info: CellContext<GTGData, unknown>) => {
+        const value = info.getValue();
+        return Number(value) === 0 ? '-' : (Number(value) || 0).toFixed(5);
+      }
+    },
     { 
       id: 'emissionWithoutBenefit',  
       accessorKey: 'emissionWithoutBenefit', 
@@ -189,6 +207,19 @@ export function LCI_Com_Data() {
       cell: (info: CellContext<GTGData, unknown>) => {
         const value = info.getValue();
         return Number(value) === 0 ? '-' : (Number(value) || 0).toExponential(5);
+      }
+    },
+    {
+      id: 'refEmissionScenario',
+      accessorKey: 'refEmissionScenario',
+      header: () => (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <span style={{ whiteSpace: 'nowrap' }}>냉매배출 시나리오</span>
+        </div>
+      ),
+      cell: (info: CellContext<GTGData, unknown>) => {
+        const value = info.getValue();
+        return Number(value) === 0 ? '-' : (Number(value) || 0).toFixed(5);
       }
     },
     { 
@@ -254,6 +285,8 @@ export function LCI_Com_Data() {
           emissionWithBenefit: item.emissionWithBenefit,
           emissionWithoutBenefit: item.emissionWithoutBenefit,
           reductionEffect: item.reductionEffect,
+          refEmissionCoefficient: item.refEmissionCoefficient, 
+          refEmissionScenario: item.refEmissionScenario,        
         };
   
         item.itemLcaCompanies.forEach((company: ItemLcaCompany) => {
@@ -290,7 +323,7 @@ export function LCI_Com_Data() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        LCA 결과(종합,사업회원)
+        LCA 결과(품목별)
       </Typography>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
       <Autocomplete

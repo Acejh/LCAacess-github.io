@@ -373,7 +373,7 @@ export function Ad_Facility() {
   const dynamicColumns: ColumnDef<TableData>[] = [
     ...columns,
     ...facilities.map((facility) => {
-      const cleanName = `${facility.id}_${facility.name}`.replace(/\./g, '_'); 
+      const cleanName = `${facility.id}_${facility.name}`.replace(/\./g, '_');
       return {
         accessorKey: cleanName,
         header: `${facility.id}_${facility.name} (${facility.capacity})`,
@@ -461,26 +461,37 @@ export function Ad_Facility() {
         className="custom-scrollbar"
       >
         <Table stickyHeader>
-          <TableHead>
-            {/* 첫 번째 헤더 줄: 설비 용량 */}
-            <TableRow>
-              <TableCell colSpan={2} style={{ ...stickyHeaderStyle2(), textAlign: 'center', left: 0, zIndex: 3 }}>설비용량(KW) →</TableCell>
-              {facilities.map(facility => (
-                <TableCell key={facility.id} colSpan={1} style={{ ...stickyHeaderStyle2(), textAlign: 'center' }}>{numeral(facility.capacity).format('0.0')}</TableCell>
-              ))}
-            </TableRow>
+        <TableHead>
+          {/* 첫 번째 헤더 줄: 설비 용량 */}
+          <TableRow>
+            <TableCell colSpan={2} style={{ ...stickyHeaderStyle2(), textAlign: 'center', left: 0, zIndex: 3 }}>설비용량(KW) →</TableCell>
+            {facilities.map(facility => (
+              <TableCell
+                key={facility.id}
+                colSpan={1}
+                style={{ ...stickyHeaderStyle2(), textAlign: 'center', cursor: 'pointer' }}  // 클릭 가능한 스타일 추가
+                onClick={() => handleEditModalOpen(facility)} // 클릭 이벤트 추가
+              >
+                {numeral(facility.capacity).format('0.0')}
+              </TableCell>
+            ))}
+          </TableRow>
 
-            {/* 두 번째 헤더 줄: 품목군, 제품명, 설비명 */}
-            <TableRow>
-              <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'center', left: 0, zIndex: 3 }}>품목군</TableCell>
-              <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'center', left: '130px', zIndex: 3 }}>제품명</TableCell>
-              {facilities.map(facility => (
-                <TableCell key={facility.id} style={{ ...stickyHeaderStyle(), textAlign: 'center' }}>
-                  {`${facility.id}_${facility.name}`}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
+          {/* 두 번째 헤더 줄: 품목군, 제품명, 설비명 */}
+          <TableRow>
+            <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'center', left: 0, zIndex: 3 }}>품목군</TableCell>
+            <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'center', left: '130px', zIndex: 3 }}>제품명</TableCell>
+            {facilities.map(facility => (
+              <TableCell
+                key={facility.id}
+                style={{ ...stickyHeaderStyle(), textAlign: 'center', cursor: 'pointer' }}  // 클릭 가능한 스타일 추가
+                onClick={() => handleEditModalOpen(facility)} // 클릭 이벤트 추가
+              >
+                {`${facility.id}_${facility.name}`}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
