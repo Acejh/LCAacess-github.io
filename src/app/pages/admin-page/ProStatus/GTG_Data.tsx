@@ -137,6 +137,7 @@ export function GTG_Data() {
     try {
       const url = `https://lcaapi.acess.co.kr/GToGResults?CompanyCode=${searchParams.company?.code}&Year=${searchParams.year}`;
       const response = await axios.get(url);
+      console.log(response.data);  
   
       const { gtoGResults, weightByItems }: { gtoGResults: GTGResult[]; weightByItems: WeightByItems[] } = response.data;
   

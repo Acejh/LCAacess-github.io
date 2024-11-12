@@ -238,7 +238,7 @@ export function DisposalTable() {
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
       <UseCompany onCompanyChange={setSelectedCompany} />
       <FormControl style={{ marginRight: '10px' }}>
-        <InputLabel id="year-label">연도</InputLabel>
+        <InputLabel id="year-label">연도</InputLabel> 
         <Select
           labelId="year-label"
           id="year-select"
