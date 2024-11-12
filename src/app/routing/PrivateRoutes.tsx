@@ -6,17 +6,6 @@ import { getCSSVariableValue } from '../../_metronic/assets/ts/_utils'
 import { WithChildren } from '../../_metronic/helpers'
 
 // 기존 페이지 import들
-import { InputInfo } from '../pages/user-page/KeyIn/Input'
-import { Effluent } from '../pages/user-page/KeyIn/Effluent'
-import { ProFacility } from '../pages/user-page/KeyIn/ProFacility'
-import { ProProducts } from '../pages/user-page/KeyIn/ProProducts'
-import { MaterialPos } from '../pages/user-page/Inquiry/MaterialPos'
-import { MaterialPosTrade } from '../pages/user-page/Inquiry/MaterialPosTrade'
-import { Waste } from '../pages/user-page/Inquiry/Waste'
-import { WasteTrade } from '../pages/user-page/Inquiry/WasteTrade'
-import { ManageClient } from '../pages/user-page/Management/ManageClient'
-import { ManageFacility } from '../pages/user-page/Management/ManageFacility'
-import { ManageVehicle } from '../pages/user-page/Management/ManageVehicle'
 import { UserControl } from '../pages/admin-page/AuthManagement/AccountControl'
 import { MemberControl } from '../pages/admin-page/AuthManagement/MemberControl'
 import { DisposalTable } from '../pages/admin-page/EcoASManagement/DisposalTable'
@@ -71,24 +60,9 @@ const PrivateRoutes = () => {
         <Route path="/Dashboard" element={<Ad_Dashboard />} />
 
         {/* 데이터 관리 */}
-        <Route path="/Input-Info" element={<InputInfo />} />
-        <Route path="/Effluent" element={<Effluent />} />
-        <Route path="/Pro-Facility" element={<ProFacility />} />
-        <Route path="/Pro-Products" element={<ProProducts />} />
         <Route path="/ValuableMapping" element={< ValuableMapping/>} />
         <Route path="/WasteMapping" element={< WasteMapping/>} />
         <Route path="/ValuableDeduction" element={< ValuableDeduction/>} />
-
-        {/* 유저 조회 */}
-        <Route path="/MaterialPos" element={<MaterialPos />} />
-        <Route path="/TradeMaterialPos" element={<MaterialPosTrade />} />
-        <Route path="/Waste" element={<Waste />} />
-        <Route path="/TradeWaste" element={<WasteTrade />} />
-
-        {/* 유저 관리 */}
-        <Route path="/ManageClient" element={<ManageClient />} />
-        <Route path="/ManageFacility" element={<ManageFacility />} />
-        <Route path="/ManageVehicle" element={<ManageVehicle />} />
 
         {/* 관리자 관리 기능 */}
         <Route path='/UserControl' element={<UserControl />} />
