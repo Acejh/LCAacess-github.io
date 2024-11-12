@@ -226,13 +226,11 @@ export function LCI_Item() {
           gwpAlt: editItem.gwpAlt,
         };
 
-        // console.log('수정할 데이터:', postData);
         await axios.put(`https://lcaapi.acess.co.kr/LciItems/${editItem.id}`, postData);
 
         // 데이터 업데이트
         await fetchData();
         setOpenModal(false);
-        // console.log('모달 닫힘');
       } catch (error) {
         if (error instanceof AxiosError) {
           console.error('수정 실패:', error.response ? error.response.data : error.message);
@@ -257,13 +255,11 @@ export function LCI_Item() {
           gwpAlt: editItem.gwpAlt,
         };
 
-        // console.log('등록할 데이터:', postData);
         await axios.post('https://lcaapi.acess.co.kr/LciItems', postData);
 
         // 데이터 업데이트
         await fetchData();
         setOpenModal(false);
-        // console.log('모달 닫힘');
       } catch (error) {
         if (error instanceof AxiosError) {
           console.error('등록 실패 (AxiosError):', error.response ? error.response.data : error.message);
@@ -284,9 +280,7 @@ export function LCI_Item() {
   const handleDeleteConfirm = async () => {
     if (deleteItemId) {
       try {
-        // console.log(`삭제할 항목 ID: ${deleteItemId}`);
         await axios.delete(`https://lcaapi.acess.co.kr/LciItems/${deleteItemId}`);
-        // console.log('삭제 완료');
 
         // 데이터 업데이트
         await fetchData();

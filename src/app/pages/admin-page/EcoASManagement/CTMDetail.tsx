@@ -96,10 +96,6 @@ export function CTMDetail() {
   
       const response = await axios.get(url);
       const { list, totalCount } = response.data;
-      // console.log('검색 페이지:', searchQuery);
-      // console.log('페이지 넘버:', pageIndex);
-      // console.log('Fetched data:', list);
-      // console.log('Total count:', totalCount);
   
       setData(list);
       setTotalCount(totalCount);

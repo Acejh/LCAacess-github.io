@@ -131,11 +131,8 @@ export function UserControl() {
         url += `&companyCode=${searchParams.company.code}`;
       }
   
-      // console.log('Fetching data with URL:', url);
-  
       const response = await axios.get(url);
       const { list, totalCount } = response.data;
-      // console.log('Response data:', response.data); 
   
       // 데이터 변환
       const transformedData = list.map((user: User) => {
@@ -198,11 +195,9 @@ export function UserControl() {
       ...newAccount,
     };  
   
-    // console.log("등록할 정보:", newAccountData); 
   
     axios.post('https://lcaapi.acess.co.kr/Users', newAccountData)
       .then(() => {
-        // console.log('Data posted successfully:', response.data);
         fetchData(pageIndex, pageSize);
       })
       .catch(error => {
@@ -243,11 +238,9 @@ export function UserControl() {
       };
   
       const url = `https://lcaapi.acess.co.kr/Users/${editAccount.id}`;
-      // console.log("PUT URL:", url); 
   
       axios.put(url, updatedAccountData)
         .then(() => {
-          // console.log('Data updated successfully:', response.data);
           fetchData(pageIndex, pageSize);  
         })
         .catch(error => {
@@ -277,11 +270,9 @@ export function UserControl() {
   const handleDeleteSubmit = () => {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
     if (deleteIndex !== null) {
       const url = `https://lcaapi.acess.co.kr/Users/${deleteIndex}`;
-      // console.log("DELETE URL:", url); 
   
       axios.delete(url)
         .then(() => {
-          // console.log('Data deleted successfully:', response.data);
           fetchData(pageIndex, pageSize); 
         })
         .catch(error => {
@@ -293,9 +284,6 @@ export function UserControl() {
   };
 
   const handleSearch = () => {
-    // console.log('Search parameters:', {
-    //   company: selectedCompany,
-    // });
     setSearchParams({
       company: selectedCompany,
     });

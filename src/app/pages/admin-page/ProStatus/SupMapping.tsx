@@ -342,11 +342,9 @@ export function SupMapping() {
         carId: selectedCar.carId,
       };
       
-      // console.log('Sending car mapping data:', postData);
   
       try {
         const response = await axios.post('https://lcaapi.acess.co.kr/ReccSupplyMapping/Car', postData);
-        // console.log('Response:', response); 
   
         if (response.status === 204) {
           setData((prevData) =>
@@ -371,11 +369,9 @@ export function SupMapping() {
         valuableThingId: selectedItem,
       };
   
-      // console.log('Sending item mapping data:', postData);
     
       try {
         const response = await axios.post('https://lcaapi.acess.co.kr/ReccSupplyMapping/Item', postData);
-        // console.log('Response:', response); 
   
         if (response.status === 204) {
           setData((prevData) =>
@@ -400,11 +396,9 @@ export function SupMapping() {
         clientId: selectedClient2nd.clientId,
       };
   
-      // console.log('Sending 2nd client mapping data:', postData);
   
       try {
         const response = await axios.post('https://lcaapi.acess.co.kr/ReccSupplyMapping/Client2nd', postData);
-        // console.log('Response:', response);
   
         if (response.status === 204) {
           setData((prevData) =>
@@ -600,7 +594,6 @@ export function SupMapping() {
   };
   
   const handleCloseClient2ndModal = () => {
-    // console.log('Closing 2nd client modal');
     setClient2ndModalOpen(false);
     setSelectedClient2nd(null);
   };

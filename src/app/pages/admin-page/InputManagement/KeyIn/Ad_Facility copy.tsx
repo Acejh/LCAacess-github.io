@@ -140,7 +140,6 @@ export function Ad_Facility() {
         return row;
       });
   
-      console.log('Fetched Data:', tableData); 
       setData(tableData);
     } catch (error) {
       console.error('데이터를 불러오는데 실패했습니다:', error);
@@ -262,7 +261,6 @@ export function Ad_Facility() {
         ...newFacility,
         items: newFacility.items.map(itemCode => itemCode)
       };
-      // console.log('보내는 데이터:', payload); 
       await axios.post('https://lcaapi.acess.co.kr/Facilities', payload); 
       setOpen(false);
       if (selectedCompany) {
@@ -284,7 +282,6 @@ export function Ad_Facility() {
         capacity: parseFloat(editFacility.capacity),
         items: editFacility.items.map(itemCode => itemCode)
       };
-      // console.log('수정 데이터:', payload);
       await axios.put(`https://lcaapi.acess.co.kr/Facilities/${editFacility.id}`, payload);
       setEditModalOpen(false);
       if (selectedCompany) {

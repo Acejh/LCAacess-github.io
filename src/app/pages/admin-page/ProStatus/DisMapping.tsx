@@ -207,7 +207,6 @@ export function DisMapping() {
     try {
       const response = await axios.get(`https://lcaapi.acess.co.kr/WasteItems?companyCode=${companyCode}`);
       const { wasteItems } = response.data;
-      // console.log('Fetched waste items:', wasteItems); 
       setWasteItems(wasteItems);
     } catch (error) {
       console.error('폐기물 항목을 가져오는 중 에러 발생:', error);
@@ -222,7 +221,6 @@ export function DisMapping() {
 
   const fetchData = useCallback(async (pageIndex: number, pageSize: number, searchQuery = '') => {
     setLoading(true);
-    // console.log('Fetching data with params:', { pageIndex, pageSize, searchQuery, searchParams }); // 로그 추가
     try {
       let url = `https://lcaapi.acess.co.kr/ReccWasteMapping?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) {
@@ -304,12 +302,10 @@ export function DisMapping() {
         clientId: selectedClient.clientId,
       };
       
-      // console.log('Sending client mapping data:', postData); 
   
       try {
         const response = await axios.post('https://lcaapi.acess.co.kr/ReccWasteMapping/Client', postData);
-        // console.log('Response:', response); 
-  
+
         if (response.status === 204) {
           setData((prevData) =>
             prevData.map((item) =>
@@ -333,11 +329,9 @@ export function DisMapping() {
         carId: selectedCar.carId,
       };
       
-      // console.log('Sending car mapping data:', postData);
   
       try {
         const response = await axios.post('https://lcaapi.acess.co.kr/ReccWasteMapping/Car', postData);
-        // console.log('Response:', response); 
   
         if (response.status === 204) {
           setData((prevData) =>
@@ -363,11 +357,9 @@ export function DisMapping() {
         wasteItemId: selectedItem,
       };
   
-      // console.log('Sending item mapping data:', postData);
   
       try {
         const response = await axios.post('https://lcaapi.acess.co.kr/ReccWasteMapping/Item', postData);
-        // console.log('Response:', response); 
   
         if (response.status === 204 && selectedWasteItem) {
           setData((prevData) =>

@@ -208,13 +208,11 @@ export function SupplyTable() {
 
   const handleYearChange = (event: SelectChangeEvent<string>) => {
     const selectedYear = event.target.value as string;
-    // console.log(`Selected year: ${selectedYear}`); // 선택한 연도 로그
     setYear(selectedYear);
   };
   
   const handleMonthChange = (event: SelectChangeEvent<string>) => {
     const selectedMonth = event.target.value as string;
-    // console.log(`Selected month: ${selectedMonth}`); // 선택한 월 로그
     setMonth(selectedMonth);
   };
 

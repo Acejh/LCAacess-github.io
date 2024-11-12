@@ -226,43 +226,34 @@ export function Ad_Effluent() {
 
         // 존재 여부 확인
         const checkUrl = `https://lcaapi.acess.co.kr/Outputs/Water/Exist?companyCode=${companyCode}&year=${actualYear}&month=${month}`;
-        // console.log(`Check URL: ${checkUrl}`); // 존재 여부 확인 URL 로그
 
         const checkResponse = await axios.get(checkUrl);
         const exists = checkResponse.data.isExist;
-        // console.log(`Exist Response: ${exists}`, checkResponse.data); // 존재 여부 결과 로그
 
         if (exists) {
             // 회사 코드와 연도를 바탕으로 IDs 배열을 가져오기 위한 요청
             const idsUrl = `https://lcaapi.acess.co.kr/Outputs/Water?CompanyCode=${companyCode}&Year=${actualYear}`;
-            // console.log(`Fetching IDs from URL: ${idsUrl}`); // IDs 가져오는 URL 로그
 
             const idsResponse = await axios.get(idsUrl);
             const ids: number[] = idsResponse.data.outputs[0]?.ids || [];
-            // console.log('Fetched ids:', ids); // IDs 배열 로그
 
             // 해당 월에 맞는 ID 추출
             if (typeof month === 'number' && ids.length > 0) {
                 const id = ids[month - 1]; // 해당 월의 ID 가져오기
-                // console.log(`Updating ID for month ${month}:`, id); // 업데이트할 ID 로그
 
                 if (id) {
-                    const updateUrl = `https://lcaapi.acess.co.kr/Outputs/Water/${id}`;
-                    const updatePayload = {
-                        companyCode,
-                        year: Number(actualYear),
-                        month: Number(month),
-                        amount: Number(amount),
-                    };
-
-                    // console.log('Update URL:', updateUrl); // 업데이트 URL 로그
-                    // console.log('Update Payload:', updatePayload); // 업데이트 페이로드 로그
-
-                    const updateResponse = await axios.put(updateUrl, updatePayload);
-                    console.log('Update Response:', updateResponse.data);
-                } else {
-                    throw new Error('해당 월의 ID를 찾을 수 없습니다.');
-                }
+                  const updateUrl = `https://lcaapi.acess.co.kr/Outputs/Water/${id}`;
+                  const updatePayload = {
+                      companyCode,
+                      year: Number(actualYear),
+                      month: Number(month),
+                      amount: Number(amount),
+                  };
+              
+                  await axios.put(updateUrl, updatePayload);
+              } else {
+                  throw new Error('해당 월의 ID를 찾을 수 없습니다.');
+              }
             }
         } else {
             // 새로 등록
@@ -274,11 +265,7 @@ export function Ad_Effluent() {
                 amount: Number(amount),
             };
 
-            // console.log('Create URL:', createUrl); // 등록 URL 로그
-            // console.log('Create Payload:', createPayload); // 등록 페이로드 로그
-
-            const createResponse = await axios.post(createUrl, createPayload);
-            console.log('Create Response:', createResponse.data); 
+            await axios.post(createUrl, createPayload);
         }
 
         handleClose();

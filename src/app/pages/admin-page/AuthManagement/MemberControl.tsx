@@ -155,7 +155,6 @@ export function MemberControl() {
   const handleDaumPostCode = () => {
     const postcode = new window.daum.Postcode({
       oncomplete: function(data: DaumPostcodeData) {
-        // console.log(data); 
   
         const roadAddr = data.roadAddress; 
         let extraRoadAddr = '';
@@ -186,17 +185,6 @@ export function MemberControl() {
     postcode.open();
   };
 
-  // DB 연계
-  // useEffect(() => {
-  //   axios.get('/api/members')
-  //     .then(response => {
-  //       setData(response.data);
-  //     })
-  //     .catch(error => {
-  //       console.error('Error fetching data:', error);
-  //     });
-  // }, []);
-  
   //데이터 추가
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -265,7 +253,6 @@ export function MemberControl() {
       };
 
       const url = `https://lcaapi.acess.co.kr/Companies/${editMember.code}`;
-      // console.log("PUT URL:", url);
 
       axios.put(url, updatedMemberData)
         .then(() => {
@@ -303,7 +290,6 @@ export function MemberControl() {
     if (deleteIndex !== null) {
       const memberToDelete = data[deleteIndex];
       const url = `https://lcaapi.acess.co.kr/Companies/${memberToDelete.code}`;
-      // console.log("DELETE URL:", url);
 
       axios.delete(url)
         .then(() => {
@@ -342,7 +328,7 @@ export function MemberControl() {
       (member.tel && member.tel.includes(searchQuery))
     );
     setFilteredData(filtered);
-    setPageIndex(0); // 검색 후 페이지를 첫 페이지로 초기화
+    setPageIndex(0);
   };
 
   const table = useReactTable({
@@ -431,7 +417,7 @@ export function MemberControl() {
         className="custom-scrollbar"
       >
         <Table stickyHeader>
-          <TableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+          <TableHead style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 1 }}>
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => (
@@ -468,7 +454,7 @@ export function MemberControl() {
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
-                      <TableCell>
+                      <TableCell style={{ whiteSpace: 'nowrap' }}>
                         <Button variant="contained" color="primary" onClick={() => handleEditOpen(index)} style={{ padding: '2px' }}>
                           수정
                         </Button>

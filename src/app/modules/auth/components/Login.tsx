@@ -34,7 +34,6 @@ export function Login() {
       setLoading(true)
       try {
         const response = await login(values.userName, values.password)
-        // console.log(response.data) // 로그인 성공 시 콘솔에 데이터 출력
         saveAuth(response.data)
         navigate('/dashboard') // 대시보드로 리디렉션
       } catch (error) {

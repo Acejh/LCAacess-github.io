@@ -200,7 +200,6 @@ export function CarsControl() {
         const parsedData = JSON.parse(userInfoString);
         const userInfo = parsedData?.userInfo;  
         if (userInfo) {
-          // console.log('Parsed Role:', userInfo.role);  // role 값 확인
           setUserRole(userInfo.role);
         }
       } catch (error) {
@@ -242,11 +241,9 @@ export function CarsControl() {
       ...newCar,
     };
 
-    // console.log("등록할 정보:", newCarData);
 
     axios.post('https://lcaapi.acess.co.kr/Cars', newCarData)
       .then(() => {
-        // console.log('Data posted successfully:', response.data);
         fetchData(pageIndex, pageSize);
       })
       .catch(error => {
@@ -297,7 +294,6 @@ export function CarsControl() {
   
       axios.put(`https://lcaapi.acess.co.kr/Cars/${editCar.id}`, updatedCarData)
         .then(() => {
-          console.log('Data updated successfully');
           fetchData(pageIndex, pageSize); 
         })
         .catch(error => {
@@ -327,11 +323,9 @@ export function CarsControl() {
   const handleDeleteSubmit = () => {
     if (deleteIndex !== null) {
       const url = `https://lcaapi.acess.co.kr/Cars/${deleteIndex}`;
-      // console.log("DELETE URL:", url);
 
       axios.delete(url)
         .then(() => {
-          // console.log('Data deleted successfully:', response.data);
           fetchData(pageIndex, pageSize);
         })
         .catch(error => {

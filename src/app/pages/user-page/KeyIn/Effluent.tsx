@@ -23,8 +23,6 @@ export function Effluent() {
         refreshToken,
       })
 
-      console.log('Refreshed Tokens:', response.data) // 재발급받은 토큰을 콘솔에 출력
-
       // 재발급 받은 토큰을 로컬 스토리지에 업데이트 (주석 처리)
       auth.accessToken = response.data.accessToken
       auth.refreshToken = response.data.refreshToken

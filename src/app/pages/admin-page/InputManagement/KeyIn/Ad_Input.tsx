@@ -147,9 +147,6 @@ export function Ad_Input() {
       if (year) {
         url += `&year=${year}`;
       }
-      // console.log(`API 호출 경로: ${url}`);
-      // console.log(`회사 코드: ${company.code}`);
-      // console.log(`연도: ${year}`);
   
       const response = await axios.get(url);
   
@@ -211,21 +208,12 @@ export function Ad_Input() {
 
   useEffect(() => {
     const fetchAmount = async () => {
-      console.log('현재 선택된 값:', {
-        companyCode: newInput.companyCode,
-        lciItemId: newInput.lciItemId,
-        year: newInput.year,
-        month: newInput.month,
-      });
-  
       if (newInput.companyCode && newInput.lciItemId && newInput.year && newInput.month) {
         try {
           const response = await axios.get(
             `https://lcaapi.acess.co.kr/Inputs/Exist?lciItemId=${newInput.lciItemId}&companyCode=${newInput.companyCode}&year=${newInput.year}&month=${newInput.month}`
           );
           const { isExist, amount } = response.data;
-  
-          // console.log('API 응답:', response.data);
   
           setIsExist(isExist); 
   
@@ -235,14 +223,12 @@ export function Ad_Input() {
               ...prevState,
               amount: amount.toFixed(5), 
             }));
-            // console.log('투입량 업데이트:', amount.toFixed(5));
           } else {
             // 데이터를 찾지 못한 경우 투입량을 0으로 초기화
             setNewInput(prevState => ({
               ...prevState,
               amount: '',
             }));
-            // console.log('데이터가 존재하지 않음. 투입량 초기화.');
           }
         } catch (error) {
           console.error('Error fetching amount:', error);
@@ -280,21 +266,12 @@ export function Ad_Input() {
   
     // 투입물 등록 버튼을 눌렀을 때 데이터를 가져오는 fetchAmount 함수를 호출합니다.
     const fetchAmount = async () => {
-      console.log('현재 선택된 값:', {
-        companyCode: newInput.companyCode,
-        lciItemId: newInput.lciItemId,
-        year: newInput.year,
-        month: newInput.month,
-      });
-  
       if (newInput.companyCode && newInput.lciItemId && newInput.year && newInput.month) {
         try {
           const response = await axios.get(
             `https://lcaapi.acess.co.kr/Inputs/Exist?lciItemId=${newInput.lciItemId}&companyCode=${newInput.companyCode}&year=${newInput.year}&month=${newInput.month}`
           );
           const { isExist, amount } = response.data;
-  
-          // console.log('API 응답:', response.data);
   
           setIsExist(isExist); 
   
@@ -304,14 +281,12 @@ export function Ad_Input() {
               ...prevState,
               amount: amount.toFixed(5), 
             }));
-            // console.log('투입량 업데이트:', amount.toFixed(5));
           } else {
             // 데이터를 찾지 못한 경우 투입량을 0으로 초기화
             setNewInput(prevState => ({
               ...prevState,
               amount: '',
             }));
-            // console.log('데이터가 존재하지 않음. 투입량 초기화.');
           }
         } catch (error) {
           console.error('Error fetching amount:', error);
@@ -372,7 +347,6 @@ export function Ad_Input() {
       [name]: value,
     }));
     
-    // console.log(`입력된 ${name}:`, value);
   };
 
   const handleSubmit = async () => {
@@ -409,8 +383,7 @@ export function Ad_Input() {
             amount: Number(amount), 
           };
   
-          const putResponse = await axios.put(putUrl, putPayload);
-          console.log('PUT 응답:', putResponse.data);
+          await axios.put(putUrl, putPayload);
   
         } catch (fetchError) {
           console.error('데이터를 확인하는 중 오류 발생:', fetchError);
@@ -422,12 +395,11 @@ export function Ad_Input() {
           companyCode: companyCode,
           year: Number(year),
           month: Number(month),
-          amount: Number(amount), // amount가 0이어도 정상 처리
+          amount: Number(amount),
         };
   
         try {
-          const postResponse = await axios.post(postUrl, postPayload);
-          console.log('POST 응답:', postResponse.data);
+          await axios.post(postUrl, postPayload);
         } catch (postError) {
           console.error('POST 요청 중 오류 발생:', postError);
         }

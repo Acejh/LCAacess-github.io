@@ -61,13 +61,10 @@ const logout = () => {
 
 const refreshToken = async (accessToken: string, refreshToken: string): Promise<AuthModel | undefined> => {
   try {
-    // console.log('토큰 재발급 요청 중...')
-    // console.log('보내는 데이터:', { accessToken, refreshToken })  // 여기서 콘솔에 출력
     const response: AxiosResponse<AuthModel> = await axios.post('https://lcaapi.acess.co.kr/Auth/refresh-token', {
       accessToken,
       refreshToken,
     })
-    // console.log('토큰 재발급 성공:', response.data)
     return response.data
   } catch (error) {
     if (axios.isAxiosError(error)) {
@@ -108,11 +105,9 @@ export function setupAxios(axiosInstance: typeof axios) {
     async (error: AxiosError<unknown, CustomAxiosRequestConfig>) => {
       const originalRequest = error.config as CustomAxiosRequestConfig
       if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
-        // console.log('토큰 만료 감지')
         originalRequest._retry = true
         const auth = getAuth()
         if (auth) {
-          // console.log('기존 토큰:', auth.accessToken)
           const newAuth = await refreshToken(auth.accessToken, auth.refreshToken)
           if (newAuth) {
             setAuth(newAuth);
@@ -121,7 +116,6 @@ export function setupAxios(axiosInstance: typeof axios) {
               userInfo: auth.userInfo,
             }
             setAuth(updatedAuth)
-            // console.log('새로운 토큰 설정 완료:', newAuth.accessToken)
             originalRequest.headers['Authorization'] = `Bearer ${newAuth.accessToken}`
             return axiosInstance(originalRequest)
           } else {

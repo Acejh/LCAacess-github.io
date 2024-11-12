@@ -219,12 +219,11 @@ export function Ad_UseFacility() {
   const handleSave = async (facilityId: number, year: number, month: string, newValue: number) => {
     try {
       const monthIndex = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].indexOf(month) + 1;
-      const response = await axios.put(`https://lcaapi.acess.co.kr/FacilityOpTimes/${facilityId}`, {
+      await axios.put(`https://lcaapi.acess.co.kr/FacilityOpTimes/${facilityId}`, {
         year,
         month: monthIndex,
         opTime: newValue,
       });
-      console.log('Update successful:', response.data);
       if (selectedCompany && selectedYear) {
         fetchData(selectedCompany, selectedYear); 
       }
@@ -236,25 +235,10 @@ export function Ad_UseFacility() {
   const handleSubmit = async () => {
     try {
       const { facilityId, year, month, opTime } = newInput;
-      
-      // Logging the data to be submitted for detailed tracking
-      console.log('Submitting data:', {
-        facilityId: Number(facilityId),
-        year: Number(year),
-        month: Number(month),
-        opTime: Number(opTime),
-      });
   
       const checkUrl = `https://lcaapi.acess.co.kr/FacilityOpTimes/Exist?facilityId=${facilityId}&year=${year}&month=${month}`;
-      
-      // Log the check request URL
-      // console.log('Checking if record exists with URL:', checkUrl);
-      
+  
       const checkResponse = await axios.get(checkUrl);
-      
-      // Log the check response details
-      // console.log('Check response:', checkResponse.data);
-      
       const exists = checkResponse.data.isExist;
   
       if (exists) {
@@ -264,14 +248,7 @@ export function Ad_UseFacility() {
           opTime: Number(opTime),
         };
   
-        // Log the update request URL and payload
-        // console.log('Updating existing record with URL:', updateUrl);
-        // console.log('Update payload:', updatePayload);
-  
-        const updateResponse = await axios.put(updateUrl, updatePayload);
-  
-        // Log the update response
-        console.log('Update response:', updateResponse.data);
+        await axios.put(updateUrl, updatePayload);
       } else {
         // If the data does not exist, create a new record
         const createUrl = 'https://lcaapi.acess.co.kr/FacilityOpTimes';
@@ -282,14 +259,7 @@ export function Ad_UseFacility() {
           opTime: Number(opTime),
         };
   
-        // Log the create request URL and payload
-        // console.log('Creating new record with URL:', createUrl);
-        // console.log('Create payload:', createPayload);
-  
-        const createResponse = await axios.post(createUrl, createPayload);
-  
-        // Log the create response
-        console.log('Create response:', createResponse.data);
+        await axios.post(createUrl, createPayload);
       }
   
       // Closing modal after successful operation
@@ -300,7 +270,6 @@ export function Ad_UseFacility() {
         fetchData(selectedCompany, selectedYear);
       }
     } catch (error) {
-      // Log any errors encountered during the submission
       console.error('Error occurred during submission:', error);
   
       // Check if the error is an Axios error for more detailed logging
