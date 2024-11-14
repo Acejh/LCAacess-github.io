@@ -317,18 +317,21 @@ export function Ad_Input() {
         // 카테고리에 따른 가이드 메시지 설정
         switch (selectedItem.category) {
           case 'Electricity':
-            setGuideMessage('한전 고지서에 기입된 [kWh] 단위의 사용량을 기재해 주세요.');
+            setGuideMessage('한전 고지서에 기입된 [kWh] 단위의 사용량을 기재해 주세요.<br />' +
+            '재활용 공장동과 사무동이 별도로 관리되고 있다면 공장동만 입력해주세요.'
+            );
             break;
           case 'Fuel':
             setGuideMessage(
-              '투입되는 모든 연료 및 열원에 대해 [L] 단위의 사용량을 기재해 주세요.<br />' + 
-              '(예시 : 지게차 경유 사용량 등)'
+              '재활용 공정 내 사용되는 연료에 대해 [L] 단위의 사용량을 기재해 주세요.<br />' + 
+              '지게차 경유 사용량은 제외해주세요.'
             );
             break;
           case 'Water':
             setGuideMessage(
-              '외부에서 투입되는 상수, 공업용수, 지하수에 대해 [㎥] 단위의 사용량을 기재해 주세요.<br />' +
-              '따로 외부에서 투입하지 않고 내부에서 순환하여 사용하는 경우에는 기재하지 마세요.<br />' + 
+              '외부에서 투입되는 상수, 공업용수에 대해 [㎥] 단위의 사용량을 기재해 주세요.<br />' +
+              '재활용 공정에 사용하는 양만 기입해주세요..<br />' + 
+              '따로 외부에서 투입하지 않고 내부에서 순환하여 사용하는 경우에는 기재하지 마세요.<br />' +
               '(예시 : 세탁기 평형수 등)'
             );
             break;
@@ -469,6 +472,28 @@ export function Ad_Input() {
           투입물 등록/수정
         </Button>
       </div>
+      {/* Guidelines Section */}
+        <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: '5px', backgroundColor: '#f9f9f9', marginBottom: '20px' }}>
+          <Typography variant="h6" gutterBottom>
+            투입물 입력 방법
+          </Typography>
+          <Typography variant="body2" paragraph>
+            ● 전력 사용량 <br />
+            - 한전 고지서에 기입된 [kWh] 단위의 사용량을 기재해 주세요.<br />
+            - 재활용 공장동과 사무동이 별도로 관리되고 있다면 공장동만 입력해주세요.
+          </Typography>
+          <Typography variant="body2" paragraph>
+            ● 경유 및 등유 <br />
+            - 재활용 공정 내 사용되는 연료에 대해 [L] 단위의 사용량을 기재해 주세요.<br />
+            - 지게차 경유 사용량은 제외해주세요.
+          </Typography>
+          <Typography variant="body2" paragraph>
+            ● 상수 및 공업용수 <br />
+            - 외부에서 투입되는 상수, 공업용수에 대해 [㎥] 단위의 사용량을 기재해 주세요.<br />
+            - 재활용 공정에 사용하는 양만 기입해주세요.<br />
+            - 따로 외부에서 투입하지 않고 내부에서 순환하여 사용하는 경우에는 기재하지 마세요. (예시 : 세탁기 평형수 등)
+          </Typography>
+        </Box>
       {error && (
         <Typography variant="body1" color="error" style={{ marginBottom: '20px' }}>
           {error}

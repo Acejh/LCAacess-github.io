@@ -116,15 +116,17 @@ export function ProductsScale() {
     }
   }, [fetchData, hasSearched]);
 
+  const updateOffsets = () => {
+    const categoryWidth = categoryNameRef.current?.offsetWidth || 0;
+    const midItemWidth = midItemNameRef.current?.offsetWidth || 0;
+  
+    setLeftOffsets({
+      midItemName: categoryWidth,
+      itemName: categoryWidth + midItemWidth - 1, 
+    });
+  };
+
   useEffect(() => {
-    const updateOffsets = () => {
-      const categoryWidth = categoryNameRef.current?.offsetWidth || 0;
-      const midItemWidth = midItemNameRef.current?.offsetWidth || 0;
-      setLeftOffsets({
-        midItemName: categoryWidth,
-        itemName: categoryWidth + midItemWidth,
-      });
-    };
     updateOffsets();
     window.addEventListener('resize', updateOffsets);
     return () => {
@@ -212,7 +214,7 @@ export function ProductsScale() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        품목별 보정중량
+        세부제품 월별 중량
       </Typography>
       <Button
         variant="contained"
@@ -274,37 +276,37 @@ export function ProductsScale() {
                 {table.getHeaderGroups().map(headerGroup => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map(header => (
-                      <TableCell 
-                        key={header.id} 
-                        ref={
+                      <TableCell
+                      key={header.id}
+                      ref={
+                        header.column.id === 'categoryName'
+                          ? categoryNameRef
+                          : header.column.id === 'midItemName'
+                          ? midItemNameRef
+                          : header.column.id === 'itemName'
+                          ? itemNameRef
+                          : undefined
+                      }
+                      style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        position: 'sticky',
+                        top: 0,
+                        left:
                           header.column.id === 'categoryName'
-                            ? categoryNameRef
+                            ? 0
                             : header.column.id === 'midItemName'
-                            ? midItemNameRef
+                            ? `${leftOffsets.midItemName}px`
                             : header.column.id === 'itemName'
-                            ? itemNameRef
-                            : undefined
-                        }
-                        style={{ 
-                          whiteSpace: 'nowrap', 
-                          overflow: 'hidden', 
-                          textOverflow: 'ellipsis', 
-                          position: 'sticky', 
-                          top: 0, 
-                          left: 
-                            header.column.id === 'categoryName'
-                              ? 0
-                              : header.column.id === 'midItemName'
-                              ? `${leftOffsets.midItemName}px` 
-                              : header.column.id === 'itemName'
-                              ? `${leftOffsets.itemName}px`
-                              : undefined,
-                          zIndex: ['categoryName', 'midItemName', 'itemName'].includes(header.column.id) ? 3 : 2,
-                          backgroundColor: '#cfcfcf', 
-                        }}
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableCell>
+                            ? `${leftOffsets.itemName}px`
+                            : undefined,
+                        zIndex: ['categoryName', 'midItemName', 'itemName'].includes(header.column.id) ? 3 : 2,
+                        backgroundColor: '#cfcfcf',
+                      }}
+                    >
+                      {flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableCell>
                     ))}
                   </TableRow>
                 ))}

@@ -173,7 +173,7 @@ export function SupplyScale() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        유가물 중량
+        품목별 유가물 중량
       </Typography>
       <Button
         variant="contained"

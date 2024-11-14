@@ -57,7 +57,7 @@ type TableData = {
 };
 
 const columns: ColumnDef<TableData>[] = [
-  { accessorKey: 'categoryName', header: '품목군' },
+  { accessorKey: 'categoryName', header: '제품군' },
   { accessorKey: 'itemName', header: '제품명' },
 ];
 
@@ -78,6 +78,16 @@ const stickyHeaderStyle2 = () => ({
   position: 'sticky' as const,
   top: 0,
   backgroundColor: '#c0c0c0',
+  zIndex: 1,
+});
+
+const stickyHeaderStyle3 = () => ({
+  whiteSpace: 'nowrap' as const,
+  overflow: 'hidden' as const,
+  textOverflow: 'ellipsis' as const,
+  position: 'sticky' as const,
+  top: 0,
+  backgroundColor: '#cfcfcf',
   zIndex: 1,
 });
 
@@ -477,7 +487,7 @@ export function Ad_Facility() {
 
           {/* 두 번째 헤더 줄: 품목군, 제품명, 설비명 */}
           <TableRow>
-            <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'center', left: 0, zIndex: 3 }}>품목군</TableCell>
+            <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'center', left: 0, zIndex: 3 }}>제품군</TableCell>
             <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'center', left: '130px', zIndex: 3 }}>제품명</TableCell>
             {facilities.map(facility => (
               <TableCell
@@ -553,9 +563,9 @@ export function Ad_Facility() {
             <Table stickyHeader>
               <TableHead>
                 <TableRow>
-                  <TableCell style={stickyHeaderStyle()}>설비명</TableCell>
-                  <TableCell style={stickyHeaderStyle()}>용량(KW)</TableCell>
-                  <TableCell style={stickyHeaderStyle()}>수정/삭제</TableCell>
+                  <TableCell style={stickyHeaderStyle3()}>설비명</TableCell>
+                  <TableCell style={stickyHeaderStyle3()}>용량(KW)</TableCell>
+                  <TableCell style={stickyHeaderStyle3()}>수정/삭제</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

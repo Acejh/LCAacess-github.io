@@ -123,14 +123,19 @@ export function DataStatus() {
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [searchInitiated, setSearchInitiated] = useState(false);
-  const userInfo = JSON.parse(localStorage.getItem('kt-auth-react-v') || '{}');
-  const role = userInfo.role;
+  const [role, setRole] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useState({
     year: '',
     month: '',
     company: null as Company | null,
   });
   const [companies, setCompanies] = useState<CompanyData[]>([]);
+
+  useEffect(() => {
+    const storedData = JSON.parse(localStorage.getItem('kt-auth-react-v') || '{}');
+    const roleFromStorage = storedData.userInfo?.role || 'User'; 
+    setRole(roleFromStorage);
+  }, []);
 
   useEffect(() => {
     axios.get('https://lcaapi.acess.co.kr/Companies')
@@ -291,11 +296,11 @@ export function DataStatus() {
     setSearchInitiated(true);
     fetchData(0, pageSize, searchParams);
   };
-
+  
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        데이터 처리 현황
+        데이터 입력 현황
       </Typography>
       <Button
         variant="contained"
@@ -500,11 +505,11 @@ export function DataStatus() {
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
-                      <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                        <Button variant="contained" disabled>
-                          산출
-                        </Button>
-                      </TableCell>
+                      {role === 'Admin' && (
+                        <TableCell style={{ textAlign: 'center' }}>
+                          <Button variant="contained">산출</Button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))
                 ) : (

@@ -99,7 +99,7 @@ export function SupplyTable() {
   
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/EcoasRecc/Supply?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `https://lcaapi.acess.co.kr/EcoasRecc/Valuable?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) {
         url += `&reccNo=${searchQuery}`;
       }
@@ -219,7 +219,7 @@ export function SupplyTable() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        공급 관리표
+        유가물 관리표
       </Typography>
       <Button
         variant="contained"

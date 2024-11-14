@@ -53,35 +53,37 @@ const SidebarMenuMain = () => {
             fontIcon='bi-chat-left' 
             icon='note-2'
           >
-          <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='수집운반 관리표' fontIcon='bi-chat-left'>
-            <SidebarMenuItem to='/CTMBasic' title='수집운반 관리표 원장' hasBullet={true} />
-            <SidebarMenuItem to='/CTMDetail' title='수집운반 관리표 상세' hasBullet={true} />
-            <SidebarMenuItem to='/CTMWeight' title='수집운반 관리표 실중량' hasBullet={true} />
-          </SidebarMenuItemWithSub>
-          <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='보정 중량' fontIcon='bi-chat-left'>
-            <SidebarMenuItem to='/CTMScale' title='관리표별 보정중량' hasBullet={true} />
-            <SidebarMenuItem to='/ProductsScale' title='품목별 보정중량' hasBullet={true} />
-          </SidebarMenuItemWithSub>
-            <SidebarMenuItem to='/SupplyTable' title='공급(유가물) 관리표' hasBullet={true} />
-            <SidebarMenuItem to='/DisposalTable' title='폐기 관리표' hasBullet={true} />
-            <SidebarMenuItem to='/NonTargetWeights' title='비대상품목 입고량' hasBullet={true} />
-            <SidebarMenuItem to='/SupplyScale' title='품목별 유가물 중량' hasBullet={true} />
-            <SidebarMenuItem to='/DisposalScale' title='품목별 폐기물 중량' hasBullet={true} />
+            <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='입고 관리표' fontIcon='bi-chat-left'>
+              <SidebarMenuItem to='/CTMBasic' title='수집운반 관리표 원장' hasBullet={true} />
+              {/* <SidebarMenuItem to='/CTMDetail' title='수집운반 관리표 상세' hasBullet={true} />
+              <SidebarMenuItem to='/CTMWeight' title='수집운반 관리표 실중량' hasBullet={true} /> */}
+            </SidebarMenuItemWithSub>
+            <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='보정 중량' fontIcon='bi-chat-left'>
+              <SidebarMenuItem to='/CTMScale' title='관리표별 중량' hasBullet={true} />
+              <SidebarMenuItem to='/ProductsScale' title='세부제품 월별 중량' hasBullet={true} />
+              <SidebarMenuItem to='/NonTargetWeights' title='비대상품목 입고량' hasBullet={true} />
+            </SidebarMenuItemWithSub>
+            <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='출고 관리표' fontIcon='bi-chat-left'>
+              <SidebarMenuItem to='/SupplyTable' title='유가물 관리표' hasBullet={true} />
+              <SidebarMenuItem to='/DisposalTable' title='폐기물 관리표' hasBullet={true} />
+              <SidebarMenuItem to='/SupplyScale' title='품목별 유가물 중량' hasBullet={true} />
+              <SidebarMenuItem to='/DisposalScale' title='품목별 폐기물 중량' hasBullet={true} />
+            </SidebarMenuItemWithSub>
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub
             to='/admin-page/ProStatus'
-            title='데이터 매핑'
+            title='데이터 입력 현황'
             fontIcon='bi-chat-left'
             icon='technology-4'
           >
-            <SidebarMenuItem to='/DataStatus' title='데이터 매핑 현황' hasBullet={true} />
-            <SidebarMenuItem to='/CTMapping' title='수집운반 매핑' hasBullet={true} />
+            <SidebarMenuItem to='/DataStatus' title='데이터 입력 현황' hasBullet={true} />
+            {/* <SidebarMenuItem to='/CTMapping' title='수집운반 매핑' hasBullet={true} /> */}
             {/* <SidebarMenuItem to='/SupMapping' title='공급(유가물) 매핑' hasBullet={true} />
             <SidebarMenuItem to='/DisMapping' title='폐기 매핑' hasBullet={true} /> */}
           </SidebarMenuItemWithSub>
 
-          <SidebarMenuItemWithSub
+          {/* <SidebarMenuItemWithSub
             to='/admin-page/AuthManagement'
             title='데이터 처리'
             fontIcon='bi-chat-left'
@@ -89,7 +91,7 @@ const SidebarMenuMain = () => {
           >
             <SidebarMenuItem to='/GTG_Data' title='GTG 결과' hasBullet={true} />
             <SidebarMenuItem to='/LCI_Data' title='LCA 결과' hasBullet={true} />
-          </SidebarMenuItemWithSub>
+          </SidebarMenuItemWithSub> */}
         </>
       )}
 
@@ -123,20 +125,22 @@ const SidebarMenuMain = () => {
             fontIcon='bi-chat-left' 
             icon='note-2'
           >
-          <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='수집운반 관리표' fontIcon='bi-chat-left'>
-            <SidebarMenuItem to='/CTMBasic' title='수집운반 관리표 원장' hasBullet={true} />
-            <SidebarMenuItem to='/CTMDetail' title='수집운반 관리표 상세' hasBullet={true} />
-            <SidebarMenuItem to='/CTMWeight' title='수집운반 관리표 실중량' hasBullet={true} />
-          </SidebarMenuItemWithSub>
-          <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='보정 중량' fontIcon='bi-chat-left'>
-            <SidebarMenuItem to='/CTMScale' title='관리표별 보정중량' hasBullet={true} />
-            <SidebarMenuItem to='/ProductsScale' title='품목별 보정중량' hasBullet={true} />
-          </SidebarMenuItemWithSub>
-            <SidebarMenuItem to='/SupplyTable' title='공급(유가물) 관리표' hasBullet={true} />
-            <SidebarMenuItem to='/DisposalTable' title='폐기 관리표' hasBullet={true} />
-            <SidebarMenuItem to='/NonTargetWeights' title='비대상품목 입고량' hasBullet={true} />
-            <SidebarMenuItem to='/SupplyScale' title='품목별 유가물 중량' hasBullet={true} />
-            <SidebarMenuItem to='/DisposalScale' title='품목별 폐기물 중량' hasBullet={true} />
+            <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='입고 관리표' fontIcon='bi-chat-left'>
+              <SidebarMenuItem to='/CTMBasic' title='수집운반 관리표 원장' hasBullet={true} />
+              <SidebarMenuItem to='/CTMDetail' title='수집운반 관리표 상세' hasBullet={true} />
+              <SidebarMenuItem to='/CTMWeight' title='수집운반 관리표 실중량' hasBullet={true} />
+            </SidebarMenuItemWithSub>
+            <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='보정 중량' fontIcon='bi-chat-left'>
+              <SidebarMenuItem to='/CTMScale' title='관리표별 중량' hasBullet={true} />
+              <SidebarMenuItem to='/ProductsScale' title='세부제품 월별 중량' hasBullet={true} />
+              <SidebarMenuItem to='/NonTargetWeights' title='비대상품목 입고량' hasBullet={true} />
+            </SidebarMenuItemWithSub>
+            <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='출고 관리표' fontIcon='bi-chat-left'>
+              <SidebarMenuItem to='/SupplyTable' title='유가물 관리표' hasBullet={true} />
+              <SidebarMenuItem to='/DisposalTable' title='폐기물 관리표' hasBullet={true} />
+              <SidebarMenuItem to='/SupplyScale' title='품목별 유가물 중량' hasBullet={true} />
+              <SidebarMenuItem to='/DisposalScale' title='품목별 폐기물 중량' hasBullet={true} />
+            </SidebarMenuItemWithSub>
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub
@@ -147,8 +151,8 @@ const SidebarMenuMain = () => {
           >
             <SidebarMenuItem to='/DataStatus' title='데이터 매핑 현황' hasBullet={true} />
             <SidebarMenuItem to='/CTMapping' title='수집운반 매핑' hasBullet={true} />
-            {/* <SidebarMenuItem to='/SupMapping' title='공급(유가물) 매핑' hasBullet={true} />
-            <SidebarMenuItem to='/DisMapping' title='폐기 매핑' hasBullet={true} /> */}
+            <SidebarMenuItem to='/SupMapping' title='공급(유가물) 매핑' hasBullet={true} />
+            <SidebarMenuItem to='/DisMapping' title='폐기 매핑' hasBullet={true} />
           </SidebarMenuItemWithSub>
 
           <SidebarMenuItemWithSub

@@ -50,24 +50,6 @@ type Scale = {
   weight: string;
 };
 
-const columns: ColumnDef<Scale>[] = [
-  { accessorKey: 'companyCode', header: '사업회원' },
-  { accessorKey: 'transNo', header: '관리표 번호' },
-  { accessorKey: 'takeDate', header: '인수일' },
-  { accessorKey: 'categoryCode', header: () => <div style={{ textAlign: 'center' }}>품목코드</div>},
-  { accessorKey: 'categoryName', header: '품목명' },
-  { accessorKey: 'midItemCode', header: () => <div style={{ textAlign: 'center' }}>제품군코드</div>},
-  { accessorKey: 'midItemName', header: '제품군명' },
-  { accessorKey: 'itemCode', header: () => <div style={{ textAlign: 'center' }}>제품코드</div>},
-  { accessorKey: 'itemName', header: '제품명' },
-  { accessorKey: 'itemCount', header: () => <div style={{ textAlign: 'center' }}>제품개수</div>},
-  { accessorKey: 'meanWeight', header: () => <div style={{ textAlign: 'center' }}>평균중량 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0.00000')},
-  { accessorKey: 'totalWeight', header: () => <div style={{ textAlign: 'center' }}>평균중량합계 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0.00000') },
-  { accessorKey: 'ratio', header: () => <div style={{ textAlign: 'center' }}>비율 (%)</div>, cell: info => numeral(info.getValue()).format('0.00000')},
-  { accessorKey: 'tkinWeight', header: () => <div style={{ textAlign: 'center' }}>실중량 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>보정중량 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0.00000') },
-];
-
 export function CTMScale() {
   const [data, setData] = useState<Scale[]>([]);
   const [pageIndex, setPageIndex] = useState(0);
@@ -80,6 +62,7 @@ export function CTMScale() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [hasSearched, setHasSearched] = useState(false);
+  const [role, setRole] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useState({
     query: '',
     year: '',
@@ -87,6 +70,12 @@ export function CTMScale() {
     company: null as Company | null,
   });
   const [downloading, setDownloading] = useState(false); 
+
+  useEffect(() => {
+    const storedData = JSON.parse(localStorage.getItem('kt-auth-react-v') || '{}');
+    const roleFromStorage = storedData.userInfo?.role || 'User'; 
+    setRole(roleFromStorage);
+  }, []);
 
   useEffect(() => {
     axios.get('https://lcaapi.acess.co.kr/Companies')
@@ -232,6 +221,30 @@ export function CTMScale() {
     }
   };
 
+  const columns: ColumnDef<Scale>[] = [
+    { accessorKey: 'companyCode', header: '사업회원' },
+    { accessorKey: 'transNo', header: '관리표 번호' },
+    { accessorKey: 'takeDate', header: '인수일' },
+    ...(role !== 'User' ? [
+      { accessorKey: 'categoryCode', header: () => <div style={{ textAlign: 'center' }}>품목코드</div> }
+    ] : []),
+    { accessorKey: 'categoryName', header: '제품군' },
+    ...(role !== 'User' ? [
+      { accessorKey: 'midItemCode', header: () => <div style={{ textAlign: 'center' }}>제품군코드</div> }
+    ] : []),
+    { accessorKey: 'midItemName', header: '품목명' },
+    ...(role !== 'User' ? [
+      { accessorKey: 'itemCode', header: () => <div style={{ textAlign: 'center' }}>제품코드</div> }
+    ] : []),
+    { accessorKey: 'itemName', header: '세부품목명' },
+    { accessorKey: 'itemCount', header: () => <div style={{ textAlign: 'center' }}>제품개수</div> },
+    { accessorKey: 'meanWeight', header: () => <div style={{ textAlign: 'center' }}>평균중량 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0.00000') },
+    { accessorKey: 'totalWeight', header: () => <div style={{ textAlign: 'center' }}>평균중량합계 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0.00000') },
+    { accessorKey: 'ratio', header: () => <div style={{ textAlign: 'center' }}>비율 (%)</div>, cell: info => numeral(info.getValue()).format('0.00000') },
+    { accessorKey: 'tkinWeight', header: () => <div style={{ textAlign: 'center' }}>실중량 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0') },
+    { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>보정중량 (kg)</div>, cell: info => numeral(info.getValue()).format('0,0.00000') },
+  ];
+
   const table = useReactTable<Scale>({
     data,
     columns,
@@ -279,7 +292,7 @@ export function CTMScale() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        수집운반 보정중량
+        관리표별 중량
       </Typography>
       <Button
         variant="contained"
@@ -380,63 +393,6 @@ export function CTMScale() {
         ) : (
           <>
             <TableHead>
-              <TableRow>
-                <TableCell
-                  colSpan={3}
-                  style={{
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    borderRight: '1px solid #e0e0e0',
-                    backgroundColor: '#d8d8d8',
-                  }}
-                >
-                  구분
-                </TableCell>
-                <TableCell
-                  colSpan={2}
-                  style={{
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    borderRight: '1px solid #e0e0e0',
-                    backgroundColor: '#d8d8d8',
-                  }}
-                >
-                  품목
-                </TableCell>
-                <TableCell
-                  colSpan={2}
-                  style={{
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    borderRight: '1px solid #e0e0e0',
-                    backgroundColor: '#d8d8d8',
-                  }}
-                >
-                  제품군
-                </TableCell>
-                <TableCell
-                  colSpan={3}
-                  style={{
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    borderRight: '1px solid #e0e0e0',
-                    backgroundColor: '#d8d8d8',
-                  }}
-                >
-                  제품분류
-                </TableCell>
-                <TableCell
-                  colSpan={5}
-                  style={{
-                    textAlign: 'center',
-                    fontWeight: 'bold',
-                    borderRight: '1px solid #e0e0e0',
-                    backgroundColor: '#d8d8d8',
-                  }}
-                >
-                  중량
-                </TableCell>
-              </TableRow>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (

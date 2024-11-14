@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './css/Ad_Dashboard.css';
 import { NoticeList } from './NoticeList';
-import { LineChart } from './TotalLineChart'; 
-import { LineChartPro } from './LineChartPro';
+// import { LineChart } from './TotalLineChart'; 
+// import { LineChartPro } from './LineChartPro';
 
 export function Ad_Dashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -29,17 +29,16 @@ export function Ad_Dashboard() {
 
   return (
     <div className="dashboard-container">
-      {/* 왼쪽 그래프 섹션 (7) */}
-      <div className="graph-section">
+      {/* <div className="graph-section">
         <div className="graph-box">
           <h2>총 온실가스 저감효과 그래프 (연도별)</h2>
-          <LineChart /> {/* 첫 번째 그래프 */}
+          <LineChart /> 
         </div>
         <div className="graph-box">
           <h2>사업회원별 및 제품군별 온실가스 저감효과 그래프 (연도별)</h2>
-          <LineChartPro /> {/* 두 번째 그래프 */}
+          <LineChartPro /> 
         </div>
-      </div>
+      </div> */}
 
       {/* 오른쪽 공지사항/알림 섹션 (3) */}
       <div className="info-section">

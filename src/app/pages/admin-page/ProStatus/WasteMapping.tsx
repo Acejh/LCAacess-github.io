@@ -31,6 +31,7 @@ import {
   DialogActions,
   Autocomplete,
   TextField,
+  Box,
 } from '@mui/material';
 
 // 폐기물 품목 매핑 데이터를 위한 타입 정의
@@ -403,9 +404,9 @@ export function WasteMapping() {
         );
       },
     },
-    { accessorKey: 'item1', header: '품목군' },
-    { accessorKey: 'item2', header: '제품군' },
-    { accessorKey: 'item3', header: '제품분류' },
+    { accessorKey: 'item1', header: '품목1' },
+    { accessorKey: 'item2', header: '품목2' },
+    { accessorKey: 'item3', header: '품목3' },
     {
       accessorKey: 'wasteMethod',
       header: '처리방법',
@@ -539,9 +540,19 @@ export function WasteMapping() {
           조회
         </Button>
       </div>
+      <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: '5px', backgroundColor: '#f9f9f9', marginBottom: '20px' }}>
+        <Typography variant="h6" gutterBottom>
+          폐기물 처리품목&middot;방법 관리 입력 방법
+        </Typography>
+        <Typography variant="body2" paragraph>
+        ● 처리방법 : 배출하는 폐기물의 거래처를 확인 한 후, 처리방법(소각, 매립, 열회수)을 선택해주세요.<br/>
+        ● 처리제품 : 어떤 제품에서 해당 폐기물이 발생하는지 세부제품을 선택해주세요.
+
+        </Typography>
+      </Box>
       <TableContainer
         component={Paper}
-        style={{ maxHeight: 545, overflowY: 'auto' }}
+        style={{ maxHeight: 500, overflowY: 'auto' }}
         className="custom-scrollbar"
       >
         <Table>

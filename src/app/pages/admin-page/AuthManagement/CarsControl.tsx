@@ -458,9 +458,9 @@ export function CarsControl() {
           onChange={(e) => setSelectedSpecFilter(e.target.value as 'All' | 'Spec' | 'NoSpec')}
           style={{ height: '45px', marginLeft: '10px' }}
         >
-          <MenuItem value="All">규격여부(전체)</MenuItem>
-          <MenuItem value="Spec">규격 있음</MenuItem>
-          <MenuItem value="NoSpec">규격 없음</MenuItem>
+          <MenuItem value="All">규격 입력 상태 (전체)</MenuItem>
+          <MenuItem value="Spec">입력 완료</MenuItem>
+          <MenuItem value="NoSpec">입력 필요</MenuItem>
         </Select>
         <Button
           variant="contained"

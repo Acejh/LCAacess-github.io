@@ -64,8 +64,8 @@ type Client = {
   bizNo: string;
   address: string;
   distance: string;
-  latitude: number;  // 추가된 필드
-  longitude: number; // 추가된 필드
+  latitude: number;  
+  longitude: number; 
 };
 
 type ClientType = {
@@ -366,8 +366,8 @@ export function AdminClient() {
       bizNo: member.bizNo,
       address: member.address,
       distance: member.distance,
-      latitude: member.latitude, // 추가된 필드
-      longitude: member.longitude, // 추가된 필드
+      latitude: member.latitude, 
+      longitude: member.longitude, 
     });
     setEditIndex(index);
     setEditOpen(true);
@@ -529,9 +529,9 @@ export function AdminClient() {
           onChange={(e) => setSelectedStateFilter(e.target.value as 'All' | 'Addr' | 'NoAddr')}
           style={{ height: '45px', marginLeft: '10px' }}
         >
-          <MenuItem value="All">주소여부(전체)</MenuItem>
-          <MenuItem value="Addr">주소 있음</MenuItem>
-          <MenuItem value="NoAddr">주소 없음</MenuItem>
+          <MenuItem value="All">주소 입력 상태 (전체)</MenuItem>
+          <MenuItem value="Addr">입력 완료</MenuItem>
+          <MenuItem value="NoAddr">입력 필요</MenuItem>
         </Select>
         <Button
           variant="contained"

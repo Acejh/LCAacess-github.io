@@ -23,8 +23,8 @@ import { Ad_UseFacility } from '../pages/admin-page/InputManagement/KeyIn/Ad_Use
 import { Ad_Waste } from '../pages/admin-page/InputManagement/KeyIn/Ad_Waste'
 import { CTMapping } from '../pages/admin-page/ProStatus/CTMapping'
 import { DataStatus } from '../pages/admin-page/ProStatus/DataStatus'
-// import { SupMapping } from '../pages/admin-page/ProStatus/SupMapping'
-// import { DisMapping } from '../pages/admin-page/ProStatus/DisMapping'
+import { SupMapping } from '../pages/admin-page/ProStatus/SupMapping'
+import { DisMapping } from '../pages/admin-page/ProStatus/DisMapping'
 import { NonTargetWeights } from '../pages/admin-page/EcoASManagement/NonTargetWeights'
 import { ProductsScale } from '../pages/admin-page/EcoASManagement/ProductsScale'
 import { SupplyScale } from '../pages/admin-page/EcoASManagement/SupplyScale'
@@ -96,8 +96,8 @@ const PrivateRoutes = () => {
         {/* 데이터 처리 */}
         <Route path='/DataStatus' element={<DataStatus />} />
         <Route path='/CTMapping' element={<CTMapping />} />
-        {/* <Route path='/SupMapping' element={<SupMapping />} />
-        <Route path='/DisMapping' element={<DisMapping />} /> */}
+        <Route path='/SupMapping' element={<SupMapping />} />
+        <Route path='/DisMapping' element={<DisMapping />} />
         <Route path='/GTG_Data' element={<GTG_Data />} />
         <Route path='/LCI_Data' element={<LCI_Data />} />
         <Route path='/LCI_Com_Data' element={<LCI_Com_Data/>} />

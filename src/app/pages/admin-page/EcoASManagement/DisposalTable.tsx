@@ -41,7 +41,7 @@ type Disposal = {
   reccComName: string;
   reccEtcNo: string;
   etcComName: string;
-  clientBizno: string;
+  clientBizNo: string;
   clientName: string;
   etcFlag: string;
   etcGubun: string;
@@ -57,21 +57,21 @@ type Disposal = {
 
 const columns: ColumnDef<Disposal>[] = [
   { accessorKey: 'reccNo', header: '관리표 번호' },
-  { accessorKey: 'reccDate', header: '처리일' },
+  { accessorKey: 'reccDate', header: '출고일' },
   { accessorKey: 'reccComBizno', header: '사업자등록번호' },
   { accessorKey: 'reccComNo', header: () => <div style={{ textAlign: 'center' }}>EcoAS코드</div>},
   { accessorKey: 'reccComName', header: '사업회원명' },
   { accessorKey: 'reccEtcNo', header: () => <div style={{ textAlign: 'center' }}>번호</div>},
   { accessorKey: 'etcComName', header: '거래처명' },
-  { accessorKey: 'clientBizno', header: '거래처 사업자등록번호' },
+  { accessorKey: 'clientBizNo', header: '거래처 사업자등록번호' },
   { accessorKey: 'clientName', header: '거래처명' },
   { accessorKey: 'etcFlag', header: '구분' },
   { accessorKey: 'etcName', header: '폐기물 명' },
   { accessorKey: 'etcMethod', header: '처리방법' },
   { accessorKey: 'carNo', header: '차량번호' },
-  { accessorKey: 'item1', header: '폐기물 분류' },
-  { accessorKey: 'item2', header: '폐기물 군' },
-  { accessorKey: 'item3', header: '폐기물 명' },
+  { accessorKey: 'item1', header: '품목 1' },
+  { accessorKey: 'item2', header: '품목 2' },
+  { accessorKey: 'item3', header: '품목 3' },
   { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>중량 (kg) </div>, cell: info => numeral(info.getValue()).format('0,0')  },
   { accessorKey: 'ecoasWeight', header: () => <div style={{ textAlign: 'center' }}>EcoAS중량 (kg) </div>, cell: info => numeral(info.getValue()).format('0,0')  },
 ];
@@ -225,7 +225,7 @@ export function DisposalTable() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{marginBottom: '10px'}}>
-        폐기 관리표
+        폐기물 관리표
       </Typography>
       <Button
         variant="contained"

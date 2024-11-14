@@ -349,6 +349,16 @@ export function Ad_Effluent() {
           수계배출물 등록/수정
         </Button>
       </div>
+      {/* Guidelines Section */}
+      <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: '5px', backgroundColor: '#f9f9f9', marginBottom: '20px' }}>
+          <Typography variant="h6" gutterBottom>
+            수계배출물 입력방법
+          </Typography>
+          <Typography variant="body2" paragraph>
+          - 수계배출물을 외부로 배출하는 경우, [㎥] 단위 기반의 월별 배출량을 기재해 주세요.<br/>
+          - 외부로 배출하는 경우는 외주처리(차량운송), 하수종말처리장 또는 폐수종말처리장(파이프라인) 등이 있습니다.
+          </Typography>
+        </Box>
       {error && (
         <Typography variant="body1" color="error" style={{ marginBottom: '20px' }}>
           {error}
