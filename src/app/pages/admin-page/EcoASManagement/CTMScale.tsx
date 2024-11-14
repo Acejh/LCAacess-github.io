@@ -294,15 +294,6 @@ export function CTMScale() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         관리표별 중량
       </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
-        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
-        onClick={handleDownloadExcel}
-        disabled={!selectedCompany || !year || downloading} 
-      >
-        {downloading ? '다운로드 중...' : '엑셀 다운로드'}
-      </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} />
         <FormControl style={{ marginRight: '10px' }}>
@@ -374,6 +365,15 @@ export function CTMScale() {
           onClick={handleSearch}
         >
           조회
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          style={{ height: '35px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleDownloadExcel}
+          disabled={!selectedCompany || !year || downloading} 
+        >
+          {downloading ? '다운로드 중...' : '엑셀 다운로드'}
         </Button>
       </div>
       <TableContainer

@@ -324,15 +324,6 @@ export function LCI_Data() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         LCA 결과(종합,사업회원)
       </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
-        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
-        onClick={handleDownloadExcel}
-        disabled={!selectedCompany || !year || downloading}
-      >
-        {downloading ? '다운로드 중...' : '엑셀 다운로드'}
-      </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} showGeneralOption={true} />
         <FormControl style={{ marginRight: '10px' }}>
@@ -362,6 +353,15 @@ export function LCI_Data() {
           disabled={!selectedCompany || !year}
         >
           조회
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          style={{ height: '35px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleDownloadExcel}
+          disabled={!selectedCompany || !year || downloading}
+        >
+          {downloading ? '다운로드 중...' : '엑셀 다운로드'}
         </Button>
       </div>
       <TableContainer component={Paper} style={{ maxHeight: 600, overflowY: 'auto', overflowX: 'auto' }} className="custom-scrollbar">

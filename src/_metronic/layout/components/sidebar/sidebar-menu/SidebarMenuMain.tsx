@@ -55,13 +55,11 @@ const SidebarMenuMain = () => {
           >
             <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='입고 관리표' fontIcon='bi-chat-left'>
               <SidebarMenuItem to='/CTMBasic' title='수집운반 관리표 원장' hasBullet={true} />
-              {/* <SidebarMenuItem to='/CTMDetail' title='수집운반 관리표 상세' hasBullet={true} />
-              <SidebarMenuItem to='/CTMWeight' title='수집운반 관리표 실중량' hasBullet={true} /> */}
-            </SidebarMenuItemWithSub>
-            <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='보정 중량' fontIcon='bi-chat-left'>
               <SidebarMenuItem to='/CTMScale' title='관리표별 중량' hasBullet={true} />
               <SidebarMenuItem to='/ProductsScale' title='세부제품 월별 중량' hasBullet={true} />
               <SidebarMenuItem to='/NonTargetWeights' title='비대상품목 입고량' hasBullet={true} />
+              {/* <SidebarMenuItem to='/CTMDetail' title='수집운반 관리표 상세' hasBullet={true} />
+              <SidebarMenuItem to='/CTMWeight' title='수집운반 관리표 실중량' hasBullet={true} /> */}
             </SidebarMenuItemWithSub>
             <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='출고 관리표' fontIcon='bi-chat-left'>
               <SidebarMenuItem to='/SupplyTable' title='유가물 관리표' hasBullet={true} />
@@ -129,8 +127,6 @@ const SidebarMenuMain = () => {
               <SidebarMenuItem to='/CTMBasic' title='수집운반 관리표 원장' hasBullet={true} />
               <SidebarMenuItem to='/CTMDetail' title='수집운반 관리표 상세' hasBullet={true} />
               <SidebarMenuItem to='/CTMWeight' title='수집운반 관리표 실중량' hasBullet={true} />
-            </SidebarMenuItemWithSub>
-            <SidebarMenuItemWithSub to='/admin-page/EcoASManagement' title='보정 중량' fontIcon='bi-chat-left'>
               <SidebarMenuItem to='/CTMScale' title='관리표별 중량' hasBullet={true} />
               <SidebarMenuItem to='/ProductsScale' title='세부제품 월별 중량' hasBullet={true} />
               <SidebarMenuItem to='/NonTargetWeights' title='비대상품목 입고량' hasBullet={true} />

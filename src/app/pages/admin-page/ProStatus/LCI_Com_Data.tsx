@@ -375,15 +375,6 @@ export function LCI_Com_Data() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         LCA 결과(품목별)
       </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
-        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
-        onClick={handleDownloadExcel}
-        disabled={!selectedMidItem || !year || downloading} 
-      >
-        {downloading ? '다운로드 중...' : '엑셀 다운로드'}
-      </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
       <Autocomplete
         options={midItems}
@@ -450,6 +441,15 @@ export function LCI_Com_Data() {
           disabled={!selectedMidItem || !year}
         >
           조회
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          style={{ height: '35px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleDownloadExcel}
+          disabled={!selectedMidItem || !year || downloading} 
+        >
+          {downloading ? '다운로드 중...' : '엑셀 다운로드'}
         </Button>
       </div>
       <TableContainer component={Paper} style={{ maxHeight: 600, overflowY: 'auto', overflowX: 'auto' }} className="custom-scrollbar">

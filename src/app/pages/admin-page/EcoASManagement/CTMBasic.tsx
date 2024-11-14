@@ -29,7 +29,6 @@ import {
   CircularProgress,
   TextField,
 } from '@mui/material';
-import * as XLSX from 'xlsx';
 
 type Basic = {
   id: number;
@@ -69,7 +68,11 @@ export function CTMBasic() {
   const [year, setYear] = useState('');
   const [month, setMonth] = useState('');
   const [loading, setLoading] = useState(true);
+  const [downloading, setDownloading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [clientBizno, setClientBizno] = useState('');
+  const [clientName, setClientName] = useState('');
+  const [carNo, setCarNo] = useState('');
   const [totalCount, setTotalCount] = useState(0);
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
@@ -78,6 +81,9 @@ export function CTMBasic() {
     year: '',
     month: '',
     company: null as Company | null,
+    clientBizno: '',
+    clientName: '',
+    carNo: '',
   });
 
   const fetchData = useCallback(async (pageIndex: number, pageSize: number, searchQuery = '') => {
@@ -91,18 +97,13 @@ export function CTMBasic() {
     setLoading(true);
     try {
       let url = `https://lcaapi.acess.co.kr/EcoasTrans/Origin?page=${pageIndex + 1}&pageSize=${pageSize}`;
-      if (searchQuery) {
-        url += `&transNo=${searchQuery}`;
-      }
-      if (searchParams.company) {
-        url += `&companyCode=${searchParams.company.code}`;
-      }
-      if (searchParams.year) {
-        url += `&year=${searchParams.year}`;
-      }
-      if (searchParams.month) {
-        url += `&month=${searchParams.month}`;
-      }
+      if (searchQuery) url += `&transNo=${searchQuery}`;
+      if (searchParams.clientBizno) url += `&clientBizno=${searchParams.clientBizno}`;
+      if (searchParams.clientName) url += `&clientName=${searchParams.clientName}`;
+      if (searchParams.carNo) url += `&carNo=${searchParams.carNo}`;
+      if (searchParams.company) url += `&companyCode=${searchParams.company.code}`;
+      if (searchParams.year) url += `&year=${searchParams.year}`;
+      if (searchParams.month) url += `&month=${searchParams.month}`;
   
       const response = await axios.get(url);
       const { list, totalCount } = response.data;
@@ -122,12 +123,58 @@ export function CTMBasic() {
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const handleDownloadExcel = () => {
-    const tableData = table.getRowModel().rows.map((row) => row.original);
-    const worksheet = XLSX.utils.json_to_sheet(tableData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    XLSX.writeFile(workbook, '수집운반 관리표 원장.xlsx');
+  //엑셀 다운로드
+  const handleDownloadExcel = async () => {
+    if (!selectedCompany) {
+      console.error('회사를 선택해 주세요.');
+      return;
+    }
+  
+    setDownloading(true); // 다운로드 시작
+  
+    try {
+      let url = `https://lcaapi.acess.co.kr/EcoasTrans/export?companyCode=${selectedCompany.code}`;
+  
+      // Optional parameters
+      if (year) url += `&year=${year}`;
+      if (month) url += `&month=${month}`;
+      if (clientBizno) url += `&clientBizno=${clientBizno}`;
+      if (clientName) url += `&clientName=${clientName}`;
+      if (carNo) url += `&carNo=${carNo}`;
+  
+      const response = await axios.get(url, {
+        responseType: 'blob',
+        timeout: 180000, // 3분 타임아웃 설정
+      });
+  
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = '수집운반_관리표.xlsx'; // 기본 파일 이름
+  
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename\*?=['"]?UTF-8['"]?''(.+?)['"]?(;|$)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = decodeURIComponent(filenameMatch[1]);
+        } else {
+          const simpleFilenameMatch = contentDisposition.match(/filename="?(.+?)['"]?(;|$)/);
+          if (simpleFilenameMatch && simpleFilenameMatch[1]) {
+            filename = simpleFilenameMatch[1];
+          }
+        }
+      }
+  
+      const blob = new Blob([response.data]);
+      const urlBlob = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = urlBlob;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error('엑셀 파일 다운로드 중 오류 발생:', error);
+    } finally {
+      setDownloading(false); // 다운로드 완료
+    }
   };
 
   const handleSearch = () => {
@@ -136,6 +183,9 @@ export function CTMBasic() {
       company: selectedCompany,
       year,
       month,
+      clientBizno,
+      clientName,
+      carNo,
     });
     setPageIndex(0);
     setHasSearched(true);  
@@ -211,14 +261,6 @@ export function CTMBasic() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         수집운반 관리표 원장
       </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
-        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px', display: 'none' }}
-        onClick={handleDownloadExcel}
-      >
-        엑셀 다운로드
-      </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
       <UseCompany onCompanyChange={setSelectedCompany} />
         <FormControl style={{ marginRight: '10px' }}>
@@ -283,6 +325,38 @@ export function CTMBasic() {
             sx={{ '& .MuiInputBase-root': { height: '45px' } }}
           />
         </FormControl>
+        <FormControl style={{ marginRight: '10px' }}>
+          <TextField
+            id="client-bizno-input"
+            label="사업자등록번호 조회"
+            value={clientBizno}
+            onChange={(e) => setClientBizno(e.target.value)}
+            style={{ width: '200px' }}
+            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+          />
+        </FormControl>
+
+        <FormControl style={{ marginRight: '10px' }}>
+          <TextField
+            id="client-name-input"
+            label="거래처 조회"
+            value={clientName}
+            onChange={(e) => setClientName(e.target.value)}
+            style={{ width: '200px' }}
+            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+          />
+        </FormControl>
+
+        <FormControl style={{ marginRight: '10px' }}>
+          <TextField
+            id="car-no-input"
+            label="차량번호 조회"
+            value={carNo}
+            onChange={(e) => setCarNo(e.target.value)}
+            style={{ width: '200px' }}
+            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+          />
+        </FormControl>
         <Button
           variant="contained"
           color="primary"
@@ -290,6 +364,15 @@ export function CTMBasic() {
           onClick={handleSearch}
         >
           조회
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          style={{ height: '35px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleDownloadExcel}
+          disabled={!selectedCompany || downloading}
+        >
+          {downloading ? '다운로드 중...' : '엑셀 다운로드'}
         </Button>
       </div>
       <TableContainer
@@ -315,19 +398,19 @@ export function CTMBasic() {
                     style={{
                       textAlign: 'center',
                       fontWeight: 'bold',
-                      borderRight: '1px solid #e0e0e0',
-                      backgroundColor: '#d8d8d8',
+                      borderRight: '1px solid #3055fa',
+                      backgroundColor: '#c2cdff',
                     }}
                   >
                     구분
                   </TableCell>
                   <TableCell
-                    colSpan={5}
+                    colSpan={4}
                     style={{
                       textAlign: 'center',
                       fontWeight: 'bold',
-                      borderRight: '1px solid #e0e0e0',
-                      backgroundColor: '#d8d8d8',
+                      borderRight: '1px solid #3055fa',
+                      backgroundColor: '#a9b9ff',
                     }}
                   >
                     인계 업체
@@ -337,8 +420,8 @@ export function CTMBasic() {
                     style={{
                       textAlign: 'center',
                       fontWeight: 'bold',
-                      borderRight: '1px solid #e0e0e0',
-                      backgroundColor: '#d8d8d8',
+                      borderRight: '1px solid #3055fa',
+                      backgroundColor: '#9badfd',
                     }}
                   >
                     거래처
@@ -348,8 +431,8 @@ export function CTMBasic() {
                     style={{
                       textAlign: 'center',
                       fontWeight: 'bold',
-                      borderRight: '1px solid #e0e0e0',
-                      backgroundColor: '#d8d8d8',
+                      borderRight: '1px solid #3055fa',
+                      backgroundColor: '#8fa3ff',
                     }}
                   >
                     인수업체

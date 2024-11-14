@@ -199,15 +199,6 @@ export function CompositionSet() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         구성비율 관리
       </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
-        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px' }}
-        onClick={handleDownloadExcel}
-        disabled={!hasSearched || !selectedYear}  
-      >
-        엑셀 다운로드
-      </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <FormControl style={{ marginRight: '10px' }}>
         <Select
@@ -236,6 +227,15 @@ export function CompositionSet() {
           disabled={!selectedYear}  
         >
           조회
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          style={{ height: '35px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleDownloadExcel}
+          disabled={!hasSearched || !selectedYear}  
+        >
+          엑셀 다운로드
         </Button>
       </div>
       <TableContainer
