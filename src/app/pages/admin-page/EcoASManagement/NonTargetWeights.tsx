@@ -41,7 +41,7 @@ type WeightData = {
 };
 
 const columns: ColumnDef<WeightData>[] = [
-  { accessorKey: 'companyName', header: '사업회원' },
+  { accessorKey: 'companyName', header: '업체명' },
   ...Array.from({ length: 12 }, (_, i) => ({
     accessorKey: `month_${i + 1}`,
     header: () => (
@@ -200,7 +200,7 @@ export function NonTargetWeights() {
         엑셀 다운로드
       </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-        <UseCompany onCompanyChange={setSelectedCompany} />
+        <UseCompany onCompanyChange={setSelectedCompany} label = '업체 선택' />
         <FormControl style={{ marginRight: '10px' }}>
           <Select
             id="year-select"
@@ -233,7 +233,7 @@ export function NonTargetWeights() {
       <TableContainer
         component={Paper}
         style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
         <Table>
           {loading ? (

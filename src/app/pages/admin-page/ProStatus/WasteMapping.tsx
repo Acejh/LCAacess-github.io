@@ -553,7 +553,7 @@ export function WasteMapping() {
       <TableContainer
         component={Paper}
         style={{ maxHeight: 500, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
         <Table>
           {loading ? (

@@ -40,7 +40,7 @@ type Disposal = {
   reccComName: string;
   reccEtcNo: string;
   etcComName: string;
-  clientBizno: string;
+  clientBizNo: string;
   clientName: string;
   etcFlag: string;
   etcGubun: string;
@@ -60,9 +60,8 @@ const columns: ColumnDef<Disposal>[] = [
   { accessorKey: 'reccComBizno', header: '사업자등록번호' },
   { accessorKey: 'reccComNo', header: () => <div style={{ textAlign: 'center' }}>EcoAS코드</div>},
   { accessorKey: 'reccComName', header: '사업회원명' },
-  { accessorKey: 'reccEtcNo', header: () => <div style={{ textAlign: 'center' }}>번호</div>},
   { accessorKey: 'etcComName', header: '거래처명' },
-  { accessorKey: 'clientBizno', header: '거래처 사업자등록번호' },
+  { accessorKey: 'clientBizNo', header: '거래처 사업자등록번호' },
   { accessorKey: 'clientName', header: '거래처명' },
   { accessorKey: 'etcFlag', header: '구분' },
   { accessorKey: 'etcName', header: '폐기물 명' },
@@ -84,7 +83,7 @@ export function DisposalTable() {
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [clientBizno, setclientBizno] = useState('');
+  const [clientBizNo, setclientBizNo] = useState('');
   const [clientName, setClientName] = useState('');
   const [carNo, setCarNo] = useState('');
   const [totalCount, setTotalCount] = useState(0);
@@ -95,7 +94,7 @@ export function DisposalTable() {
     year: '',
     month: '',
     company: null as Company | null,
-    clientBizno: '',
+    clientBizNo: '',
     clientName: '',
     carNo: '',
   });
@@ -112,7 +111,7 @@ export function DisposalTable() {
     try {
       let url = `https://lcaapi.acess.co.kr/EcoasRecc/Waste?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) url += `&reccNo=${searchQuery}`;
-      if (searchParams.clientBizno) url += `&clientBizno=${searchParams.clientBizno}`;
+      if (searchParams.clientBizNo) url += `&clientBizNo=${searchParams.clientBizNo}`;
       if (searchParams.clientName) url += `&clientName=${searchParams.clientName}`;
       if (searchParams.carNo) url += `&carNo=${searchParams.carNo}`;
       if (searchParams.company) url += `&companyCode=${searchParams.company.code}`;
@@ -152,7 +151,7 @@ export function DisposalTable() {
       // Optional parameters
       if (year) url += `&year=${year}`;
       if (month) url += `&month=${month}`;
-      if (clientBizno) url += `&clientBizno=${clientBizno}`;
+      if (clientBizNo) url += `&clientBizNo=${clientBizNo}`;
       if (clientName) url += `&clientName=${clientName}`;
       if (carNo) url += `&carNo=${carNo}`;
   
@@ -198,7 +197,7 @@ export function DisposalTable() {
       company: selectedCompany,
       year,
       month,
-      clientBizno,
+      clientBizNo,
       clientName,
       carNo,
     });
@@ -276,106 +275,64 @@ export function DisposalTable() {
       <Typography variant="h5" gutterBottom style={{marginBottom: '10px'}}>
         폐기물 관리표
       </Typography>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-      <UseCompany onCompanyChange={setSelectedCompany} />
-      <FormControl style={{ marginRight: '10px' }}>
-        <InputLabel id="year-label">연도</InputLabel> 
-        <Select
-          labelId="year-label"
-          id="year-select"
-          value={year}
-          label="연도"
-          onChange={handleYearChange}
-          style={{ width: '100px' }}
-          sx={{ height: '45px' }}
-          MenuProps={{
-            PaperProps: {
-              style: {
-                maxHeight: 120,
+      <div style={{ display: 'flex', flexWrap: 'wrap'}}>
+        <UseCompany onCompanyChange={setSelectedCompany} />
+        <FormControl style={{ marginRight: '10px' }}>
+          <InputLabel id="year-label">연도</InputLabel>
+          <Select
+            labelId="year-label"
+            id="year-select"
+            value={year}
+            label="연도"
+            onChange={handleYearChange}
+            style={{ width: '100px' }}
+            sx={{ height: '45px' }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 120,
+                },
               },
-            },
-          }}
-        >
-          <MenuItem value="">전체</MenuItem>
-          {Array.from({ length: 5 }, (_, i) => (new Date().getFullYear() - i).toString()).map(year => (
-            <MenuItem key={year} value={year}>
-              {year}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl style={{ marginRight: '10px' }}>
-        <InputLabel id="month-label">월</InputLabel>
-        <Select
-          labelId="month-label"
-          id="month-select"
-          value={month}
-          label="월"
-          onChange={handleMonthChange}
-          style={{ width: '100px' }}
-          sx={{ height: '45px' }}
-          MenuProps={{
-            PaperProps: {
-              style: {
-                maxHeight: 120, 
+            }}
+          >
+            <MenuItem value="">전체</MenuItem>
+            {Array.from({ length: 5 }, (_, i) => (new Date().getFullYear() - i).toString()).map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl style={{ marginRight: '10px' }}>
+          <InputLabel id="month-label">월</InputLabel>
+          <Select
+            labelId="month-label"
+            id="month-select"
+            value={month}
+            label="월"
+            onChange={handleMonthChange}
+            style={{ width: '100px' }}
+            sx={{ height: '45px' }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 120,
+                },
               },
-            },
-          }}
-        >
-          <MenuItem value="">전체</MenuItem>
-          {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-            <MenuItem key={month} value={String(month)}>
-              {month}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <FormControl style={{ marginRight: '10px' }}>
-        <TextField
-          id="search-query-input"
-          label="관리표 번호 조회"
-          value={searchQuery}
-          onChange={handleSearchQueryChange}
-          style={{ width: '200px' }}
-          sx={{ '& .MuiInputBase-root': { height: '45px' } }}
-        />
-      </FormControl>
-      <FormControl style={{ marginRight: '10px' }}>
-        <TextField
-          id="client-bizno-input"
-          label="사업자등록번호 조회"
-          value={clientBizno}
-          onChange={(e) => setclientBizno(e.target.value)}
-          style={{ width: '200px' }}
-          sx={{ '& .MuiInputBase-root': { height: '45px' } }}
-        />
-      </FormControl>
-
-      <FormControl style={{ marginRight: '10px' }}>
-        <TextField
-          id="client-name-input"
-          label="거래처 조회"
-          value={clientName}
-          onChange={(e) => setClientName(e.target.value)}
-          style={{ width: '200px' }}
-          sx={{ '& .MuiInputBase-root': { height: '45px' } }}
-        />
-      </FormControl>
-
-      <FormControl style={{ marginRight: '10px' }}>
-        <TextField
-          id="car-no-input"
-          label="차량번호 조회"
-          value={carNo}
-          onChange={(e) => setCarNo(e.target.value)}
-          style={{ width: '200px' }}
-          sx={{ '& .MuiInputBase-root': { height: '45px' } }}
-        />
-      </FormControl>
+            }}
+          >
+            <MenuItem value="">전체</MenuItem>
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+              <MenuItem key={month} value={String(month)}>
+                {month}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
         <Button
           variant="contained"
           color="primary"
-          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px'}}
+          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
           onClick={handleSearch}
         >
           조회
@@ -390,16 +347,59 @@ export function DisposalTable() {
           {downloading ? '다운로드 중...' : '엑셀 다운로드'}
         </Button>
       </div>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '20px' }}>
+        <FormControl style={{ marginRight: '10px', marginTop: '10px' }}>
+          <TextField
+            id="search-query-input"
+            label="관리표 번호 조회"
+            value={searchQuery}
+            onChange={handleSearchQueryChange}
+            style={{ width: '200px' }}
+            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+          />
+        </FormControl>
+        <FormControl style={{ marginRight: '10px', marginTop: '10px' }}>
+          <TextField
+            id="client-bizno-input"
+            label="사업자등록번호 조회"
+            value={clientBizNo}
+            onChange={(e) => setclientBizNo(e.target.value)}
+            style={{ width: '200px' }}
+            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+          />
+        </FormControl>
+        <FormControl style={{ marginRight: '10px', marginTop: '10px' }}>
+          <TextField
+            id="client-name-input"
+            label="거래처 조회"
+            value={clientName}
+            onChange={(e) => setClientName(e.target.value)}
+            style={{ width: '200px' }}
+            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+          />
+        </FormControl>
+        <FormControl style={{ marginRight: '10px', marginTop: '10px' }}>
+          <TextField
+            id="car-no-input"
+            label="차량번호 조회"
+            value={carNo}
+            onChange={(e) => setCarNo(e.target.value)}
+            style={{ width: '200px' }}
+            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+          />
+        </FormControl>
+      </div>
       <TableContainer
         component={Paper}
         style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
         <Table>
           {loading ? (
             <TableBody>
               <TableRow>
-                <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                <TableCell colSpan={19} style={{ textAlign: 'center', border: '1px solid #ddd' }}>
                   <CircularProgress />
                 </TableCell>
               </TableRow>
@@ -407,19 +407,21 @@ export function DisposalTable() {
           ) : (
             <>
               <TableHead>
-              {table.getHeaderGroups().map(headerGroup => (
+                {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map(header => (
-                      <TableCell 
-                        key={header.id} 
-                        style={{ 
-                          whiteSpace: 'nowrap', 
-                          overflow: 'hidden', 
-                          textOverflow: 'ellipsis', 
-                          position: 'sticky', 
-                          top: 0, 
-                          backgroundColor: '#cfcfcf', 
-                          zIndex: 1 
+                    {headerGroup.headers.map((header) => (
+                      <TableCell
+                        key={header.id}
+                        style={{
+                          textAlign: 'center',
+                          border: '1px solid #ddd',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          position: 'sticky',
+                          top: 0,
+                          backgroundColor: '#cfcfcf',
+                          zIndex: 1,
                         }}
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
@@ -429,39 +431,39 @@ export function DisposalTable() {
                 ))}
               </TableHead>
               <TableBody>
-                {loading ? (
+                {!hasSearched ? (
                   <TableRow>
-                    <TableCell colSpan={19} style={{ textAlign: 'center' }}>
-                      <CircularProgress />
+                    <TableCell colSpan={19} style={{ textAlign: 'center', color: 'red', border: '1px solid #ddd' }}>
+                      조회하여 주십시오.
                     </TableCell>
                   </TableRow>
+                ) : table.getRowModel().rows.length > 0 ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          style={{
+                            textAlign: ['reccComNo', 'reccEtcNo', 'weight', 'ecoasWeight'].includes(cell.column.id)
+                              ? 'right'
+                              : 'left',
+                            border: '1px solid #ddd',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
                 ) : (
-                  <>
-                    {!hasSearched ? (
-                      <TableRow>
-                        <TableCell colSpan={19} style={{ textAlign: 'center', color: 'red' }}>
-                          조회하여 주십시오.
-                        </TableCell>
-                      </TableRow>
-                    ) : table.getRowModel().rows.length > 0 ? (
-                      table.getRowModel().rows.map(row => (
-                        <TableRow key={row.id}>
-                          {row.getVisibleCells().map(cell => (
-                            <TableCell key={cell.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                              textAlign: ['reccComNo', 'reccEtcNo', 'weight', 'ecoasWeight'].includes(cell.column.id) ? 'right' : 'left', }}>
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={19} style={{ textAlign: 'center', color: 'red' }}>
-                          데이터가 없습니다.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </>
+                  <TableRow>
+                    <TableCell colSpan={19} style={{ textAlign: 'center', color: 'red', border: '1px solid #ddd' }}>
+                      데이터가 없습니다.
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </>

@@ -30,9 +30,19 @@ interface UseCompanyProps extends FormControlProps {
   sx?: SxProps<Theme>;
   selectSx?: SxProps<Theme>;
   selectedCompany?: Company | null;
+  label?: string; // label prop 추가
 }
 
-const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListChange, showAllOption = true, showGeneralOption = false, sx, selectSx, ...rest }) => {
+const UseCompany: React.FC<UseCompanyProps> = ({
+  onCompanyChange,
+  onCompanyListChange,
+  showAllOption = true,
+  showGeneralOption = false,
+  sx,
+  selectSx,
+  label = "사업회원 선택", // 기본값 설정
+  ...rest
+}) => {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const hasFetchedData = useRef(false);
@@ -40,8 +50,8 @@ const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListC
   const fetchCompanies = useCallback(async () => {
     try {
       const response = await axios.get('https://lcaapi.acess.co.kr/Companies');
-      const companies: Company[] = response.data.list; // 정렬 없이 가져온 순서대로 사용
-    
+      const companies: Company[] = response.data.list;
+
       if (showGeneralOption) {
         const generalCompany = {
           id: -2,
@@ -142,7 +152,7 @@ const UseCompany: React.FC<UseCompanyProps> = ({ onCompanyChange, onCompanyListC
         renderInput={(params) => (
           <TextField
             {...params}
-            label="사업회원 선택"
+            label={label} // 동적 label 설정
             variant="outlined"
             sx={{ 
               '& .MuiInputBase-root': {

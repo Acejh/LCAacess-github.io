@@ -288,6 +288,11 @@ export function NoticeControl() {
 
   const columns: ColumnDef<Notice>[] = [
     {
+      accessorKey: 'id',
+      header: '번호',
+      cell: (info) => info.getValue<number>(),  
+    },
+    {
       accessorKey: 'title',
       header: '제목',
       cell: (info) => (
@@ -424,7 +429,7 @@ export function NoticeControl() {
           <TableContainer
             component={Paper}
             style={{ maxHeight: 545, overflowY: 'auto' }}
-            className="custom-scrollbar"
+            className="custom-scrollbar custom-table"
           >
             <Table stickyHeader>
               <TableHead>

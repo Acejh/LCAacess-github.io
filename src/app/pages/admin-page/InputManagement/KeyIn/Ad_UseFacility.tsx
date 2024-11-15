@@ -381,7 +381,7 @@ export function Ad_UseFacility() {
       <TableContainer
         component={Paper}
         style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
         <Table>
           {loading ? (

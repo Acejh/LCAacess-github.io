@@ -261,8 +261,8 @@ export function CTMBasic() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         수집운반 관리표 원장
       </Typography>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-      <UseCompany onCompanyChange={setSelectedCompany} />
+      <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '20px' }}>
+        <UseCompany onCompanyChange={setSelectedCompany} />
         <FormControl style={{ marginRight: '10px' }}>
           <InputLabel id="year-label">연도</InputLabel>
           <Select
@@ -315,70 +315,70 @@ export function CTMBasic() {
             ))}
           </Select>
         </FormControl>
-        <FormControl style={{ marginRight: '10px' }}>
-          <TextField
-            id="search-query-input"
-            label="관리표 번호 조회"
-            value={searchQuery}
-            onChange={handleSearchQueryChange}
-            style={{ width: '200px' }}
-            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
-          />
-        </FormControl>
-        <FormControl style={{ marginRight: '10px' }}>
-          <TextField
-            id="client-bizno-input"
-            label="사업자등록번호 조회"
-            value={clientBizno}
-            onChange={(e) => setClientBizno(e.target.value)}
-            style={{ width: '200px' }}
-            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
-          />
-        </FormControl>
-
-        <FormControl style={{ marginRight: '10px' }}>
-          <TextField
-            id="client-name-input"
-            label="거래처 조회"
-            value={clientName}
-            onChange={(e) => setClientName(e.target.value)}
-            style={{ width: '200px' }}
-            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
-          />
-        </FormControl>
-
-        <FormControl style={{ marginRight: '10px' }}>
-          <TextField
-            id="car-no-input"
-            label="차량번호 조회"
-            value={carNo}
-            onChange={(e) => setCarNo(e.target.value)}
-            style={{ width: '200px' }}
-            sx={{ '& .MuiInputBase-root': { height: '45px' } }}
-          />
-        </FormControl>
-        <Button
-          variant="contained"
-          color="primary"
-          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
-          onClick={handleSearch}
-        >
-          조회
-        </Button>
-        <Button
-          variant="contained"
-          color="secondary"
-          style={{ height: '35px', padding: '0 10px', fontSize: '14px' }}
-          onClick={handleDownloadExcel}
-          disabled={!selectedCompany || downloading}
-        >
-          {downloading ? '다운로드 중...' : '엑셀 다운로드'}
-        </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
+            onClick={handleSearch}
+          >
+            조회
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            style={{ height: '35px', padding: '0 10px', fontSize: '14px' }}
+            onClick={handleDownloadExcel}
+            disabled={!selectedCompany || downloading}
+          >
+            {downloading ? '다운로드 중...' : '엑셀 다운로드'}
+          </Button>
+        <div style={{ display: 'flex', flexWrap: 'wrap', width: '100%' }}>
+          <FormControl style={{ marginRight: '10px', marginTop: '10px' }}>
+            <TextField
+              id="search-query-input"
+              label="관리표 번호 조회"
+              value={searchQuery}
+              onChange={handleSearchQueryChange}
+              style={{ width: '200px' }}
+              sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+            />
+          </FormControl>
+          <FormControl style={{ marginRight: '10px', marginTop: '10px' }}>
+            <TextField
+              id="client-bizno-input"
+              label="사업자등록번호 조회"
+              value={clientBizno}
+              onChange={(e) => setClientBizno(e.target.value)}
+              style={{ width: '200px' }}
+              sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+            />
+          </FormControl>
+          <FormControl style={{ marginRight: '10px', marginTop: '10px' }}>
+            <TextField
+              id="client-name-input"
+              label="거래처 조회"
+              value={clientName}
+              onChange={(e) => setClientName(e.target.value)}
+              style={{ width: '200px' }}
+              sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+            />
+          </FormControl>
+          <FormControl style={{ marginRight: '10px', marginTop: '10px' }}>
+            <TextField
+              id="car-no-input"
+              label="차량번호 조회"
+              value={carNo}
+              onChange={(e) => setCarNo(e.target.value)}
+              style={{ width: '200px' }}
+              sx={{ '& .MuiInputBase-root': { height: '45px' } }}
+            />
+          </FormControl>
+        </div>
       </div>
       <TableContainer
         component={Paper}
         style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
         <Table>
           {loading ? (
@@ -398,7 +398,7 @@ export function CTMBasic() {
                     style={{
                       textAlign: 'center',
                       fontWeight: 'bold',
-                      borderRight: '1px solid #3055fa',
+                      border: '1px solid #ddd',
                       backgroundColor: '#c2cdff',
                     }}
                   >
@@ -409,7 +409,7 @@ export function CTMBasic() {
                     style={{
                       textAlign: 'center',
                       fontWeight: 'bold',
-                      borderRight: '1px solid #3055fa',
+                      border: '1px solid #ddd',
                       backgroundColor: '#a9b9ff',
                     }}
                   >
@@ -420,7 +420,7 @@ export function CTMBasic() {
                     style={{
                       textAlign: 'center',
                       fontWeight: 'bold',
-                      borderRight: '1px solid #3055fa',
+                      border: '1px solid #ddd',
                       backgroundColor: '#9badfd',
                     }}
                   >
@@ -431,7 +431,7 @@ export function CTMBasic() {
                     style={{
                       textAlign: 'center',
                       fontWeight: 'bold',
-                      borderRight: '1px solid #3055fa',
+                      border: '1px solid #ddd',
                       backgroundColor: '#8fa3ff',
                     }}
                   >
@@ -444,6 +444,8 @@ export function CTMBasic() {
                       <TableCell
                         key={header.id}
                         style={{
+                          textAlign: 'center',
+                          border: '1px solid #ddd',
                           whiteSpace: 'nowrap',
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
@@ -460,39 +462,43 @@ export function CTMBasic() {
                 ))}
               </TableHead>
               <TableBody>
-                {loading ? (
+                {!hasSearched ? (
                   <TableRow>
-                    <TableCell colSpan={12} style={{ textAlign: 'center' }}>
-                      <CircularProgress />
+                    <TableCell
+                      colSpan={12}
+                      style={{ textAlign: 'center', color: 'red', border: '1px solid #ddd' }}
+                    >
+                      조회하여 주십시오.
                     </TableCell>
                   </TableRow>
+                ) : table.getRowModel().rows.length > 0 ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          style={{
+                            textAlign: 'center',
+                            border: '1px solid #ddd',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                          }}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
                 ) : (
-                  <>
-                    {!hasSearched ? (
-                      <TableRow>
-                        <TableCell colSpan={12} style={{ textAlign: 'center', color: 'red' }}>
-                          조회하여 주십시오.
-                        </TableCell>
-                      </TableRow>
-                    ) : table.getRowModel().rows.length > 0 ? (
-                      table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id}>
-                          {row.getVisibleCells().map((cell) => (
-                            <TableCell key={cell.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', 
-                            textAlign: ['giveComNo' ,'takeComNo' ].includes(cell.column.id) ? 'right' : 'left',}}>
-                              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                            </TableCell>
-                          ))}
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={12} style={{ textAlign: 'center', color: 'red' }}>
-                          데이터가 없습니다.
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </>
+                  <TableRow>
+                    <TableCell
+                      colSpan={12}
+                      style={{ textAlign: 'center', color: 'red', border: '1px solid #ddd' }}
+                    >
+                      데이터가 없습니다.
+                    </TableCell>
+                  </TableRow>
                 )}
               </TableBody>
             </>

@@ -544,30 +544,48 @@ export function AdminClient() {
         <Button
           variant="contained"
           color="secondary"
-          style={{ height: '35px', marginLeft: '50px', fontSize: '12px' }}
+          style={{ height: '35px', width: '120px', marginLeft: '20px', fontSize: '12px' }}
           onClick={handleOpen}
         >
           거래처 등록
         </Button>
       </div>
-      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }} className="custom-scrollbar">
+      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }} className="custom-scrollbar custom-table">
         <Table stickyHeader>
-          <TableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableCell key={header.id} style={{ backgroundColor: '#cfcfcf' }}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableCell>
-                ))}
-                <TableCell style={{ backgroundColor: '#cfcfcf' }}>수정</TableCell>
-              </TableRow>
-            ))}
-          </TableHead>
+        <TableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+          {table.getHeaderGroups().map((headerGroup) => (
+            <TableRow key={headerGroup.id}>
+              {headerGroup.headers.map((header) => (
+                <TableCell
+                  key={header.id}
+                  style={{
+                    backgroundColor: '#cfcfcf',
+                    textAlign: 'center', // 헤더 가운데 정렬
+                    border: '1px solid #ccc', // 테두리 추가
+                  }}
+                >
+                  {flexRender(header.column.columnDef.header, header.getContext())}
+                </TableCell>
+              ))}
+              <TableCell
+                style={{
+                  backgroundColor: '#cfcfcf',
+                  textAlign: 'center', // 헤더 가운데 정렬
+                  border: '1px solid #ccc', // 테두리 추가
+                }}
+              >
+                수정
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableHead>
           <TableBody>
             {loading ? (
               <TableRow>
-                <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                <TableCell
+                  colSpan={12}
+                  style={{ textAlign: 'center', border: '1px solid #ccc' }}
+                >
                   <CircularProgress />
                 </TableCell>
               </TableRow>
@@ -575,21 +593,29 @@ export function AdminClient() {
               <>
                 {!hasSearched ? (
                   <TableRow>
-                    <TableCell colSpan={12} style={{ textAlign: 'center', color: 'red' }}>
+                    <TableCell
+                      colSpan={12}
+                      style={{
+                        textAlign: 'center',
+                        color: 'red',
+                        border: '1px solid #ddd',
+                      }}
+                    >
                       조회하여 주십시오.
                     </TableCell>
                   </TableRow>
                 ) : table.getRowModel().rows.length > 0 ? (
                   table.getRowModel().rows.map((row, index) => {
-                    // 새로운 조건: 주소가 비어있고, latitude, longitude가 0인지 확인
                     const isAddressInvalid =
-                      !row.original.address && row.original.latitude === 0 && row.original.longitude === 0;
+                      !row.original.address &&
+                      row.original.latitude === 0 &&
+                      row.original.longitude === 0;
 
                     return (
                       <TableRow
                         key={row.id}
                         style={{
-                          backgroundColor: isAddressInvalid ? '#f5c6cb' : 'white', // 주소가 비어있고 위도/경도가 0일 때만 색 변경
+                          backgroundColor: isAddressInvalid ? '#f5c6cb' : 'white',
                         }}
                       >
                         {row.getVisibleCells().map((cell) => (
@@ -599,13 +625,19 @@ export function AdminClient() {
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              textAlign: ['distance'].includes(cell.column.id) ? 'right' : 'left',
+                              textAlign: 'center', // 셀 가운데 정렬
+                              border: '1px solid #ccc', // 테두리 추가
                             }}
                           >
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
                         ))}
-                        <TableCell>
+                        <TableCell
+                          style={{
+                            textAlign: 'center', // 수정 버튼 가운데 정렬
+                            border: '1px solid #ccc', // 테두리 추가
+                          }}
+                        >
                           <Button
                             variant="contained"
                             color="primary"
@@ -630,7 +662,13 @@ export function AdminClient() {
                   })
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                    <TableCell
+                      colSpan={12}
+                      style={{
+                        textAlign: 'center',
+                        border: '1px solid #ccc',
+                      }}
+                    >
                       데이터가 없습니다.
                     </TableCell>
                   </TableRow>

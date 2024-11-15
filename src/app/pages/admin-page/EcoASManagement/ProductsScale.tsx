@@ -35,9 +35,9 @@ type WeightData = {
 };
 
 const columns: ColumnDef<WeightData>[] = [
-  { accessorKey: 'categoryName', header: '품목군' },
-  { accessorKey: 'midItemName', header: '제품군' },
-  { accessorKey: 'itemName', header: '제품 분류' },
+  { accessorKey: 'categoryName', header: '제품군' },
+  { accessorKey: 'midItemName', header: '품목명' },
+  { accessorKey: 'itemName', header: '세부품목명' },
   ...Array.from({ length: 12 }, (_, i) => ({
     accessorKey: `month_${i + 1}`,
     header: () => (
@@ -273,40 +273,42 @@ export function ProductsScale() {
           ) : (
             <>
               <TableHead>
-                {table.getHeaderGroups().map(headerGroup => (
+                {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map(header => (
+                    {headerGroup.headers.map((header) => (
                       <TableCell
-                      key={header.id}
-                      ref={
-                        header.column.id === 'categoryName'
-                          ? categoryNameRef
-                          : header.column.id === 'midItemName'
-                          ? midItemNameRef
-                          : header.column.id === 'itemName'
-                          ? itemNameRef
-                          : undefined
-                      }
-                      style={{
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        position: 'sticky',
-                        top: 0,
-                        left:
+                        key={header.id}
+                        ref={
                           header.column.id === 'categoryName'
-                            ? 0
+                            ? categoryNameRef
                             : header.column.id === 'midItemName'
-                            ? `${leftOffsets.midItemName}px`
+                            ? midItemNameRef
                             : header.column.id === 'itemName'
-                            ? `${leftOffsets.itemName}px`
-                            : undefined,
-                        zIndex: ['categoryName', 'midItemName', 'itemName'].includes(header.column.id) ? 3 : 2,
-                        backgroundColor: '#cfcfcf',
-                      }}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                    </TableCell>
+                            ? itemNameRef
+                            : undefined
+                        }
+                        style={{
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          textAlign: 'center', // 헤더 가운데 정렬
+                          border: '1px solid #ddd', // border 스타일 추가
+                          position: 'sticky',
+                          top: 0,
+                          left:
+                            header.column.id === 'categoryName'
+                              ? 0
+                              : header.column.id === 'midItemName'
+                              ? `${leftOffsets.midItemName}px`
+                              : header.column.id === 'itemName'
+                              ? `${leftOffsets.itemName}px`
+                              : undefined,
+                          zIndex: ['categoryName', 'midItemName', 'itemName'].includes(header.column.id) ? 3 : 2,
+                          backgroundColor: '#cfcfcf', // 고정 컬럼 헤더 배경색
+                        }}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                      </TableCell>
                     ))}
                   </TableRow>
                 ))}
@@ -314,13 +316,13 @@ export function ProductsScale() {
               <TableBody>
                 {!hasSearched && initialLoad ? (
                   <TableRow>
-                    <TableCell colSpan={15} style={{ textAlign: 'center', color: 'red' }}>
+                    <TableCell colSpan={15} style={{ textAlign: 'center', color: 'red', border: '1px solid #ddd' }}>
                       조회하여 주십시오.
                     </TableCell>
                   </TableRow>
                 ) : loading ? (
                   <TableRow>
-                    <TableCell colSpan={15} style={{ textAlign: 'center' }}>
+                    <TableCell colSpan={15} style={{ textAlign: 'center', border: '1px solid #ddd' }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>
@@ -337,6 +339,7 @@ export function ProductsScale() {
                             textAlign: ['categoryName', 'midItemName', 'itemName'].includes(cell.column.id)
                               ? 'left'
                               : 'right',
+                            border: '1px solid #ddd', // border 스타일 추가
                             position: ['categoryName', 'midItemName', 'itemName'].includes(cell.column.id)
                               ? 'sticky'
                               : 'static',
@@ -346,12 +349,12 @@ export function ProductsScale() {
                                 : cell.column.id === 'midItemName'
                                 ? `${leftOffsets.midItemName}px`
                                 : cell.column.id === 'itemName'
-                                ? `${leftOffsets.itemName}px` 
+                                ? `${leftOffsets.itemName}px`
                                 : undefined,
                             zIndex: ['categoryName', 'midItemName', 'itemName'].includes(cell.column.id) ? 2 : 1,
                             backgroundColor: ['categoryName', 'midItemName', 'itemName'].includes(cell.column.id)
                               ? '#ffffff'
-                              : undefined,
+                              : undefined, // 고정 컬럼 셀 배경색
                           }}
                         >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -361,7 +364,7 @@ export function ProductsScale() {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={15} style={{ textAlign: 'center', color: 'red' }}>
+                    <TableCell colSpan={15} style={{ textAlign: 'center', color: 'red', border: '1px solid #ddd' }}>
                       데이터가 없습니다.
                     </TableCell>
                   </TableRow>

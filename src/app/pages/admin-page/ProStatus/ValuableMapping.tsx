@@ -269,9 +269,9 @@ export function ValuableMapping() {
   // 테이블 열 정의
   const columns: ColumnDef<ValuableMappingData>[] = [
     { accessorKey: 'companyName', header: '사업회원' },
-    { accessorKey: 'item1', header: '품목군' },
-    { accessorKey: 'item2', header: '제품군' },
-    { accessorKey: 'item3', header: '제품분류' },
+    { accessorKey: 'item1', header: '품목1' },
+    { accessorKey: 'item2', header: '품목2' },
+    { accessorKey: 'item3', header: '품목3' },
     {
       accessorKey: 'lciItem.name',
       header: 'LCI 품목매핑',
@@ -370,7 +370,7 @@ export function ValuableMapping() {
       <TableContainer
         component={Paper}
         style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
         <Table>
           {loading ? (

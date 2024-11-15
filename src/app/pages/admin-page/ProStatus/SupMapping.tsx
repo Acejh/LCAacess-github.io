@@ -471,7 +471,7 @@ export function SupMapping() {
     { accessorKey: 'item3', header: '제품분류' },
     {
       id: 'valuableMapping',
-      header: '유가물 매핑 확인',
+      header: '유가물 매핑 상태',
       cell: ({ row }) => (
         <Button
           variant="contained"
@@ -492,7 +492,7 @@ export function SupMapping() {
     { accessorKey: 'ecoasWeight', header: () => <div style={{ textAlign: 'center' }}>EcoAS무게(kg)</div>},
     {
       id: 'reccSupplyClient',
-      header: '거래처 매핑 확인',
+      header: '거래처 매핑 상태',
       cell: ({ row }) => (
         <Button
           variant="contained"
@@ -511,7 +511,7 @@ export function SupMapping() {
     },
     {
       id: 'reccSupplyClient2nd',
-      header: '2차 거래처 매핑 확인',
+      header: '2차 거래처 매핑 상태',
       cell: ({ row }) => (
         <Button
           variant="contained"
@@ -530,7 +530,7 @@ export function SupMapping() {
     },
     {
       id: 'reccSupplyCar',
-      header: '차량 매핑 확인',
+      header: '차량 매핑 상태',
       cell: ({ row }) => (
         <Button
           variant="contained"
@@ -624,7 +624,7 @@ export function SupMapping() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        공급 매핑
+        유가물 매핑
       </Typography>
       <Button
         variant="contained"
@@ -710,7 +710,7 @@ export function SupMapping() {
       <TableContainer
         component={Paper}
         style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
         <Table>
           <TableHead>

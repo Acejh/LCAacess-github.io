@@ -146,7 +146,7 @@ export function LCI_Com_Data() {
       header: () => (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span>GWP</span>
-          <span style={{ whiteSpace: 'nowrap' }}>유가물 재활용 공정</span>
+          <span style={{ whiteSpace: 'nowrap' }}>재활용 처리</span>
         </div>
       ),
       cell: (info: CellContext<GTGData, unknown>) => {
@@ -160,7 +160,8 @@ export function LCI_Com_Data() {
       header: () => (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <span>GWP</span>
-          <span style={{ whiteSpace: 'nowrap' }}>유가물 대체효과</span>
+          <span style={{ whiteSpace: 'nowrap' }}>유가물 재활용 및</span>
+          <span style={{ whiteSpace: 'nowrap' }}>에너지 회수</span>
         </div>
       ),
       cell: (info: CellContext<GTGData, unknown>) => {
@@ -373,7 +374,7 @@ export function LCI_Com_Data() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        LCA 결과(품목별)
+        LCA 결과(품목)
       </Typography>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
       <Autocomplete
@@ -452,7 +453,7 @@ export function LCI_Com_Data() {
           {downloading ? '다운로드 중...' : '엑셀 다운로드'}
         </Button>
       </div>
-      <TableContainer component={Paper} style={{ maxHeight: 600, overflowY: 'auto', overflowX: 'auto' }} className="custom-scrollbar">
+      <TableContainer component={Paper} style={{ maxHeight: 600, overflowY: 'auto', overflowX: 'auto' }} className="custom-scrollbar custom-table">
         <Table stickyHeader>
           <TableHead>
             {table.getHeaderGroups().map((headerGroup) => (

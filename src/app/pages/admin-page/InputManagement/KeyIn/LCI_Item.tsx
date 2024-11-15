@@ -306,6 +306,12 @@ export function LCI_Item() {
       cell: (info) => lciTypes[info.getValue() as string] || info.getValue(),
     },
     {
+      header: '연도',
+      accessorFn: (row) => row.year,
+      id: 'year',
+      cell: (info) => lciTypes[info.getValue() as string] || info.getValue(),
+    },
+    {
       header: '종류',
       accessorFn: (row) => row.category,
       id: 'category',
@@ -322,12 +328,12 @@ export function LCI_Item() {
       id: 'unit',
     },
     {
-      header: 'GWP',
+      header: 'GWP\n 재활용 처리',
       accessorFn: (row) => row.gwp,
       id: 'gwp',
     },
     {
-      header: '유가물 대체효과',
+      header: 'GWP\n 유가물 재활용 및\n 에너지 회수',
       accessorFn: (row) => row.gwpAlt,
       id: 'gwpAlt',
     },
@@ -454,7 +460,7 @@ export function LCI_Item() {
         </Button>
       </div>
 
-      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto' }}>
+      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto'}} className="custom-scrollbar custom-table">
         <Table>
           {loading ? (
             <TableBody>
@@ -473,10 +479,10 @@ export function LCI_Item() {
                       <TableCell
                         key={header.id}
                         style={{
-                          whiteSpace: 'nowrap',
+                          whiteSpace: 'pre-wrap', 
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
-                          textAlign: ['gwp', 'gwpAlt'].includes(header.column.id) ? 'center' : 'left',
+                          textAlign: 'center', 
                           backgroundColor: '#cfcfcf',
                           position: 'sticky',
                           top: 0,
@@ -506,7 +512,7 @@ export function LCI_Item() {
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
                             textOverflow: 'ellipsis',
-                            textAlign: typeof cell.getValue() === 'number' ? 'right' : 'left',
+                            textAlign: cell.column.id === 'year' ? 'left' : typeof cell.getValue() === 'number' ? 'right' : 'left',
                           }}
                         >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}

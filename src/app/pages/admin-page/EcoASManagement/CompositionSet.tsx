@@ -197,7 +197,7 @@ export function CompositionSet() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        구성비율 관리
+        출고 구성비율 관리
       </Typography>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <FormControl style={{ marginRight: '10px' }}>
@@ -241,7 +241,7 @@ export function CompositionSet() {
       <TableContainer
         component={Paper}
         style={{ maxHeight: 600, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
         <Table>
           {loading ? (

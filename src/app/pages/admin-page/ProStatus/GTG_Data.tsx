@@ -292,7 +292,7 @@ export function GTG_Data() {
           {downloading ? '다운로드 중...' : '엑셀 다운로드'}
         </Button>
       </div>
-      <TableContainer component={Paper} style={{ maxHeight: 600, overflowY: 'auto', overflowX: 'auto' }} className="custom-scrollbar">
+      <TableContainer component={Paper} style={{ maxHeight: 600, overflowY: 'auto', overflowX: 'auto' }} className="custom-scrollbar custom-table" >
         <Table stickyHeader>
           <TableHead>
             <TableRow>
@@ -405,7 +405,7 @@ export function GTG_Data() {
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header, index) => {
-                  const leftValues = [0, 66, 271, 338]; 
+                  const leftValues = [0, 73, 304, 379]; 
                   return (
                     <TableCell
                       key={header.id}
@@ -442,7 +442,7 @@ export function GTG_Data() {
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell, index) => {
                     const isRightAligned = cell.column.id === 'totalAmount' || !['type', 'name', 'unit', 'totalAmount'].includes(cell.column.id);
-                    const leftValues = [0, 66, 271, 338];
+                    const leftValues = [0, 73, 304, 379];
                     
                     return (
                       <TableCell

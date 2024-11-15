@@ -25,3 +25,8 @@
   scrollbar-width: thin;
   scrollbar-color: #5171ff #e2e2e2;
 }
+
+.custom-table td, .custom-table th {
+  border: 0.1px solid #ddd; /* 더 얇게 */
+  text-align: center;       /* 가운데 정렬 */
+}

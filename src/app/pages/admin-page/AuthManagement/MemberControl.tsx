@@ -414,7 +414,7 @@ export function MemberControl() {
       <TableContainer
         component={Paper}
         style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
         <Table stickyHeader>
           <TableHead style={{ whiteSpace: 'nowrap', position: 'sticky', top: 0, zIndex: 1 }}>

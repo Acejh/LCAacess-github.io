@@ -272,7 +272,7 @@ export function CTMapping() {
     { accessorKey: 'giveCarNo', header: '인계 차량번호' },
     {
       id: 'transClient',
-      header: '거래처 매핑 확인',
+      header: '거래처 매핑 상태',
       cell: ({ row }) => (
         <Button
           variant="contained"
@@ -291,7 +291,7 @@ export function CTMapping() {
     },
     {
       id: 'transCar',
-      header: '차량 매핑 확인',
+      header: '차량 매핑 상태',
       cell: ({ row }) => (
         <Button
           variant="contained"
@@ -352,7 +352,7 @@ export function CTMapping() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        수집운반 원장 매핑
+        수집운반 매핑
       </Typography>
       <Button
         variant="contained"
@@ -439,7 +439,7 @@ export function CTMapping() {
       <TableContainer
         component={Paper}
         style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
       <Table>
         <TableHead>

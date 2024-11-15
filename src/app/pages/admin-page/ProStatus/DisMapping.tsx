@@ -433,7 +433,7 @@ export function DisMapping() {
     { accessorKey: 'etcMethod', header: '처리방법'},
     {
       id: 'valuableMapping',
-      header: '폐기물 매핑 확인',
+      header: '폐기물 매핑 상태',
       cell: ({ row }) => (
         <Button
           variant="contained"
@@ -454,7 +454,7 @@ export function DisMapping() {
     { accessorKey: 'ecoasWeight', header: () => <div style={{ textAlign: 'center' }}>EcoAS무게(kg)</div>},
     {
       id: 'reccWasteClient',
-      header: '거래처 매핑 확인',
+      header: '거래처 매핑 상태',
       cell: ({ row }) => (
         <Button
           variant="contained"
@@ -473,7 +473,7 @@ export function DisMapping() {
     },
     {
       id: 'reccWasteCar',
-      header: '차량 매핑 확인',
+      header: '차량 매핑 상태',
       cell: ({ row }) => (
         <Button
           variant="contained"
@@ -557,7 +557,7 @@ export function DisMapping() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        폐기 매핑
+        폐기물 매핑
       </Typography>
       <Button
         variant="contained"
@@ -643,7 +643,7 @@ export function DisMapping() {
       <TableContainer
         component={Paper}
         style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
         <Table>
           <TableHead>

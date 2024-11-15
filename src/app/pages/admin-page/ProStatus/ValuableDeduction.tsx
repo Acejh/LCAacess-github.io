@@ -307,7 +307,7 @@ export function ValuableDeduction() {
         </Button>
       </div>
 
-      <TableContainer component={Paper} style={{ maxHeight: 600, overflowY: 'auto', overflowX: 'auto' }} className="custom-scrollbar">
+      <TableContainer component={Paper} style={{ maxHeight: 600, overflowY: 'auto', overflowX: 'auto' }} className="custom-scrollbar custom-table">
         <Table stickyHeader>
           <TableHead>
             {table.getHeaderGroups().map((headerGroup) => (

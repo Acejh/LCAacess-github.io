@@ -37,9 +37,9 @@ type WasteData = {
 };
 
 const columns: ColumnDef<WasteData>[] = [
-  { accessorKey: 'item1', header: '품목군' },
-  { accessorKey: 'item2', header: '제품군' },
-  { accessorKey: 'item3', header: '제품 분류' },
+  { accessorKey: 'item1', header: '품목1' },
+  { accessorKey: 'item2', header: '품목2' },
+  { accessorKey: 'item3', header: '품목3' },
   ...Array.from({ length: 12 }, (_, i) => ({
     accessorKey: `month_${i + 1}`,
     header: () => (
@@ -217,7 +217,7 @@ export function DisposalScale() {
       <TableContainer
         component={Paper}
         style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
         <Table>
           {loading ? (

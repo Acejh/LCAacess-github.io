@@ -477,7 +477,7 @@ export function CarsControl() {
       <TableContainer
         component={Paper}
         style={{ maxHeight: 545, overflowY: 'auto' }}
-        className="custom-scrollbar"
+        className="custom-scrollbar custom-table"
       >
         <Table stickyHeader>
           <TableHead style={{ position: 'sticky', top: 0, zIndex: 1 }}>

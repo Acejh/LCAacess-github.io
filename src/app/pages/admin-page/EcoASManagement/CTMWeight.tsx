@@ -302,19 +302,21 @@ export function CTMWeight() {
           ) : (
             <>
               <TableHead>
-              {table.getHeaderGroups().map(headerGroup => (
+                {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
-                    {headerGroup.headers.map(header => (
-                      <TableCell 
-                        key={header.id} 
-                        style={{ 
-                          whiteSpace: 'nowrap', 
-                          overflow: 'hidden', 
-                          textOverflow: 'ellipsis', 
-                          position: 'sticky', 
-                          top: 0, 
-                          backgroundColor: '#cfcfcf', 
-                          zIndex: 1 
+                    {headerGroup.headers.map((header) => (
+                      <TableCell
+                        key={header.id}
+                        style={{
+                          textAlign: 'center', // 헤더 가운데 정렬
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          position: 'sticky',
+                          top: 0,
+                          backgroundColor: '#cfcfcf', // 헤더 배경색
+                          border: '1px solid #ddd', // 테두리 추가
+                          zIndex: 1,
                         }}
                       >
                         {flexRender(header.column.columnDef.header, header.getContext())}
@@ -326,7 +328,7 @@ export function CTMWeight() {
               <TableBody>
                 {loading ? (
                   <TableRow>
-                    <TableCell colSpan={12} style={{ textAlign: 'center' }}>
+                    <TableCell colSpan={12} style={{ textAlign: 'center', border: '1px solid #ddd' }}>
                       <CircularProgress />
                     </TableCell>
                   </TableRow>
@@ -334,16 +336,24 @@ export function CTMWeight() {
                   <>
                     {!hasSearched ? (
                       <TableRow>
-                        <TableCell colSpan={12} style={{ textAlign: 'center', color: 'red' }}>
+                        <TableCell colSpan={12} style={{ textAlign: 'center', color: 'red', border: '1px solid #ddd' }}>
                           조회하여 주십시오.
                         </TableCell>
                       </TableRow>
                     ) : table.getRowModel().rows.length > 0 ? (
-                      table.getRowModel().rows.map(row => (
+                      table.getRowModel().rows.map((row) => (
                         <TableRow key={row.id}>
-                          {row.getVisibleCells().map(cell => (
-                            <TableCell key={cell.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                            textAlign: ['itemCode', 'weight'].includes(cell.column.id) ? 'right' : 'left', }}>
+                          {row.getVisibleCells().map((cell) => (
+                            <TableCell
+                              key={cell.id}
+                              style={{
+                                textAlign: ['itemCode', 'weight'].includes(cell.column.id) ? 'right' : 'left',
+                                whiteSpace: 'nowrap',
+                                overflow: 'hidden',
+                                textOverflow: 'ellipsis',
+                                border: '1px solid #ddd', // 테두리 추가
+                              }}
+                            >
                               {flexRender(cell.column.columnDef.cell, cell.getContext())}
                             </TableCell>
                           ))}
@@ -351,7 +361,7 @@ export function CTMWeight() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={12} style={{ textAlign: 'center', color: 'red' }}>
+                        <TableCell colSpan={12} style={{ textAlign: 'center', color: 'red', border: '1px solid #ddd' }}>
                           데이터가 없습니다.
                         </TableCell>
                       </TableRow>
