@@ -81,15 +81,15 @@ const SidebarMenuMain = () => {
             <SidebarMenuItem to='/DisMapping' title='폐기 매핑' hasBullet={true} /> */}
           </SidebarMenuItemWithSub>
 
-          {/* <SidebarMenuItemWithSub
+          <SidebarMenuItemWithSub
             to='/admin-page/AuthManagement'
             title='데이터 처리'
             fontIcon='bi-chat-left'
             icon='verify'
           >
             <SidebarMenuItem to='/GTG_Data' title='GTG 결과' hasBullet={true} />
-            <SidebarMenuItem to='/LCI_Data' title='LCA 결과' hasBullet={true} />
-          </SidebarMenuItemWithSub> */}
+            {/* <SidebarMenuItem to='/LCI_Data' title='LCA 결과' hasBullet={true} /> */}
+          </SidebarMenuItemWithSub>
         </>
       )}
 
