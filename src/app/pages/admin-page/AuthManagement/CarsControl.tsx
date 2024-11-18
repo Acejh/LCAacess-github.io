@@ -44,7 +44,7 @@ type Car = {
 };
 
 const columns: ColumnDef<Car>[] = [
-  { accessorKey: 'companyCode', header: '사업회원' },
+  { accessorKey: 'companyCode', header: '업체명' },
   { accessorKey: 'year', header: '연도' },
   { accessorKey: 'inOutType', header: '입출고 구분', cell: info => info.getValue() === 'IN' ? '입고' : info.getValue() === 'OUT' ? '출고' : ''},
   { accessorKey: 'carNo', header: '차량번호' },

@@ -74,7 +74,7 @@ type ClientType = {
 };
 
 const columns: ColumnDef<Client>[] = [
-  { accessorKey: 'companyCode', header: '사업회원' },
+  { accessorKey: 'companyCode', header: '업체명' },
   { accessorKey: 'inOutType', header: '입출고 구분' },
   { accessorKey: 'type', header: '거래처 구분' },
   { accessorKey: 'name', header: '거래처명' },

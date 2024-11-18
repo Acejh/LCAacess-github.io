@@ -59,7 +59,7 @@ const columns: ColumnDef<Disposal>[] = [
   { accessorKey: 'reccDate', header: '출고일' },
   { accessorKey: 'reccComBizno', header: '사업자등록번호' },
   { accessorKey: 'reccComNo', header: () => <div style={{ textAlign: 'center' }}>EcoAS코드</div>},
-  { accessorKey: 'reccComName', header: '사업회원명' },
+  { accessorKey: 'reccComName', header: '업체명' },
   { accessorKey: 'etcComName', header: '거래처명' },
   { accessorKey: 'clientBizNo', header: '거래처 사업자등록번호' },
   { accessorKey: 'clientName', header: '거래처명' },
@@ -362,10 +362,10 @@ export function DisposalTable() {
         <FormControl style={{ marginRight: '10px', marginTop: '10px' }}>
           <TextField
             id="client-bizno-input"
-            label="사업자등록번호 조회"
+            label="거래처 사업자등록번호 조회"
             value={clientBizNo}
             onChange={(e) => setclientBizNo(e.target.value)}
-            style={{ width: '200px' }}
+            style={{ width: '220px' }}
             sx={{ '& .MuiInputBase-root': { height: '45px' } }}
           />
         </FormControl>

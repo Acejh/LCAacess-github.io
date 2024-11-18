@@ -222,7 +222,7 @@ export function CTMScale() {
   };
 
   const columns: ColumnDef<Scale>[] = [
-    { accessorKey: 'companyCode', header: '사업회원' },
+    { accessorKey: 'companyCode', header: '업체명' },
     { accessorKey: 'transNo', header: '관리표 번호' },
     { accessorKey: 'takeDate', header: '인수일' },
     ...(role !== 'User' ? [

@@ -328,7 +328,12 @@ export function CTMBasic() {
             color="secondary"
             style={{ height: '35px', padding: '0 10px', fontSize: '14px' }}
             onClick={handleDownloadExcel}
-            disabled={!selectedCompany || downloading}
+            disabled={
+              !selectedCompany || 
+              !year ||
+              downloading || 
+              (selectedCompany.name === '전체' || selectedCompany.name === '공통')
+            }
           >
             {downloading ? '다운로드 중...' : '엑셀 다운로드'}
           </Button>
@@ -346,10 +351,10 @@ export function CTMBasic() {
           <FormControl style={{ marginRight: '10px', marginTop: '10px' }}>
             <TextField
               id="client-bizno-input"
-              label="사업자등록번호 조회"
+              label="거래처 사업자등록번호 조회"
               value={clientBizno}
               onChange={(e) => setClientBizno(e.target.value)}
-              style={{ width: '200px' }}
+              style={{ width: '220px' }}
               sx={{ '& .MuiInputBase-root': { height: '45px' } }}
             />
           </FormControl>
@@ -366,7 +371,7 @@ export function CTMBasic() {
           <FormControl style={{ marginRight: '10px', marginTop: '10px' }}>
             <TextField
               id="car-no-input"
-              label="차량번호 조회"
+              label=" 인수업체 차량번호 조회"
               value={carNo}
               onChange={(e) => setCarNo(e.target.value)}
               style={{ width: '200px' }}

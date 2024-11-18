@@ -70,7 +70,7 @@ type CompanyData = {
 };
 
 const columns: ColumnDef<Status>[] = [
-  { accessorKey: 'companyName', header: '사업회원' },
+  { accessorKey: 'companyName', header: '업체명' },
   { accessorKey: 'year', header: () => <div style={{ textAlign: 'center' }}>연도</div>},
   { accessorKey: 'month', header: () => <div style={{ textAlign: 'center' }}>월</div>},
   { 

@@ -56,7 +56,7 @@ const columns: ColumnDef<Supply>[] = [
   { accessorKey: 'reccDate', header: '일시' },
   { accessorKey: 'reccComBizno', header: '사업자등록번호' },
   { accessorKey: 'reccComNo', header: () => <div style={{ textAlign: 'center' }}>EcoAS코드</div>},
-  { accessorKey: 'reccComName', header: '사업회원명' },
+  { accessorKey: 'reccComName', header: '업체명' },
   { accessorKey: 'supplyComName', header: '거래처명' },
   { accessorKey: 'supplyEtc', header: '비고' },
   { accessorKey: 'clientBizno', header: '거래처 사업자등록번호' },
@@ -356,10 +356,10 @@ export function SupplyTable() {
           <FormControl style={{ marginRight: '10px', marginTop: '10px' }}>
             <TextField
               id="client-bizno-input"
-              label="사업자등록번호 조회"
+              label="거래처 사업자등록번호 조회"
               value={clientBizno}
               onChange={(e) => setClientBizno(e.target.value)}
-              style={{ width: '200px' }}
+              style={{ width: '220px' }}
               sx={{ '& .MuiInputBase-root': { height: '45px' } }}
             />
           </FormControl>
