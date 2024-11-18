@@ -332,14 +332,18 @@ export function SupplyTable() {
             조회
           </Button>
           <Button
-            variant="contained"
-            color="secondary"
-            style={{ height: '35px', padding: '0 10px', fontSize: '14px' }}
-            onClick={handleDownloadExcel}
-            disabled={!selectedCompany || downloading}
-          >
-            {downloading ? '다운로드 중...' : '엑셀 다운로드'}
-          </Button>
+          variant="contained"
+          color="secondary"
+          style={{ height: '35px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleDownloadExcel}
+          disabled={
+            !selectedCompany ||
+            downloading || 
+            (selectedCompany.name === '전체' || selectedCompany.name === '공통')
+          }
+        >
+          {downloading ? '다운로드 중...' : '엑셀 다운로드'}
+        </Button>
         </div>
 
         <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: '20px' }}>

@@ -37,6 +37,7 @@ type WeightData = {
   year: number;
   month: number;
   weight: number;
+  totalWeight: number;
 };
 
 const columns: ColumnDef<WeightData>[] = [
@@ -50,6 +51,11 @@ const columns: ColumnDef<WeightData>[] = [
     ),
     cell: (info: CellContext<WeightData, unknown>) => numeral(info.getValue()).format('0,0'),
   })),
+  { 
+    accessorKey: 'totalWeight', 
+    header: '계 (kg)',
+    cell: (info: CellContext<WeightData, unknown>) => numeral(info.getValue()).format('0,0'), 
+  },
 ];
 
 export function NonTargetWeights() {
@@ -84,10 +90,14 @@ export function NonTargetWeights() {
         const { list, totalCount } = response.data;
 
         const transformedData = list.map((item: {
-            companyName: string;
-            monthlyWeights: number[];
+          companyName: string;
+          monthlyWeights: number[];
+          totalWeight: number;
         }) => {
-            const monthlyData: { companyName: string; [key: string]: number | string } = { companyName: item.companyName };
+            const monthlyData: { companyName: string; totalWeight: number; [key: string]: number | string } = { 
+                companyName: item.companyName, 
+                totalWeight: item.totalWeight // totalWeight 추가
+            };
             item.monthlyWeights.forEach((weight: number, index: number) => {
                 monthlyData[`month_${index + 1}`] = weight;
             });

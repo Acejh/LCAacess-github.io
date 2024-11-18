@@ -45,8 +45,15 @@ const columns: ColumnDef<WeightData>[] = [
         {i + 1}월 (kg)
       </div>
     ),
-    cell: (info: CellContext<WeightData, unknown>) => numeral(info.getValue()).format('0,0.00000'),
+    cell: (info: CellContext<WeightData, unknown>) => 
+      numeral(info.getValue()).format('0,0.00000'), // 숫자 포맷팅
   })),
+  { 
+    accessorKey: 'totalWeight', 
+    header: '계 (kg)',
+    cell: (info: CellContext<WeightData, unknown>) => 
+      numeral(info.getValue()).format('0,0.00000'), // totalWeight 포맷팅
+  },
 ];
 
 export function ProductsScale() {
@@ -73,40 +80,42 @@ export function ProductsScale() {
 
   const fetchData = useCallback(async () => {
     if (!searchParams.company || !searchParams.year) {
-        setData([]);
-        setLoading(false);
-        return;
+      setData([]);
+      setLoading(false);
+      return;
     }
-
+  
     setLoading(true);
-
+  
     try {
-        const url = `https://lcaapi.acess.co.kr/MonthlyWeights/scaled?CompanyCode=${searchParams.company.code}&Year=${searchParams.year}`;
-        const response = await axios.get(url);
-        const { list } = response.data;
-
-        const transformedData = list.map((item: {
-            categoryName: string;
-            midItemName: string;
-            itemName: string;
-            monthlyWeights: number[];
-        }) => {
-            const monthlyData: { [key: string]: number | string } = {
-              categoryName: item.categoryName,
-              midItemName: item.midItemName,
-              itemName: item.itemName
-            };
-            item.monthlyWeights.forEach((weight: number, index: number) => {
-                monthlyData[`month_${index + 1}`] = weight;
-            });
-            return monthlyData;
+      const url = `https://lcaapi.acess.co.kr/MonthlyWeights/scaled?CompanyCode=${searchParams.company.code}&Year=${searchParams.year}`;
+      const response = await axios.get(url);
+      const { list } = response.data;
+  
+      const transformedData = list.map((item: {
+        categoryName: string;
+        midItemName: string;
+        itemName: string;
+        monthlyWeights: number[];
+      }) => {
+        const totalWeight = item.monthlyWeights.reduce((sum, weight) => sum + weight, 0); // 월별 합계 계산
+        const monthlyData: { [key: string]: number | string } = {
+          categoryName: item.categoryName,
+          midItemName: item.midItemName,
+          itemName: item.itemName,
+          totalWeight, // 총합 추가
+        };
+        item.monthlyWeights.forEach((weight: number, index: number) => {
+          monthlyData[`month_${index + 1}`] = weight;
         });
-
-        setData(transformedData);
-        setLoading(false);
+        return monthlyData;
+      });
+  
+      setData(transformedData);
+      setLoading(false);
     } catch (error) {
-        console.error('Error fetching data:', error);
-        setLoading(false);
+      console.error('Error fetching data:', error);
+      setLoading(false);
     }
   }, [searchParams]);
 
@@ -142,7 +151,7 @@ export function ProductsScale() {
     }, 180000); 
   
     try {
-      let url = `https://lcaapi.acess.co.kr/MonthlyWeights/export-compensated?`;
+      let url = `https://lcaapi.acess.co.kr/MonthlyWeights/scaled/export?`;
       if (selectedCompany) {
         url += `&companyCode=${selectedCompany.code}`;
       }

@@ -342,7 +342,11 @@ export function DisposalTable() {
           color="secondary"
           style={{ height: '35px', padding: '0 10px', fontSize: '14px' }}
           onClick={handleDownloadExcel}
-          disabled={!selectedCompany || downloading}
+          disabled={
+            !selectedCompany ||
+            downloading || 
+            (selectedCompany.name === '전체' || selectedCompany.name === '공통')
+          }
         >
           {downloading ? '다운로드 중...' : '엑셀 다운로드'}
         </Button>

@@ -559,14 +559,6 @@ export function DisMapping() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         폐기물 매핑
       </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
-        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px', display: 'none' }}
-        onClick={handleDownloadExcel}
-      >
-        엑셀 다운로드
-      </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} showAllOption={false} />
         <FormControl style={{ marginRight: '10px' }}>
@@ -638,6 +630,14 @@ export function DisMapping() {
           onClick={handleSearch}
         >
           조회
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px', display: 'none' }}
+          onClick={handleDownloadExcel}
+        >
+          엑셀 다운로드
         </Button>
       </div>
       <TableContainer

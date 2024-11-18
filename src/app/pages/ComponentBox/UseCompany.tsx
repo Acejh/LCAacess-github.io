@@ -152,7 +152,7 @@ const UseCompany: React.FC<UseCompanyProps> = ({
         renderInput={(params) => (
           <TextField
             {...params}
-            label={label} // 동적 label 설정
+            label={label} 
             variant="outlined"
             sx={{ 
               '& .MuiInputBase-root': {
