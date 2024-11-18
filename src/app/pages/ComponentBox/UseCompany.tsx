@@ -40,7 +40,7 @@ const UseCompany: React.FC<UseCompanyProps> = ({
   showGeneralOption = false,
   sx,
   selectSx,
-  label = "사업회원 선택", // 기본값 설정
+  label = "업체 선택", // 기본값 설정
   ...rest
 }) => {
   const [companies, setCompanies] = useState<Company[]>([]);

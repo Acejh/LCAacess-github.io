@@ -49,7 +49,7 @@ const columns: ColumnDef<WasteData>[] = [
     cell: (info: CellContext<WasteData, unknown>) => numeral(info.getValue()).format('0,0'),
   })),
   {
-    accessorKey: 'totalWeight', // total에서 totalWeight로 변경
+    accessorKey: 'totalWeight', 
     header: '계 (kg)',
     cell: (info: CellContext<WasteData, unknown>) => numeral(info.getValue()).format('0,0'),
   },
