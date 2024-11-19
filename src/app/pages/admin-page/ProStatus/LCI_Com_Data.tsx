@@ -470,7 +470,7 @@ export function LCI_Com_Data() {
                       fontWeight: 'bold',
                       position: 'sticky',
                       top: 0,
-                      zIndex: 100,
+                      zIndex: 5,
                     }}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}

@@ -17,7 +17,7 @@ export interface Product {
 interface UseProductProps extends FormControlProps {
   onProductChange: (product: string[]) => void;
   onProductListChange?: (products: Product[]) => void;
-  selectedProducts?: string[]; // 선택된 제품의 itemCode 목록
+  selectedProducts?: string[]; 
   sx?: SxProps<Theme>;
 }
 

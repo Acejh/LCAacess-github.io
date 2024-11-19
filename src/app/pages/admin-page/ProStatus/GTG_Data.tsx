@@ -420,7 +420,7 @@ export function GTG_Data() {
                         top: 0, 
                         left: index < 4 ? leftValues[index] : 'auto', 
                         width: index === 0 ? '150px' : index === 1 ? '200px' : index === 2 ? '100px' : '120px', 
-                        zIndex: index < 4 ? 100 : 1, 
+                        zIndex: index < 4 ? 5 : 1, 
                       }}
                     >
                       {flexRender(header.column.columnDef.header, header.getContext())}

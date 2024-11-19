@@ -231,7 +231,7 @@ export function SupMapping() {
   const fetchData = useCallback(async (pageIndex: number, pageSize: number, searchQuery = '') => {
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/ReccSupplyMapping?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `https://lcaapi.acess.co.kr/ReccValuableMapping?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) {
         url += `&reccNo=${searchQuery}`;
       }

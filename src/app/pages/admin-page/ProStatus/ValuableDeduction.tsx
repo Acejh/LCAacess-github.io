@@ -301,7 +301,7 @@ export function ValuableDeduction() {
           color="secondary"
           onClick={handleOpen}
           style={{ marginLeft: '10px' }}
-          disabled={!selectedCompany || !year} // 조회된 상태에서만 활성화
+          disabled={!selectedCompany || !year} 
         >
           차감량 등록
         </Button>
@@ -324,7 +324,7 @@ export function ValuableDeduction() {
                       fontWeight: 'bold',
                       position: 'sticky',
                       top: 0,
-                      zIndex: 100,
+                      zIndex: 5,
                     }}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
