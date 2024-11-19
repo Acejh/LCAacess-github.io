@@ -8,6 +8,7 @@ import {
   getCoreRowModel,
   ColumnDef,
   flexRender,
+  CellContext,
 } from '@tanstack/react-table';
 import {
   Table,
@@ -43,7 +44,7 @@ type Item = {
 };
 
 type Input = {
-  ids: number;
+  ids: number | number[]; 
   inputType: string;
   unit: string;
   year: string | number;
@@ -71,24 +72,6 @@ type ApiResponse = {
   monthlyAmounts: number[];
 };
 
-const columns: ColumnDef<Input>[] = [
-  { accessorKey: 'inputType', header: '항목' },
-  { accessorKey: 'unit', header: '단위' },
-  { accessorKey: 'year', header: () => <div style={{ textAlign: 'right' }}>연도</div>},
-  { accessorKey: '1월', header: () => <div style={{ textAlign: 'right' }}>1월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '2월', header: () => <div style={{ textAlign: 'right' }}>2월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '3월', header: () => <div style={{ textAlign: 'right' }}>3월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '4월', header: () => <div style={{ textAlign: 'right' }}>4월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '5월', header: () => <div style={{ textAlign: 'right' }}>5월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '6월', header: () => <div style={{ textAlign: 'right' }}>6월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '7월', header: () => <div style={{ textAlign: 'right' }}>7월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '8월', header: () => <div style={{ textAlign: 'right' }}>8월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '9월', header: () => <div style={{ textAlign: 'right' }}>9월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '10월', header: () => <div style={{ textAlign: 'right' }}>10월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '11월', header: () => <div style={{ textAlign: 'right' }}>11월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-  { accessorKey: '12월', header: () => <div style={{ textAlign: 'right' }}>12월</div>, cell: info => numeral(info.getValue()).format('0,0') },
-];
-
 const style = {
   position: 'absolute',
   top: '50%',
@@ -109,6 +92,8 @@ export function Ad_Input() {
   const [guideMessage, setGuideMessage] = useState('');
   const years = Array.from(new Array(6), (val, index) => currentYear - index);
   const [items, setItems] = useState<Item[]>([]);
+  const [editingCell, setEditingCell] = useState<{ rowId: string; columnId: string } | null>(null);
+  const [editValue, setEditValue] = useState<number | string | null>(null);
   const [tempSelectedCompany, setTempSelectedCompany] = useState<Company | null>(null); 
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [tempSelectedYear, setTempSelectedYear] = useState<string>('');
@@ -141,7 +126,7 @@ export function Ad_Input() {
     }
   
     setError(null);
-    setLoading(true); 
+    setLoading(true);
     try {
       let url = `https://lcaapi.acess.co.kr/Inputs?companyCode=${company.code}`;
       if (year) {
@@ -158,28 +143,46 @@ export function Ad_Input() {
       const apiResponse: ApiResponse[] = response.data;
   
       const formattedData: Input[] = items.map((item) => {
-        const apiItem = apiResponse.find(apiItem => apiItem.inputType === item.name) || {
-          ids: Array(12).fill(0),
-          monthlyAmounts: Array(12).fill(0),
-          year: year || '전체',
-        };
+        const apiItem = apiResponse.find(apiItem => apiItem.inputType === item.name);
+      
+        if (!apiItem) {
+          return {
+            ids: Array(12).fill(0), // 각 월에 대한 기본 ID 설정
+            inputType: item.name,
+            unit: item.unit,
+            year: year || '전체',
+            '1월': 0,
+            '2월': 0,
+            '3월': 0,
+            '4월': 0,
+            '5월': 0,
+            '6월': 0,
+            '7월': 0,
+            '8월': 0,
+            '9월': 0,
+            '10월': 0,
+            '11월': 0,
+            '12월': 0,
+          };
+        }
+      
         return {
-          ids: apiItem.ids[0],
+          ids: apiItem.ids, // ids 배열을 그대로 유지
           inputType: item.name,
           unit: item.unit,
           year: apiItem.year,
-          '1월': apiItem.monthlyAmounts[0],
-          '2월': apiItem.monthlyAmounts[1],
-          '3월': apiItem.monthlyAmounts[2],
-          '4월': apiItem.monthlyAmounts[3],
-          '5월': apiItem.monthlyAmounts[4],
-          '6월': apiItem.monthlyAmounts[5],
-          '7월': apiItem.monthlyAmounts[6],
-          '8월': apiItem.monthlyAmounts[7],
-          '9월': apiItem.monthlyAmounts[8],
-          '10월': apiItem.monthlyAmounts[9],
-          '11월': apiItem.monthlyAmounts[10],
-          '12월': apiItem.monthlyAmounts[11],
+          '1월': apiItem.monthlyAmounts[0] ?? 0,
+          '2월': apiItem.monthlyAmounts[1] ?? 0,
+          '3월': apiItem.monthlyAmounts[2] ?? 0,
+          '4월': apiItem.monthlyAmounts[3] ?? 0,
+          '5월': apiItem.monthlyAmounts[4] ?? 0,
+          '6월': apiItem.monthlyAmounts[5] ?? 0,
+          '7월': apiItem.monthlyAmounts[6] ?? 0,
+          '8월': apiItem.monthlyAmounts[7] ?? 0,
+          '9월': apiItem.monthlyAmounts[8] ?? 0,
+          '10월': apiItem.monthlyAmounts[9] ?? 0,
+          '11월': apiItem.monthlyAmounts[10] ?? 0,
+          '12월': apiItem.monthlyAmounts[11] ?? 0,
         };
       });
   
@@ -194,7 +197,7 @@ export function Ad_Input() {
         setError('데이터를 불러오는데 실패했습니다.');
       }
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   }, [items]);
   
@@ -243,6 +246,90 @@ export function Ad_Input() {
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
+
+  const handleSaveEdit = async (rowId: string, columnId: string) => {
+    if (!editingCell || editValue === null) {
+      setEditingCell(null);
+      return;
+    }
+  
+    const row = table.getRowModel().rows.find((row) => row.id === rowId);
+    if (!row) {
+      console.error(`Row not found for editing: Row ID = ${rowId}, Column ID = ${columnId}`);
+      setEditingCell(null);
+      return;
+    }
+  
+    const monthIndex = parseInt(columnId.replace('월', ''), 10) - 1; // 1월 -> 0, 2월 -> 1
+    const ids = row.original.ids;
+  
+    // 해당 월의 id 가져오기
+    const id = Array.isArray(ids) ? ids[monthIndex] : 0;
+  
+    if (id && !isNaN(monthIndex)) {
+      try {
+  
+        await axios.put(`https://lcaapi.acess.co.kr/Inputs/${id}`, {
+          month: monthIndex + 1, // 서버에 전달할 월 (1부터 시작)
+          amount: Number(editValue),
+        });
+  
+        setEditValue(null);
+        setEditingCell(null);
+  
+        if (selectedCompany && selectedYear) {
+          fetchData(selectedCompany, selectedYear);
+        }
+      } catch (error) {
+        console.error('Error saving data:', error);
+      }
+    } else {
+      console.error(`Invalid ID or month index: ${id}, Month: ${columnId}`);
+    }
+  };
+  
+  const handleCancelEdit = () => {
+    setEditValue(null);
+    setEditingCell(null);
+  };
+  
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>, rowId: string, columnId: string) => {
+    if (event.key === 'Enter') {
+      handleSaveEdit(rowId, columnId);
+    } else if (event.key === 'Escape') {
+      handleCancelEdit();
+    }
+  };
+
+  const renderCellContent = (cell: CellContext<Input, number | undefined>) => {
+    const { id: columnId } = cell.column;
+    const { id: rowId } = cell.row;
+  
+    if (editingCell?.rowId === rowId && editingCell?.columnId === columnId) {
+      return (
+        <TextField
+          value={editValue || ''}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleCancelEdit} // Cancel on blur
+          onKeyDown={(e) => handleKeyPress(e, rowId, columnId)} // Save or cancel on keypress
+          autoFocus
+          fullWidth
+        />
+      );
+    }
+  
+    return (
+      <div
+        onDoubleClick={() => {
+          setEditingCell({ rowId, columnId });
+          setEditValue(cell.getValue() ?? '');
+        }}
+        style={{ cursor: 'pointer' }}
+      >
+        {numeral(cell.getValue()).format('0,0') ?? ''}
+      </div>
+    );
+  };
 
   const handleFetchData = () => {
     setData([]);
@@ -413,6 +500,17 @@ export function Ad_Input() {
       console.error('데이터 등록 중 오류 발생:', error);
     }
   };
+
+  const columns: ColumnDef<Input>[] = [
+    { accessorKey: 'inputType', header: '항목' },
+    { accessorKey: 'unit', header: '단위' },
+    { accessorKey: 'year', header: () => <div style={{ textAlign: 'right' }}>연도</div> },
+    ...['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].map((month) => ({
+      accessorKey: month,
+      header: () => <div style={{ textAlign: 'right' }}>{month}</div>,
+      cell: (info: CellContext<Input, number | undefined>) => renderCellContent(info), 
+    })),
+  ];
   
   const table = useReactTable<Input>({
     data,

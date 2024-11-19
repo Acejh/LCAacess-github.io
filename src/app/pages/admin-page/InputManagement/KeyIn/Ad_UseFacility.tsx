@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
-import EditableCell from '../../../ComponentBox/EditableCell';
 // import numeral from 'numeral';
 import '../../../CSS/SCbar.css';
 import {
@@ -54,6 +53,7 @@ type Input = {
   facilityName: string;
   capacity: number;
   year: string | number;
+  ids: number[];
   '1월': number;
   '2월': number;
   '3월': number;
@@ -89,6 +89,8 @@ export function Ad_UseFacility() {
   const [tempSelectedYear, setTempSelectedYear] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<string>('');
   const [tempSelectedCompany, setTempSelectedCompany] = useState<Company | null>(null);
+  const [editingCell, setEditingCell] = useState<{ rowId: string; columnId: string } | null>(null);
+  const [editValue, setEditValue] = useState<number | string | null>(null);
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -98,6 +100,36 @@ export function Ad_UseFacility() {
     month: 1,
     opTime: '',
   });
+
+  
+  useEffect(() => {
+    const fetchOpTime = async () => {
+      if (newInput.facilityId && newInput.year && newInput.month) {
+        try {
+          const response = await axios.get(
+            `https://lcaapi.acess.co.kr/FacilityOpTimes/Exist?facilityId=${newInput.facilityId}&year=${newInput.year}&month=${newInput.month}`
+          );
+          const { isExist, facilityOpTime } = response.data;
+
+          if (isExist) {
+            setNewInput((prev) => ({
+              ...prev,
+              opTime: facilityOpTime.opTime.toString(),
+            }));
+          } else {
+            setNewInput((prev) => ({
+              ...prev,
+              opTime: '',
+            }));
+          }
+        } catch (error) {
+          console.error('Error fetching operation time:', error);
+        }
+      }
+    };
+
+    fetchOpTime();
+  }, [newInput.facilityId, newInput.year, newInput.month]); 
 
   const fetchFacilities = async (companyCode: string): Promise<Facility[]> => {
     const response = await axios.get(`https://lcaapi.acess.co.kr/Facilities?companyCode=${companyCode}`);
@@ -138,6 +170,7 @@ export function Ad_UseFacility() {
           facilityName: `${item.facilityId}_${item.facilityName}`,  // 수정된 부분
           capacity: facility ? facility.capacity : 0,
           year: item.year,
+          ids: item.ids,
           '1월': item.monthlyOpTime[0],
           '2월': item.monthlyOpTime[1],
           '3월': item.monthlyOpTime[2],
@@ -155,7 +188,7 @@ export function Ad_UseFacility() {
   
       setData(formattedData);
     } catch (error: unknown) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching data:', error); 
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         setError('데이터가 존재하지 않습니다. 데이터를 추가해주시길 바랍니다');
       } else if (error instanceof Error) {
@@ -175,6 +208,91 @@ export function Ad_UseFacility() {
       setLoading(false);
     }
   }, [selectedCompany, selectedYear, fetchData]);
+
+  const handleSaveEdit = async (rowId: string, columnId: string) => {
+    if (!editingCell || editValue === null) {
+      setEditingCell(null);
+      return; // Early exit if there's nothing to save
+    }
+  
+    const row = table.getRowModel().rows.find((row) => row.id === rowId);
+    if (!row) {
+      console.error("Row not found for editing:", { rowId, columnId });
+      setEditingCell(null);
+      return; // Early exit if row is not found
+    }
+  
+    const ids = row.original.ids; // Get ids from the row
+    if (!ids || ids.length === 0) {
+      console.error("No valid ids found for this row:", { rowId, columnId, ids });
+      setEditingCell(null);
+      return; // Early exit if no valid IDs
+    }
+  
+    try {
+      await axios.put(`https://lcaapi.acess.co.kr/FacilityOpTimes/${ids[0]}`, {
+        opTime: Number(editValue), // Only sending opTime as required
+      });
+      setEditValue(null);
+      setEditingCell(null);
+  
+      // Refresh data after successful save
+      if (selectedCompany && selectedYear) {
+        fetchData(selectedCompany, selectedYear);
+      }
+    } catch (error) {
+      console.error("Error saving data:", {
+        ids,
+        columnId,
+        opTime: Number(editValue),
+        error: error instanceof Error ? error.message : error,
+      });
+    }
+  };
+  
+  const handleCancelEdit = () => {
+    // Clear editing state without saving
+    setEditValue(null);
+    setEditingCell(null);
+  };
+  
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>, rowId: string, columnId: string) => {
+    if (event.key === 'Enter') {
+      handleSaveEdit(rowId, columnId); // Save on Enter
+    } else if (event.key === 'Escape') {
+      handleCancelEdit(); // Cancel on ESC
+    }
+  };
+  
+  const renderCellContent = (cell: CellContext<Input, number | undefined>) => {
+    const { id: columnId } = cell.column;
+    const { id: rowId } = cell.row;
+  
+    if (editingCell?.rowId === rowId && editingCell?.columnId === columnId) {
+      return (
+        <TextField
+          value={editValue || ''}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleCancelEdit} // Cancel on blur
+          onKeyDown={(e) => handleKeyPress(e, rowId, columnId)} // Save or cancel on keypress
+          autoFocus
+          fullWidth
+        />
+      );
+    }
+  
+    return (
+      <div
+        onDoubleClick={() => {
+          setEditingCell({ rowId, columnId });
+          setEditValue(cell.getValue() ?? '');
+        }}
+        style={{ cursor: 'pointer' }}
+      >
+        {cell.getValue() ?? ''}
+      </div>
+    );
+  };
 
   const handleFetchData = () => {
     setData([]);
@@ -216,21 +334,21 @@ export function Ad_UseFacility() {
     }));
   };
 
-  const handleSave = async (facilityId: number, year: number, month: string, newValue: number) => {
-    try {
-      const monthIndex = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].indexOf(month) + 1;
-      await axios.put(`https://lcaapi.acess.co.kr/FacilityOpTimes/${facilityId}`, {
-        year,
-        month: monthIndex,
-        opTime: newValue,
-      });
-      if (selectedCompany && selectedYear) {
-        fetchData(selectedCompany, selectedYear); 
-      }
-    } catch (error) {
-      console.error('Error saving data:', error);
-    }
-  };
+  // const handleSave = async (facilityId: number, year: number, month: string, newValue: number) => {
+  //   try {
+  //     const monthIndex = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].indexOf(month) + 1;
+  //     await axios.put(`https://lcaapi.acess.co.kr/FacilityOpTimes/${facilityId}`, {
+  //       year,
+  //       month: monthIndex,
+  //       opTime: newValue,
+  //     });
+  //     if (selectedCompany && selectedYear) {
+  //       fetchData(selectedCompany, selectedYear); 
+  //     }
+  //   } catch (error) {
+  //     console.error('Error saving data:', error);
+  //   }
+  // };
 
   const handleSubmit = async () => {
     try {
@@ -288,22 +406,14 @@ export function Ad_UseFacility() {
     XLSX.writeFile(workbook, '설비가동시간.xlsx');
   };
 
-  const columns: ColumnDef<Input>[] = [
+  const columns: ColumnDef<Input, unknown>[] = [
     { accessorKey: 'facilityName', header: '설비명' },
     { accessorKey: 'capacity', header: () => <div style={{ textAlign: 'center' }}>용량(KW)</div> },
     { accessorKey: 'year', header: () => <div style={{ textAlign: 'center' }}>연도</div> },
     ...['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].map((month) => ({
       accessorKey: month,
-      header: () => <div style={{ textAlign: 'center' }}>{`${month} (시간/월)`}</div>,  
-      cell: (info: CellContext<Input, number>) => (
-        <EditableCell
-          value={info.getValue() as number}
-          facilityId={info.row.original.facilityId}
-          month={month}
-          year={info.row.original.year as number}
-          onSave={(newValue) => handleSave(info.row.original.facilityId, info.row.original.year as number, month, newValue)}
-        />
-      ),
+      header: () => <div style={{ textAlign: 'center' }}>{`${month} (시간/월)`}</div>,
+      cell: (info: CellContext<Input, number | undefined>) => renderCellContent(info),
     })),
   ];
 

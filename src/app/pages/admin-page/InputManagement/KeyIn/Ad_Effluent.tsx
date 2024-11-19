@@ -8,6 +8,7 @@ import {
   getCoreRowModel,
   ColumnDef,
   flexRender,
+  CellContext,
 } from '@tanstack/react-table';
 import {
   Table,
@@ -33,22 +34,22 @@ import {
 import * as XLSX from 'xlsx';
 
 type Input = {
-  ids: number;
+  ids: number[]; // 배열로 수정
   inputType: string;
   unit: string;
   year: string | number;
-  '1월': number;
-  '2월': number;
-  '3월': number;
-  '4월': number;
-  '5월': number;
-  '6월': number;
-  '7월': number;
-  '8월': number;
-  '9월': number;
-  '10월': number;
-  '11월': number;
-  '12월': number;
+  "1월": number;
+  "2월": number;
+  "3월": number;
+  "4월": number;
+  "5월": number;
+  "6월": number;
+  "7월": number;
+  "8월": number;
+  "9월": number;
+  "10월": number;
+  "11월": number;
+  "12월": number;
 };
 
 type OutputResponse = {
@@ -59,24 +60,6 @@ type OutputResponse = {
   ids: number[];
   monthlyAmounts: number[];
 };
-
-const columns: ColumnDef<Input>[] = [
-  { accessorKey: 'inputType', header: '항목' },
-  { accessorKey: 'unit', header: '단위' },
-  { accessorKey: 'year', header: () => <div style={{ textAlign: 'right' }}>연도</div>},
-  { accessorKey: '1월', header: () => <div style={{ textAlign: 'right' }}>1월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
-  { accessorKey: '2월', header: () => <div style={{ textAlign: 'right' }}>2월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
-  { accessorKey: '3월', header: () => <div style={{ textAlign: 'right' }}>3월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
-  { accessorKey: '4월', header: () => <div style={{ textAlign: 'right' }}>4월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
-  { accessorKey: '5월', header: () => <div style={{ textAlign: 'right' }}>5월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
-  { accessorKey: '6월', header: () => <div style={{ textAlign: 'right' }}>6월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
-  { accessorKey: '7월', header: () => <div style={{ textAlign: 'right' }}>7월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
-  { accessorKey: '8월', header: () => <div style={{ textAlign: 'right' }}>8월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
-  { accessorKey: '9월', header: () => <div style={{ textAlign: 'right' }}>9월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
-  { accessorKey: '10월', header: () => <div style={{ textAlign: 'right' }}>10월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
-  { accessorKey: '11월', header: () => <div style={{ textAlign: 'right' }}>11월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
-  { accessorKey: '12월', header: () => <div style={{ textAlign: 'right' }}>12월</div>, cell: info => numeral(info.getValue()).format('0,0.00') },
-];
 
 const style = {
   position: 'absolute',
@@ -99,6 +82,8 @@ export function Ad_Effluent() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [tempSelectedYear, setTempSelectedYear] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<string>('');
+  const [editingCell, setEditingCell] = useState<{ rowId: string; columnId: string } | null>(null);
+  const [editValue, setEditValue] = useState<number | string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [newInput, setNewInput] = useState({
@@ -109,63 +94,121 @@ export function Ad_Effluent() {
     amount: '',
   });
 
+  useEffect(() => {
+    const fetchAmount = async () => {
+      if (!newInput.companyCode || !newInput.year || !newInput.month) {
+        // 필수 값이 없으면 초기화
+        setNewInput(prevState => ({
+          ...prevState,
+          amount: '',
+        }));
+        return;
+      }
+  
+      try {
+        const response = await axios.get(
+          `https://lcaapi.acess.co.kr/Outputs/Water/Exist`,
+          {
+            params: {
+              CompanyCode: newInput.companyCode,
+              Year: newInput.year,
+              month: newInput.month,
+            },
+          }
+        );
+  
+        const { isExist, amount } = response.data;
+  
+        if (isExist) {
+          // 값이 존재하면 업데이트
+          setNewInput(prevState => ({
+            ...prevState,
+            amount: amount.toString(),
+          }));
+        } else {
+          // 값이 없으면 0으로 설정
+          setNewInput(prevState => ({
+            ...prevState,
+            amount: '0',
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching amount:', error);
+        setNewInput(prevState => ({
+          ...prevState,
+          amount: '',
+        }));
+      }
+    };
+  
+    fetchAmount();
+  }, [newInput.companyCode, newInput.year, newInput.month]);
+
   const fetchData = useCallback(async (company: Company | null, year: string) => {
     if (!company) {
-        setData([]);
-        setLoading(false);
-        return;
+      setData([]);
+      setLoading(false);
+      return;
     }
-
+  
+    if (!year) {
+      setError("연도를 선택해 주세요.");
+      setLoading(false);
+      return;
+    }
+  
     setError(null);
     setLoading(true);
+  
     try {
-        let url = `https://lcaapi.acess.co.kr/Outputs/Water?CompanyCode=${company.code}`;
-        if (year) {
-            url += `&Year=${year}`;
-        }
-
-        const response = await axios.get(url);
-
-        if (response.status === 404) {
-            const errorMessage = response.data?.title || 'Data not found';
-            throw new Error(errorMessage);
-        }
-
-        const apiResponse: OutputResponse[] = response.data.outputs;
-
-        const formattedData: Input[] = apiResponse.map((output: OutputResponse) => ({
-            ids: output.ids[0], 
-            inputType: "수계배출물",
-            unit: output.unit,
-            year: output.year,
-            '1월': output.monthlyAmounts[0],
-            '2월': output.monthlyAmounts[1],
-            '3월': output.monthlyAmounts[2],
-            '4월': output.monthlyAmounts[3],
-            '5월': output.monthlyAmounts[4],
-            '6월': output.monthlyAmounts[5],
-            '7월': output.monthlyAmounts[6],
-            '8월': output.monthlyAmounts[7],
-            '9월': output.monthlyAmounts[8],
-            '10월': output.monthlyAmounts[9],
-            '11월': output.monthlyAmounts[10],
-            '12월': output.monthlyAmounts[11],
-        }));
-
-        setData(formattedData);
+      let url = `https://lcaapi.acess.co.kr/Outputs/Water?CompanyCode=${company.code}`;
+      if (year) {
+        url += `&Year=${year}`;
+      }
+  
+      const response = await axios.get(url);
+  
+      if (response.status === 404) {
+        const errorMessage = response.data?.title || "Data not found";
+        throw new Error(errorMessage);
+      }
+  
+      const apiResponse: OutputResponse[] = response.data.outputs;
+  
+      // 데이터 형식화
+      const formattedData: Input[] = apiResponse.map((output: OutputResponse) => ({
+        ids: output.ids, // ids 배열 전체 저장
+        inputType: "수계배출물",
+        unit: output.unit,
+        year: output.year,
+        "1월": output.monthlyAmounts[0],
+        "2월": output.monthlyAmounts[1],
+        "3월": output.monthlyAmounts[2],
+        "4월": output.monthlyAmounts[3],
+        "5월": output.monthlyAmounts[4],
+        "6월": output.monthlyAmounts[5],
+        "7월": output.monthlyAmounts[6],
+        "8월": output.monthlyAmounts[7],
+        "9월": output.monthlyAmounts[8],
+        "10월": output.monthlyAmounts[9],
+        "11월": output.monthlyAmounts[10],
+        "12월": output.monthlyAmounts[11],
+      }));
+  
+      setData(formattedData);
     } catch (error: unknown) {
-        console.error('Error fetching data:', error);
-        if (axios.isAxiosError(error) && error.response?.status === 404) {
-            setError('데이터가 존재하지 않습니다. 데이터를 추가해주시길 바랍니다');
-        } else if (error instanceof Error) {
-            setError(`데이터를 불러오는데 실패했습니다: ${error.message}`);
-        } else {
-            setError('데이터를 불러오는데 실패했습니다.');
-        }
+      console.error("Error fetching data:", error);
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        setError("데이터가 존재하지 않습니다. 데이터를 추가해주시길 바랍니다.");
+      } else if (error instanceof Error) {
+        setError(`데이터를 불러오는데 실패했습니다: ${error.message}`);
+      } else {
+        setError("데이터를 불러오는데 실패했습니다.");
+      }
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-}, []);
+  }, []);
   
   useEffect(() => {
     if (selectedCompany && selectedYear) {
@@ -174,6 +217,114 @@ export function Ad_Effluent() {
       setLoading(false);
     }
   }, [selectedCompany, selectedYear, fetchData,]);
+
+  const handleSaveEdit = async (rowId: string, columnId: string) => {
+    if (!editingCell || editValue === null) {
+      setEditingCell(null);
+      return; // 저장할 데이터가 없으면 종료
+    }
+  
+    const row = table.getRowModel().rows.find((row) => row.id === rowId);
+    if (!row) {
+      console.error("Row not found for editing:", { rowId, columnId });
+      setEditingCell(null);
+      return; // 행을 찾지 못하면 종료
+    }
+  
+    const ids = row.original.ids; // 해당 행의 ids 가져오기
+    if (!Array.isArray(ids) || ids.length === 0) {
+      console.error("No valid ids found for this row:", { rowId, columnId, ids });
+      setEditingCell(null);
+      return; // 유효한 ids가 없으면 종료
+    }
+  
+    // `columnId`에서 월 번호 추출 (예: "month-1" → 0-based 인덱스)
+    const monthIndex = parseInt(columnId.replace("month-", ""), 10) - 1;
+  
+    const id = ids[monthIndex]; // 해당 월의 ID 가져오기
+    if (!id) {
+      console.error("No valid ID found for this month:", { rowId, columnId, monthIndex, ids });
+      setEditingCell(null);
+      return; // ID를 찾지 못하면 종료
+    }
+  
+    try {
+      console.log("Editing Cell:", { rowId, columnId });
+      console.log("Row Data:", row.original);
+      console.log("Selected Month Index:", monthIndex);
+      console.log("Selected ID:", id);
+      console.log("New Value:", editValue);
+  
+      // API 요청으로 데이터 업데이트
+      await axios.put(`https://lcaapi.acess.co.kr/Outputs/Water/${id}`, {
+        amount: Number(editValue), // 수정된 값
+        month: monthIndex + 1, // 월 정보 (1-based index)
+      });
+  
+      console.log("Data updated successfully");
+  
+      setEditValue(null);
+      setEditingCell(null);
+  
+      // 데이터 갱신
+      if (selectedCompany && selectedYear) {
+        fetchData(selectedCompany, selectedYear);
+      }
+    } catch (error) {
+      console.error("Error saving data:", {
+        ids,
+        columnId,
+        amount: Number(editValue),
+        error: error instanceof Error ? error.message : error,
+      });
+    }
+  };
+  
+  const handleCancelEdit = () => {
+    setEditValue(null);
+    setEditingCell(null); // 수정 모드 취소
+  };
+  
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>, rowId: string, columnId: string) => {
+    if (event.key === "Enter") {
+      handleSaveEdit(rowId, columnId); // Enter 키로 저장
+    } else if (event.key === "Escape") {
+      handleCancelEdit(); // ESC 키로 취소
+    }
+  };
+  
+  const renderCellContent = (cell: CellContext<Input, number | undefined>) => {
+    const { id: columnId } = cell.column;
+    const { id: rowId } = cell.row;
+  
+    if (editingCell?.rowId === rowId && editingCell?.columnId === columnId) {
+      return (
+        <TextField
+          value={editValue || ""}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleCancelEdit} // 포커스를 잃으면 취소
+          onKeyDown={(e) => handleKeyPress(e, rowId, columnId)} // Enter로 저장, ESC로 취소
+          autoFocus
+          fullWidth
+        />
+      );
+    }
+  
+    // 포맷팅된 값을 렌더링
+    const formattedValue = cell.getValue() !== undefined ? numeral(cell.getValue()).format("0,0.00") : "";
+  
+    return (
+      <div
+        onDoubleClick={() => {
+          setEditingCell({ rowId, columnId });
+          setEditValue(cell.getValue() ?? ""); // 현재 값을 수정 모드로 설정
+        }}
+        style={{ cursor: "pointer" }}
+      >
+        {formattedValue}
+      </div>
+    );
+  };
   
   const handleFetchData = () => {
     setData([]);
@@ -217,63 +368,55 @@ export function Ad_Effluent() {
 
   const handleSubmit = async () => {
     try {
-        const { companyCode, year, month, amount } = newInput;
-        const actualYear = year || null;
-
-        if (!companyCode || !year || !month || !amount) {
-            throw new Error('모든 필드를 입력해 주세요.');
-        }
-
-        // 존재 여부 확인
-        const checkUrl = `https://lcaapi.acess.co.kr/Outputs/Water/Exist?companyCode=${companyCode}&year=${actualYear}&month=${month}`;
-
-        const checkResponse = await axios.get(checkUrl);
-        const exists = checkResponse.data.isExist;
-
-        if (exists) {
-            // 회사 코드와 연도를 바탕으로 IDs 배열을 가져오기 위한 요청
-            const idsUrl = `https://lcaapi.acess.co.kr/Outputs/Water?CompanyCode=${companyCode}&Year=${actualYear}`;
-
-            const idsResponse = await axios.get(idsUrl);
-            const ids: number[] = idsResponse.data.outputs[0]?.ids || [];
-
-            // 해당 월에 맞는 ID 추출
-            if (typeof month === 'number' && ids.length > 0) {
-                const id = ids[month - 1]; // 해당 월의 ID 가져오기
-
-                if (id) {
-                  const updateUrl = `https://lcaapi.acess.co.kr/Outputs/Water/${id}`;
-                  const updatePayload = {
-                      companyCode,
-                      year: Number(actualYear),
-                      month: Number(month),
-                      amount: Number(amount),
-                  };
-              
-                  await axios.put(updateUrl, updatePayload);
-              } else {
-                  throw new Error('해당 월의 ID를 찾을 수 없습니다.');
-              }
-            }
+      const { companyCode, year, month, amount } = newInput;
+      if (!companyCode || !year || !month || !amount) {
+        throw new Error("모든 필드를 입력해 주세요.");
+      }
+  
+      // Check if the record exists
+      const checkUrl = `https://lcaapi.acess.co.kr/Outputs/Water/Exist?companyCode=${companyCode}&year=${year}&month=${month}`;
+      const checkResponse = await axios.get(checkUrl);
+      const exists = checkResponse.data.isExist;
+  
+      if (exists) {
+        // If the data exists, update it
+        const idsUrl = `https://lcaapi.acess.co.kr/Outputs/Water?CompanyCode=${companyCode}&Year=${year}`;
+        const idsResponse = await axios.get(idsUrl);
+        const ids: number[] = idsResponse.data.outputs[0]?.ids || [];
+  
+        if (ids.length > 0) {
+          const id = ids[month - 1]; // Map the month to the correct ID
+          if (id) {
+            const updateUrl = `https://lcaapi.acess.co.kr/Outputs/Water/${id}`;
+            await axios.put(updateUrl, {
+              companyCode,
+              year: Number(year),
+              month: Number(month),
+              amount: Number(amount),
+            });
+          } else {
+            throw new Error("해당 월의 ID를 찾을 수 없습니다.");
+          }
         } else {
-            // 새로 등록
-            const createUrl = 'https://lcaapi.acess.co.kr/Outputs/Water';
-            const createPayload = {
-                companyCode,
-                year: Number(actualYear),
-                month: Number(month),
-                amount: Number(amount),
-            };
-
-            await axios.post(createUrl, createPayload);
+          throw new Error("IDs를 가져오는 데 실패했습니다.");
         }
-
-        handleClose();
-        fetchData(selectedCompany, selectedYear);
+      } else {
+        // If the data does not exist, create a new record
+        const createUrl = "https://lcaapi.acess.co.kr/Outputs/Water";
+        await axios.post(createUrl, {
+          companyCode,
+          year: Number(year),
+          month: Number(month),
+          amount: Number(amount),
+        });
+      }
+  
+      handleClose();
+      fetchData(selectedCompany, selectedYear);
     } catch (error) {
-        console.error('데이터 등록 중 오류 발생:', error);
+      console.error("데이터 등록 중 오류 발생:", error);
     }
-};
+  };
 
   // 엑셀 다운로드
   const handleDownloadExcel = () => {
@@ -282,6 +425,18 @@ export function Ad_Effluent() {
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
     XLSX.writeFile(workbook, '배출물 정보.xlsx');
   };
+
+  const columns: ColumnDef<Input, unknown>[] = [
+    { accessorKey: "inputType", header: "항목", id: "inputType" },
+    { accessorKey: "unit", header: "단위", id: "unit" },
+    { accessorKey: "year", header: () => <div style={{ textAlign: "right" }}>연도</div>, id: "year" },
+    ...["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"].map((month, index) => ({
+      accessorKey: month,
+      header: () => <div style={{ textAlign: "right" }}>{month}</div>,
+      id: `month-${index + 1}`, 
+      cell: (info: CellContext<Input, number | undefined>) => renderCellContent(info),
+    })),
+  ];
 
   const table = useReactTable<Input>({
     data,
