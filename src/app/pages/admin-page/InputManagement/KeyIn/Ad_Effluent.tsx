@@ -430,12 +430,12 @@ export function Ad_Effluent() {
     { accessorKey: "inputType", header: "항목", id: "inputType" },
     { accessorKey: "unit", header: "단위", id: "unit" },
     { accessorKey: "year", header: () => <div style={{ textAlign: "right" }}>연도</div>, id: "year" },
-    ...["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"].map((month, index) => ({
+    ...(["1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월"] as const).map((month, index) => ({
       accessorKey: month,
       header: () => <div style={{ textAlign: "right" }}>{month}</div>,
       id: `month-${index + 1}`, 
-      cell: (info: CellContext<Input, number | undefined>) => renderCellContent(info),
-    })),
+      cell: (info) => renderCellContent(info as CellContext<Input, number | undefined>), // 타입 캐스팅
+    })) as ColumnDef<Input, unknown>[], // 전체 결과 타입 캐스팅
   ];
 
   const table = useReactTable<Input>({

@@ -47,8 +47,7 @@ export function Ad_Dashboard() {
         </div>
 
         <div className="notification-section">
-          <h2>알림 (실시간 업데이트)</h2>
-          <div className="placeholder">알림 내용</div> {/* 알림 */}
+          <h2>알림</h2>
         </div>
       </div>
     </div>

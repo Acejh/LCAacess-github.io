@@ -111,7 +111,7 @@ export function NoticeList({ isAdmin, handleAdminClick }: NoticeListProps) {
                     {notice.title}
                   </h3>
                 </div>
-                <span style={{ width: '20%', textAlign: 'right', color: '#888' }}>
+                <span style={{ width: '20%', textAlign: 'right', marginRight: '20px', color: '#888' }}>
                   {new Date(notice.createdAt).toLocaleDateString()}
                 </span>
               </div>

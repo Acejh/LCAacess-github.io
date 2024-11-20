@@ -505,11 +505,11 @@ export function Ad_Input() {
     { accessorKey: 'inputType', header: '항목' },
     { accessorKey: 'unit', header: '단위' },
     { accessorKey: 'year', header: () => <div style={{ textAlign: 'right' }}>연도</div> },
-    ...['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].map((month) => ({
+    ...(['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'] as const).map((month) => ({
       accessorKey: month,
       header: () => <div style={{ textAlign: 'right' }}>{month}</div>,
       cell: (info: CellContext<Input, number | undefined>) => renderCellContent(info), 
-    })),
+    })) as ColumnDef<Input>[], 
   ];
   
   const table = useReactTable<Input>({

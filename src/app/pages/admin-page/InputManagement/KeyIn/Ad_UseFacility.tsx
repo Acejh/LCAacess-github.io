@@ -410,11 +410,11 @@ export function Ad_UseFacility() {
     { accessorKey: 'facilityName', header: '설비명' },
     { accessorKey: 'capacity', header: () => <div style={{ textAlign: 'center' }}>용량(KW)</div> },
     { accessorKey: 'year', header: () => <div style={{ textAlign: 'center' }}>연도</div> },
-    ...['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].map((month) => ({
+    ...(['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'] as const).map((month) => ({
       accessorKey: month,
       header: () => <div style={{ textAlign: 'center' }}>{`${month} (시간/월)`}</div>,
-      cell: (info: CellContext<Input, number | undefined>) => renderCellContent(info),
-    })),
+      cell: (info) => renderCellContent(info as CellContext<Input, number | undefined>), // 타입 캐스팅
+    })) as ColumnDef<Input, unknown>[], // 타입 캐스팅
   ];
 
   const table = useReactTable<Input>({
