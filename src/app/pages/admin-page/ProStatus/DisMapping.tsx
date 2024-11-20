@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import '../../CSS/SCbar.css';
+import { useNavigate } from 'react-router-dom';
 import {
   useReactTable,
   getCoreRowModel,
@@ -118,6 +119,9 @@ export function DisMapping() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [totalCount, setTotalCount] = useState(0);
+  const [tempItemMappingStatus, setTempItemMappingStatus] = useState<string>('');
+  const [tempClientMappingStatus, setTempClientMappingStatus] = useState<string>('');
+  const [tempCarMappingStatus, setTempCarMappingStatus] = useState<string>('');
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [itemModalOpen, setItemModalOpen] = useState(false);
@@ -131,12 +135,17 @@ export function DisMapping() {
     year: '',
     month: '',
     company: null as Company | null,
+    itemMappingStatus: '',
+    clientMappingStatus: '',
+    carMappingStatus: '',
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [clientModalOpen, setClientModalOpen] = useState(false);
   const [carModalOpen, setCarModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Basic['reccWasteClient'] | null>(null);
   const [selectedCar, setSelectedCar] = useState<Basic['reccWasteCar'] | null>(null);
+
+  const navigate = useNavigate();
 
   const fetchClientTypes = async () => {
     try {
@@ -235,6 +244,15 @@ export function DisMapping() {
       if (searchParams.month) {
         url += `&month=${searchParams.month}`;
       }
+      if (searchParams.itemMappingStatus) {
+        url += `&itemMappingStatus=${searchParams.itemMappingStatus}`;
+      }
+      if (searchParams.clientMappingStatus) {
+        url += `&clientMappingStatus=${searchParams.clientMappingStatus}`;
+      }
+      if (searchParams.carMappingStatus) {
+        url += `&carMappingStatus=${searchParams.carMappingStatus}`;
+      }
   
       const response = await axios.get(url);
       const { list, totalCount } = response.data;
@@ -275,21 +293,24 @@ export function DisMapping() {
 
   const handleSearch = () => {
     if (!selectedCompany) {
-        setErrorMessage("사업회원을 선택하여주십시오");
-        return;
+      setErrorMessage("사업회원을 선택하여주십시오");
+      return;
     }
-
+  
     setErrorMessage(null);
-
+  
     setPageIndex(0);
-
+  
     setSearchParams({
-        query: searchQuery,
-        company: selectedCompany,
-        year: year || '', 
-        month: month || '', 
+      query: searchQuery,
+      company: selectedCompany,
+      year: year || '',
+      month: month || '',
+      itemMappingStatus: tempItemMappingStatus,
+      clientMappingStatus: tempClientMappingStatus,
+      carMappingStatus: tempCarMappingStatus,
     });
-};
+  };
 
   const handleSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -543,15 +564,15 @@ export function DisMapping() {
   };
 
   const navigateToClientManagement = () => {
-    window.location.href = '/AdminClient'; 
+    navigate('/AdminClient'); // React Router로 페이지 이동
   };
-
+  
   const navigateToWasteManagement = () => {
-    window.location.href = '/Ad_Waste'; 
+    navigate('/Ad_Waste'); // React Router로 페이지 이동
   };
-
+  
   const navigateToCarsManagement = () => {
-    window.location.href = '/CarsControl'; 
+    navigate('/CarsControl'); // React Router로 페이지 이동
   };
   
   return (
@@ -639,6 +660,77 @@ export function DisMapping() {
         >
           엑셀 다운로드
         </Button>
+      </div>
+      <div style={{ marginBottom: '20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+          <FormControl style={{ marginRight: '10px' }}>
+            <InputLabel id="item-mapping-status-label">폐기물 매핑 상태 조회</InputLabel>
+            <Select
+              labelId="item-mapping-status-label"
+              id="item-mapping-status-select"
+              value={tempItemMappingStatus}
+              onChange={(e) => setTempItemMappingStatus(e.target.value)}
+              style={{ width: '200px' }}
+              sx={{ height: '45px' }}
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 120,
+                  },
+                },
+              }}
+            >
+              <MenuItem value="">전체</MenuItem>
+              <MenuItem value="MAPPED">매핑됨</MenuItem>
+              <MenuItem value="NOT_MAPPED">미완료</MenuItem>
+            </Select>
+          </FormControl>
+
+          <FormControl style={{ marginRight: '10px' }}>
+            <InputLabel id="client-mapping-status-label">거래처 매핑 상태 조회</InputLabel>
+            <Select
+              labelId="client-mapping-status-label"
+              id="client-mapping-status-select"
+              value={tempClientMappingStatus}
+              onChange={(e) => setTempClientMappingStatus(e.target.value)}
+              style={{ width: '200px' }}
+              sx={{ height: '45px' }}
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 120,
+                  },
+                },
+              }}
+            >
+              <MenuItem value="">전체</MenuItem>
+              <MenuItem value="MAPPED">매핑됨</MenuItem>
+              <MenuItem value="NOT_MAPPED">미완료</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl style={{ marginRight: '10px' }}>
+            <InputLabel id="car-mapping-status-label">차량 매핑 상태 조회</InputLabel>
+            <Select
+              labelId="car-mapping-status-label"
+              id="car-mapping-status-select"
+              value={tempCarMappingStatus}
+              onChange={(e) => setTempCarMappingStatus(e.target.value)}
+              style={{ width: '200px' }}
+              sx={{ height: '45px' }}
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 120,
+                  },
+                },
+              }}
+            >
+              <MenuItem value="">전체</MenuItem>
+              <MenuItem value="MAPPED">매핑됨</MenuItem>
+              <MenuItem value="NOT_MAPPED">미완료</MenuItem>
+            </Select>
+          </FormControl>
+        </div>
       </div>
       <TableContainer
         component={Paper}

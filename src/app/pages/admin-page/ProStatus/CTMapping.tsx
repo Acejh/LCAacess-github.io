@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
+import { useNavigate } from 'react-router-dom'; 
 import '../../CSS/SCbar.css';
 import {
   useReactTable,
@@ -82,12 +83,18 @@ export function CTMapping() {
     year: '',
     month: '',
     company: null as Company | null,
+    clientMappingStatus: '',
+    carMappingStatus: '', // 차량 매핑 상태 추가
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [tempClientMappingStatus, setTempClientMappingStatus] = useState<string>('');
+  const [tempCarMappingStatus, setTempCarMappingStatus] = useState<string>('');
   const [clientModalOpen, setClientModalOpen] = useState(false);
   const [carModalOpen, setCarModalOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Basic['transClient'] | null>(null);
   const [selectedCar, setSelectedCar] = useState<Basic['transCar'] | null>(null);
+
+  const navigate = useNavigate();
 
   const fetchClientTypes = async () => {
     try {
@@ -117,6 +124,12 @@ export function CTMapping() {
       }
       if (searchParams.month) {
         url += `&month=${searchParams.month}`;
+      }
+      if (searchParams.clientMappingStatus) {
+        url += `&clientMappingStatus=${searchParams.clientMappingStatus}`;
+      }
+      if (searchParams.carMappingStatus) { 
+        url += `&carMappingStatus=${searchParams.carMappingStatus}`;
       }
   
       const response = await axios.get(url);
@@ -166,8 +179,10 @@ export function CTMapping() {
     setSearchParams({
       query: searchQuery,
       company: selectedCompany,
-      year: year || '',  
+      year: year || '',
       month,
+      clientMappingStatus: tempClientMappingStatus, // 거래처 매핑 상태
+      carMappingStatus: tempCarMappingStatus, // 차량 매핑 상태
     });
   };
 
@@ -427,6 +442,52 @@ export function CTMapping() {
             sx={{ '& .MuiInputBase-root': { height: '45px' } }}
           />
         </FormControl>
+        <FormControl style={{ marginRight: '10px' }}>
+          <InputLabel id="client-mapping-status-label">거래처 매핑 상태 조회</InputLabel>
+          <Select
+            labelId="client-mapping-status-label"
+            id="client-mapping-status-select"
+            value={tempClientMappingStatus}
+            label="거래처 매핑 상태 조회"
+            onChange={(e) => setTempClientMappingStatus(e.target.value)}
+            style={{ width: '200px' }}
+            sx={{ height: '45px' }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 120,
+                },
+              },
+            }}
+          >
+            <MenuItem value="">전체</MenuItem>
+            <MenuItem value="MAPPED">매핑됨</MenuItem>
+            <MenuItem value="NOT">매핑필요</MenuItem>
+          </Select>
+        </FormControl>
+        <FormControl style={{ marginRight: '10px' }}>
+          <InputLabel id="car-mapping-status-label">차량 매핑 상태 조회</InputLabel>
+          <Select
+            labelId="car-mapping-status-label"
+            id="car-mapping-status-select"
+            value={tempCarMappingStatus}
+            label="차량 매핑 상태 조회"
+            onChange={(e) => setTempCarMappingStatus(e.target.value)}
+            style={{ width: '200px' }}
+            sx={{ height: '45px' }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 120,
+                },
+              },
+            }}
+          >
+            <MenuItem value="">전체</MenuItem>
+            <MenuItem value="MAPPED">매핑됨</MenuItem>
+            <MenuItem value="NOT">매핑필요</MenuItem>
+          </Select>
+        </FormControl>
         <Button
           variant="contained"
           color="primary"
@@ -505,6 +566,7 @@ export function CTMapping() {
         </TableBody>
       </Table>
     </TableContainer>
+    
     <Dialog open={clientModalOpen} onClose={handleCloseClientModal} maxWidth="sm" fullWidth>
       <DialogTitle>거래처 매핑 확인</DialogTitle>
       <DialogContent dividers>
@@ -519,11 +581,22 @@ export function CTMapping() {
           </>
         )}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCloseClientModal} color="secondary" variant="outlined">닫기</Button>
-        {selectedClient && selectedClient.id === 0 && (
-          <Button onClick={handleConfirmClientMapping} color="primary" variant="contained">확정</Button>
+      <DialogActions style={{ justifyContent: 'space-between' }}>
+        {selectedClient?.id && selectedClient.id > 0 && (
+          <Button onClick={() => navigate('/AdminClient')} color="primary" variant="contained">
+            거래처 관리
+          </Button>
         )}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button onClick={handleCloseClientModal} color="secondary" variant="outlined">
+            닫기
+          </Button>
+          {selectedClient?.id === 0 && (
+            <Button onClick={handleConfirmClientMapping} color="primary" variant="contained">
+              확정
+            </Button>
+          )}
+        </div>
       </DialogActions>
     </Dialog>
 
@@ -539,13 +612,25 @@ export function CTMapping() {
           </>
         )}
       </DialogContent>
-      <DialogActions>
-        <Button onClick={handleCloseCarModal} color="secondary" variant="outlined">닫기</Button>
-        {selectedCar && selectedCar.id === 0 && (
-          <Button onClick={handleConfirmCarMapping} color="primary" variant="contained">확정</Button>
+      <DialogActions style={{ justifyContent: 'space-between' }}>
+        {selectedCar?.id && selectedCar.id > 0 && (
+          <Button onClick={() => navigate('/CarsControl')} color="primary" variant="contained">
+            차량 관리
+          </Button>
         )}
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button onClick={handleCloseCarModal} color="secondary" variant="outlined">
+            닫기
+          </Button>
+          {selectedCar?.id === 0 && (
+            <Button onClick={handleConfirmCarMapping} color="primary" variant="contained">
+              확정
+            </Button>
+          )}
+        </div>
       </DialogActions>
     </Dialog>
+
       <div style={{ marginTop: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <Button onClick={() => table.setPageIndex(pageIndex - 1)} disabled={!table.getCanPreviousPage()} variant="contained" color="primary" style={{ marginRight: '10px' }}>

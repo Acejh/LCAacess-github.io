@@ -120,11 +120,19 @@ export function SupMapping() {
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [itemModalOpen, setItemModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<number | null>(null);
+  const [itemMappingStatus, setItemMappingStatus] = useState<string>('');
+  const [clientMappingStatus, setClientMappingStatus] = useState<string>('');
+  const [extraClientMappingStatus, setExtraClientMappingStatus] = useState<string>('');
+  const [carMappingStatus, setCarMappingStatus] = useState<string>('');
   const [searchParams, setSearchParams] = useState({
     query: '',
     year: '',
     month: '',
     company: null as Company | null,
+    itemMappingStatus: '', // 유가물 매핑 상태
+    clientMappingStatus: '', // 거래처 매핑 상태
+    extraClientMappingStatus: '', // 2차 거래처 매핑 상태
+    carMappingStatus: '', // 차량 매핑 상태
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [clientModalOpen, setClientModalOpen] = useState(false);
@@ -244,6 +252,18 @@ export function SupMapping() {
       if (searchParams.month) {
         url += `&month=${searchParams.month}`;
       }
+      if (searchParams.itemMappingStatus) {
+        url += `&itemMappingStatus=${searchParams.itemMappingStatus}`;
+      }
+      if (searchParams.clientMappingStatus) {
+        url += `&clientMappingStatus=${searchParams.clientMappingStatus}`;
+      }
+      if (searchParams.extraClientMappingStatus) {
+        url += `&extraClientMappingStatus=${searchParams.extraClientMappingStatus}`;
+      }
+      if (searchParams.carMappingStatus) {
+        url += `&carMappingStatus=${searchParams.carMappingStatus}`;
+      }
   
       const response = await axios.get(url);
       const { list, totalCount } = response.data;
@@ -289,21 +309,24 @@ export function SupMapping() {
 
   const handleSearch = () => {
     if (!selectedCompany) {
-        setErrorMessage("사업회원을 선택하여주십시오");
-        return;
+      setErrorMessage("사업회원을 선택하여주십시오");
+      return;
     }
-
+  
     setErrorMessage(null);
-
     setPageIndex(0);
-
+  
     setSearchParams({
-        query: searchQuery,
-        company: selectedCompany,
-        year: year || '', 
-        month: month || '',
+      query: searchQuery,
+      company: selectedCompany,
+      year: year || '',
+      month: month || '',
+      itemMappingStatus, // 유가물 매핑 상태
+      clientMappingStatus, // 거래처 매핑 상태
+      extraClientMappingStatus, // 2차 거래처 매핑 상태
+      carMappingStatus, // 차량 매핑 상태
     });
-};
+  };
 
   const handleSearchQueryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
@@ -706,6 +729,103 @@ export function SupMapping() {
         >
           엑셀 다운로드
         </Button>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+        <FormControl style={{ marginRight: '10px' }}>
+          <InputLabel id="item-mapping-status-label">유가물 매핑 상태 조회</InputLabel>
+          <Select
+            labelId="item-mapping-status-label"
+            id="item-mapping-status-select"
+            value={itemMappingStatus}
+            label="유가물 매핑 상태 조회"
+            onChange={(e) => setItemMappingStatus(e.target.value)}
+            style={{ width: '200px' }}
+            sx={{ height: '45px' }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 120,
+                },
+              },
+            }}
+          >
+            <MenuItem value="">전체</MenuItem>
+            <MenuItem value="MAPPED">매핑됨</MenuItem>
+            <MenuItem value="NOT">매핑필요</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl style={{ marginRight: '10px' }}>
+          <InputLabel id="client-mapping-status-label">거래처 매핑 상태 조회</InputLabel>
+          <Select
+            labelId="client-mapping-status-label"
+            id="client-mapping-status-select"
+            value={clientMappingStatus}
+            label="거래처 매핑 상태 조회"
+            onChange={(e) => setClientMappingStatus(e.target.value)}
+            style={{ width: '200px' }}
+            sx={{ height: '45px' }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 120,
+                },
+              },
+            }}
+          >
+            <MenuItem value="">전체</MenuItem>
+            <MenuItem value="MAPPED">매핑됨</MenuItem>
+            <MenuItem value="NOT">매핑필요</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl style={{ marginRight: '10px' }}>
+          <InputLabel id="extra-client-mapping-status-label">2차 거래처 매핑 상태 조회</InputLabel>
+          <Select
+            labelId="extra-client-mapping-status-label"
+            id="extra-client-mapping-status-select"
+            value={extraClientMappingStatus}
+            label="2차 거래처 매핑 상태 조회"
+            onChange={(e) => setExtraClientMappingStatus(e.target.value)}
+            style={{ width: '220px' }}
+            sx={{ height: '45px' }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 120,
+                },
+              },
+            }}
+          >
+            <MenuItem value="">전체</MenuItem>
+            <MenuItem value="MAPPED">매핑됨</MenuItem>
+            <MenuItem value="NOT">매핑필요</MenuItem>
+          </Select>
+        </FormControl>
+
+        <FormControl style={{ marginRight: '10px' }}>
+          <InputLabel id="car-mapping-status-label">차량 매핑 상태 조회</InputLabel>
+          <Select
+            labelId="car-mapping-status-label"
+            id="car-mapping-status-select"
+            value={carMappingStatus}
+            label="차량 매핑 상태 조회"
+            onChange={(e) => setCarMappingStatus(e.target.value)}
+            style={{ width: '200px' }}
+            sx={{ height: '45px' }}
+            MenuProps={{
+              PaperProps: {
+                style: {
+                  maxHeight: 120,
+                },
+              },
+            }}
+          >
+            <MenuItem value="">전체</MenuItem>
+            <MenuItem value="MAPPED">매핑됨</MenuItem>
+            <MenuItem value="NOT">매핑필요</MenuItem>
+          </Select>
+        </FormControl>
       </div>
       <TableContainer
         component={Paper}

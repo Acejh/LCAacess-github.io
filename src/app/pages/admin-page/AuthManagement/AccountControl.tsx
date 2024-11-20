@@ -76,6 +76,8 @@ export function UserControl() {
   const [isFormValid, setIsFormValid] = useState(false);
   const [open, setOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
+  const [resetOpen, setResetOpen] = useState(false);
+  const [resetUserName, setResetUserName] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [deleteMemberName, setDeleteMemberName] = useState<string>('');
@@ -251,6 +253,38 @@ export function UserControl() {
     }
   };
 
+  const handleResetOpen = (index: number) => {
+    const row = table.getRowModel().rows[index];
+    const user = row.original;
+  
+    if (user) {
+      setResetUserName(user.userName);
+      setResetOpen(true);
+    } else {
+      console.error(`No user found to reset password at index: ${index}`);
+    }
+  };
+  
+  const handleResetClose = () => {
+    setResetUserName(null);
+    setResetOpen(false);
+  };
+  
+  const handleResetSubmit = async () => {
+    if (resetUserName) {
+      try {
+        const url = `https://lcaapi.acess.co.kr/Users/reset-password`;
+        await axios.put(url, { userName: resetUserName });
+  
+        console.log(`${resetUserName} 비밀번호 초기화 완료`);
+        setResetOpen(false);
+        fetchData(pageIndex, pageSize); 
+      } catch (error) {
+        console.error('Error resetting password:', error);
+      }
+    }
+  };
+
   //데이터 삭제
   const handleDeleteOpen = (index: number) => {
     const row = table.getRowModel().rows[index];
@@ -410,6 +444,14 @@ export function UserControl() {
                         </Button>
                         <Button variant="contained" color="secondary" onClick={() => handleDeleteOpen(index)} style={{ marginLeft: '10px', padding: '2px' }}>
                           삭제
+                        </Button>
+                        <Button
+                          variant="contained"
+                          color="warning"
+                          onClick={() => handleResetOpen(index)}
+                          style={{ marginLeft: '10px', padding: '2px' }}
+                        >
+                          초기화
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -653,6 +695,30 @@ export function UserControl() {
             </Button>
             <Button variant="contained" color="primary" onClick={handleDeleteSubmit}>
               예
+            </Button>
+          </div>
+        </Box>
+      </Modal>
+
+      <Modal
+        open={resetOpen}
+        onClose={handleResetClose}
+        aria-labelledby="reset-modal-title"
+        aria-describedby="reset-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="reset-modal-title" variant="h6" component="h2">
+            비밀번호 초기화를 진행하시겠습니까?
+          </Typography>
+          <Typography id="reset-modal-description" variant="body1" style={{ marginTop: 10 }}>
+            초기화가 진행되면 비밀번호는 <strong>12345</strong>로 바뀌게 됩니다.
+          </Typography>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
+            <Button variant="contained" color="secondary" onClick={handleResetClose} style={{ marginRight: '10px' }}>
+              취소
+            </Button>
+            <Button variant="contained" color="primary" onClick={handleResetSubmit}>
+              계속
             </Button>
           </div>
         </Box>
