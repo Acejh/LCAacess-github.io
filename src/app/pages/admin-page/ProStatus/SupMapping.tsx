@@ -68,7 +68,7 @@ type Basic = {
   companyCode: string;
   reccNo: string;
   reccDate: string;
-  clientBizNo: string;
+  clientBizno: string;
   clientName: string;
   carNo: string;
   item1: string;
@@ -463,7 +463,7 @@ export function SupMapping() {
   const columns: ColumnDef<Basic>[] = [
     { accessorKey: 'reccNo', header: '관리표 번호' },
     { accessorKey: 'reccDate', header: '공급일자' },
-    { accessorKey: 'clientBizNo', header: '거래처 사업자번호' },
+    { accessorKey: 'clientBizno', header: '거래처 사업자번호' },
     { accessorKey: 'clientName', header: '거래처 이름' },
     { accessorKey: 'carNo', header: '차량번호' },
     { accessorKey: 'item1', header: '품목군' },

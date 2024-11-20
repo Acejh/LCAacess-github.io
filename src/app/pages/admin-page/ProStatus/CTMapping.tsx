@@ -46,7 +46,7 @@ type Basic = {
   transNo: string;
   takeDate: string;
   giveComNo: string;
-  clientBizNo: string | null;
+  clientBizno: string | null;
   clientName: string;
   giveCarNo: string;
   transClient: {
@@ -267,7 +267,7 @@ export function CTMapping() {
     { accessorKey: 'transNo', header: '관리표 번호' },
     { accessorKey: 'takeDate', header: '인수일' },
     { accessorKey: 'giveComNo', header: () => <div style={{ textAlign: 'center' }}>인계업체 코드</div>},
-    { accessorKey: 'clientBizNo', header: '거래처 사업자번호' },
+    { accessorKey: 'clientBizno', header: '거래처 사업자번호' },
     { accessorKey: 'clientName', header: '거래처 이름' },
     { accessorKey: 'giveCarNo', header: '인계 차량번호' },
     {
