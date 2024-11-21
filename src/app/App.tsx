@@ -10,7 +10,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 // 글로벌 폰트 크기 설정
 const theme = createTheme({
   typography: {
-    fontSize: 16, // 원하는 폰트 크기로 설정
+    fontSize: 16, 
   },
 })
 

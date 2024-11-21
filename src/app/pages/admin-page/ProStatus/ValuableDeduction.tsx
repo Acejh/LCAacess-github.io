@@ -324,7 +324,7 @@ export function ValuableDeduction() {
                       fontWeight: 'bold',
                       position: 'sticky',
                       top: 0,
-                      zIndex: 5,
+                      zIndex: 100,
                     }}
                   >
                     {flexRender(header.column.columnDef.header, header.getContext())}
@@ -348,7 +348,7 @@ export function ValuableDeduction() {
                       key={cell.id}
                       style={{
                         whiteSpace: 'nowrap',
-                        overflow: 'hidden',
+                        overflow: 'hidden',                                                                                                                                                                                                   
                         textOverflow: 'ellipsis',
                         textAlign: 'right',
                         backgroundColor: '#fff',

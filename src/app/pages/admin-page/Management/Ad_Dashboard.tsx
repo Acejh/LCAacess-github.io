@@ -43,7 +43,7 @@ export function Ad_Dashboard() {
       {/* 오른쪽 공지사항/알림 섹션 (3) */}
       <div className="info-section">
         <div className="announcement-section">
-          <NoticeList isAdmin={isAdmin} handleAdminClick={handleAdminClick} /> {/* 공지사항 */}
+          <NoticeList isAdmin={isAdmin} handleAdminClick={handleAdminClick} />
         </div>
 
         <div className="notification-section">
