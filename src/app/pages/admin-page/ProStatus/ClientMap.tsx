@@ -282,7 +282,7 @@ export function ClientMap() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom>
-        클라이언트 매핑 관리
+        유가물 2차 거래처 매핑 관리
       </Typography>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} showAllOption={false} />

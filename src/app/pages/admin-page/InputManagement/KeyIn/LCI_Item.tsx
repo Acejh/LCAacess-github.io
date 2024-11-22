@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios, { AxiosError } from 'axios';  // AxiosError 타입 import
 import '../../../CSS/SCbar.css';
 import { SelectChangeEvent } from '@mui/material';
+import { useDropzone } from 'react-dropzone';
 import {
   useReactTable,
   getCoreRowModel,
@@ -70,6 +71,11 @@ export function LCI_Item() {
   const [year, setYear] = useState('');
   const [selectedYear, setSelectedYear] = useState('');
 
+  const [downloading, setDownloading] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false); // 업로드 모달 상태
+  const [uploading, setUploading] = useState(false); // 업로드 진행 상태
+  const [selectedFile, setSelectedFile] = useState<File | null>(null); // 선택한 파일
+
   const [selectedType, setSelectedType] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [tempSelectedType, setTempSelectedType] = useState('');
@@ -87,6 +93,20 @@ export function LCI_Item() {
   // 삭제 모달 관리
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [deleteItemId, setDeleteItemId] = useState<number | null>(null);
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles && acceptedFiles.length > 0) {
+      setSelectedFile(acceptedFiles[0]);
+    }
+  }, []);
+  
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    accept: {
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/vnd.ms-excel': ['.xls'],
+    },
+  });
 
   const fetchLciTypes = async () => {
     try {
@@ -298,6 +318,87 @@ export function LCI_Item() {
     setDeleteItemId(null);
   };
 
+  // 엑셀 업로드 모달 열기
+  const handleUploadModalOpen = () => {
+    setUploadModalOpen(true);
+  };
+
+  // 엑셀 업로드 모달 닫기
+  const handleUploadModalClose = () => {
+    setUploadModalOpen(false);
+    setSelectedFile(null);
+  };
+
+  // 파일 업로드 처리
+  const handleFileUpload = async () => {
+    if (!selectedFile) return;
+
+    setUploading(true);
+
+    const formData = new FormData();
+    formData.append('uploadFile', selectedFile);
+
+    try {
+      await axios.post('https://lcaapi.acess.co.kr/LciItems/import', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      alert('파일이 성공적으로 업로드되었습니다.');
+      setUploadModalOpen(false);
+      setSelectedFile(null);
+    } catch (error) {
+      console.error('파일 업로드 실패:', error);
+      alert('파일 업로드에 실패하였습니다.');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDownloadExcel = async () => {
+    if (!year) {
+      console.error('회사 또는 연도를 선택해 주세요.');
+      return;
+    }
+  
+    setDownloading(true); // 다운로드 시작
+  
+    try {
+      const url = `https://lcaapi.acess.co.kr/LciItems/Export?Year=${year}`;
+      
+      const response = await axios.get(url, {
+        responseType: 'blob',
+        timeout: 180000, // 3분 타임아웃 설정
+      });
+  
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = 'GTG_결과.xlsx'; // 기본 파일 이름
+  
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename\*?=['"]?UTF-8['"]?''(.+?)['"]?(;|$)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = decodeURIComponent(filenameMatch[1]);
+        } else {
+          const simpleFilenameMatch = contentDisposition.match(/filename="?(.+?)['"]?(;|$)/);
+          if (simpleFilenameMatch && simpleFilenameMatch[1]) {
+            filename = simpleFilenameMatch[1];
+          }
+        }
+      }
+  
+      const blob = new Blob([response.data]);
+      const urlBlob = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = urlBlob;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error('엑셀 파일 다운로드 중 오류 발생:', error);
+    } finally {
+      setDownloading(false); // 다운로드 완료
+    }
+  };
+
   const columns: ColumnDef<LciItem>[] = [
     {
       header: '유형',
@@ -457,6 +558,25 @@ export function LCI_Item() {
           disabled={!hasSearched}
         >
           등록
+        </Button>
+        {/* 엑셀 다운로드 */}
+        <Button
+          variant="contained"
+          color="secondary"
+          style={{ height: '35px', marginLeft: '20px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleDownloadExcel}
+          disabled={!year || downloading}  
+        >
+          {downloading ? '다운로드 중...' : '엑셀 다운로드'}
+        </Button>
+          {/* 엑셀 업로드 */}
+        <Button
+          variant="contained"
+          color="primary"
+          style={{ height: '35px', marginLeft: '20px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleUploadModalOpen}
+        >
+          엑셀 업로드
         </Button>
       </div>
 
@@ -663,6 +783,50 @@ export function LCI_Item() {
               style={{ marginLeft: '10px' }}
             >
               삭제
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+      {/* 엑셀 업로드 */}
+      <Modal
+        open={uploadModalOpen}
+        onClose={handleUploadModalClose}
+        aria-labelledby="upload-modal-title"
+        aria-describedby="upload-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="upload-modal-title" variant="h6" component="h2">
+            엑셀 파일 업로드
+          </Typography>
+          <Box
+            {...getRootProps()}
+            sx={{
+              border: '2px dashed #ddd',
+              padding: '20px',
+              textAlign: 'center',
+              cursor: 'pointer',
+              marginTop: '10px',
+            }}
+          >
+            <input {...getInputProps()} />
+            {selectedFile ? (
+              <Typography>{selectedFile.name}</Typography>
+            ) : (
+              <Typography>파일을 드래그하거나 클릭하여 선택하세요.</Typography>
+            )}
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', marginTop: 2 }}>
+            <Button onClick={handleUploadModalClose} color="secondary">
+              취소
+            </Button>
+            <Button
+              onClick={handleFileUpload}
+              variant="contained"
+              color="primary"
+              style={{ marginLeft: '10px' }}
+              disabled={uploading || !selectedFile}
+            >
+              {uploading ? <CircularProgress size={20} /> : '업로드'}
             </Button>
           </Box>
         </Box>

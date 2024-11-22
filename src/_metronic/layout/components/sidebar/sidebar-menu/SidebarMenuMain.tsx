@@ -114,7 +114,7 @@ const SidebarMenuMain = () => {
             <SidebarMenuItem to='/Ad_Effluent' title='수계배출물 관리' hasBullet={true} />
             <SidebarMenuItem to='/WasteMapping' title='폐기물 처리품목&middot;방법 관리' hasBullet={true} />
             <SidebarMenuItem to='/ValuableMapping' title='유가물 품목&middot;매핑 관리' hasBullet={true} />
-            <SidebarMenuItem to='/ClientMap' title='유가물 2차거래처 매핑 관리' hasBullet={true} />
+            <SidebarMenuItem to='/ClientMap' title='유가물 2차 거래처 매핑 관리' hasBullet={true} />
             <SidebarMenuItem to='/ValuableDeduction' title='유가물 차감량 관리' hasBullet={true} />
           </SidebarMenuItemWithSub>
 

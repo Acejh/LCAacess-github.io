@@ -1,19 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './css/Ad_Dashboard.css';
-import { NoticeList } from './NoticeList';
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./css/Ad_Dashboard.css";
+import { NoticeList } from "./NoticeList";
 // import { LineChart } from './TotalLineChart'; 
 // import { LineChartPro } from './LineChartPro';
+import { DashboardTable } from "./DashboardTable"; 
 
 export function Ad_Dashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const authData = localStorage.getItem('kt-auth-react-v');
+    const authData = localStorage.getItem("kt-auth-react-v");
     if (authData) {
       const parsedAuthData = JSON.parse(authData);
-      if (parsedAuthData.userInfo?.role === 'Admin') {
+      if (parsedAuthData.userInfo?.role === "Admin") {
         setIsAdmin(true);
       }
     }
@@ -21,9 +22,9 @@ export function Ad_Dashboard() {
 
   const handleAdminClick = () => {
     if (isAdmin) {
-      navigate('/NoticeControl');
+      navigate("/NoticeControl");
     } else {
-      alert('관리자만 접근할 수 있습니다.');
+      alert("관리자만 접근할 수 있습니다.");
     }
   };
 
@@ -39,6 +40,10 @@ export function Ad_Dashboard() {
           <LineChartPro /> 
         </div>
       </div> */}
+      <div className="table-section" >
+        <h2>LCA 결과 테이블</h2>
+        <DashboardTable />
+      </div>
 
       {/* 오른쪽 공지사항/알림 섹션 (3) */}
       <div className="info-section">
