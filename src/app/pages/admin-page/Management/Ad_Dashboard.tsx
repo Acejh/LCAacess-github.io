@@ -40,10 +40,12 @@ export function Ad_Dashboard() {
           <LineChartPro /> 
         </div>
       </div> */}
-      <div className="table-section" >
-        <h2>LCA 결과 테이블</h2>
-        <DashboardTable />
-      </div>
+      {isAdmin && (
+        <div className="table-section">
+          <h2>LCA 결과 테이블</h2>
+          <DashboardTable />
+        </div>
+      )}
 
       {/* 오른쪽 공지사항/알림 섹션 (3) */}
       <div className="info-section">
