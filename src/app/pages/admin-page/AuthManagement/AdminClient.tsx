@@ -544,7 +544,7 @@ export function AdminClient() {
         <Button
           variant="contained"
           color="secondary"
-          style={{ height: '35px', width: '120px', marginLeft: '20px', fontSize: '12px' }}
+          style={{ height: '35px', width: '120px', marginLeft: '10px', fontSize: '12px' }}
           onClick={handleOpen}
         >
           거래처 등록

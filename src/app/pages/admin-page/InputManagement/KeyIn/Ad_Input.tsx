@@ -275,7 +275,7 @@ export function Ad_Input() {
       try {
   
         await axios.put(`https://lcaapi.acess.co.kr/Inputs/${id}`, {
-          month: monthIndex + 1, // 서버에 전달할 월 (1부터 시작)
+          month: monthIndex + 1, 
           amount: Number(editValue),
         });
   
@@ -315,8 +315,8 @@ export function Ad_Input() {
         <TextField
           value={editValue || ''}
           onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleCancelEdit} // Cancel on blur
-          onKeyDown={(e) => handleKeyPress(e, rowId, columnId)} // Save or cancel on keypress
+          onBlur={handleCancelEdit} 
+          onKeyDown={(e) => handleKeyPress(e, rowId, columnId)} 
           autoFocus
           fullWidth
         />

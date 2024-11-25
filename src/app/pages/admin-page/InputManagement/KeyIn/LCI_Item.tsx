@@ -553,7 +553,7 @@ export function LCI_Item() {
         <Button
           variant="contained"
           color="success"
-          style={{ height: '35px', marginLeft: '10px', padding: '0 10px', fontSize: '14px' }}
+          style={{ height: '35px', padding: '0 10px', fontSize: '14px' }}
           onClick={handleRegister}
           disabled={!hasSearched}
         >
@@ -563,7 +563,7 @@ export function LCI_Item() {
         <Button
           variant="contained"
           color="secondary"
-          style={{ height: '35px', marginLeft: '20px', padding: '0 10px', fontSize: '14px' }}
+          style={{ height: '35px', marginLeft: '10px', padding: '0 10px', fontSize: '14px' }}
           onClick={handleDownloadExcel}
           disabled={!year || downloading}  
         >
@@ -573,7 +573,7 @@ export function LCI_Item() {
         <Button
           variant="contained"
           color="primary"
-          style={{ height: '35px', marginLeft: '20px', padding: '0 10px', fontSize: '14px' }}
+          style={{ height: '35px', marginLeft: '10px', padding: '0 10px', fontSize: '14px' }}
           onClick={handleUploadModalOpen}
         >
           엑셀 업로드

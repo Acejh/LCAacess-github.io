@@ -389,7 +389,7 @@ export function MemberControl() {
         엑셀 다운로드
       </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
-        <FormControl style={{ marginRight: '10px' }}>
+        <FormControl>
           <TextField
             id="search-query-input"
             label="검색"
@@ -407,7 +407,7 @@ export function MemberControl() {
         >
           조회
         </Button>
-        <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '20px', fontSize: '12px' }} onClick={handleOpen}>
+        <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '10px', fontSize: '12px' }} onClick={handleOpen}>
           사업회원 등록
         </Button>
       </div>

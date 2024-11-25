@@ -470,7 +470,7 @@ export function CarsControl() {
         >
           조회
         </Button>
-        <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '50px', fontSize: '12px' }} onClick={handleOpen}>
+        <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '10px', fontSize: '12px' }} onClick={handleOpen}>
           차량 등록
         </Button>
       </div>

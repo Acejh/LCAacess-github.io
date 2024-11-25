@@ -386,12 +386,12 @@ export function UserControl() {
         <Button 
           variant="contained" 
           color="primary" 
-          style={{ width: '30px', height: '35px', marginLeft: '10px', fontSize: '12px' }}
+          style={{ width: '30px', height: '35px',  fontSize: '12px' }}
           onClick={handleSearch}
         >
           조회
         </Button>
-        <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '20px', fontSize: '12px' }} onClick={handleOpen}>
+        <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '10px', fontSize: '12px' }} onClick={handleOpen}>
           계정 등록
         </Button>
       </div>
