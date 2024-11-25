@@ -120,86 +120,91 @@ export function Ad_Input() {
 
   const fetchData = useCallback(async (company: Company | null, year: string) => {
     if (!company) {
-      setData([]);
-      setLoading(false);
-      return;
+        setData([]);
+        setLoading(false);
+        return;
     }
-  
+
     setError(null);
     setLoading(true);
+
     try {
-      let url = `https://lcaapi.acess.co.kr/Inputs?companyCode=${company.code}`;
-      if (year) {
-        url += `&year=${year}`;
-      }
-  
-      const response = await axios.get(url);
-  
-      if (response.status === 404) {
-        const errorMessage = response.data?.title || 'Data not found';
-        throw new Error(errorMessage);
-      }
-  
-      const apiResponse: ApiResponse[] = response.data;
-  
-      const formattedData: Input[] = items.map((item) => {
-        const apiItem = apiResponse.find(apiItem => apiItem.inputType === item.name);
-      
-        if (!apiItem) {
-          return {
-            ids: Array(12).fill(0), // 각 월에 대한 기본 ID 설정
-            inputType: item.name,
-            unit: item.unit,
-            year: year || '전체',
-            '1월': 0,
-            '2월': 0,
-            '3월': 0,
-            '4월': 0,
-            '5월': 0,
-            '6월': 0,
-            '7월': 0,
-            '8월': 0,
-            '9월': 0,
-            '10월': 0,
-            '11월': 0,
-            '12월': 0,
-          };
+        let url = `https://lcaapi.acess.co.kr/Inputs?companyCode=${company.code}`;
+        if (year) {
+            url += `&year=${year}`;
         }
-      
-        return {
-          ids: apiItem.ids, // ids 배열을 그대로 유지
-          inputType: item.name,
-          unit: item.unit,
-          year: apiItem.year,
-          '1월': apiItem.monthlyAmounts[0] ?? 0,
-          '2월': apiItem.monthlyAmounts[1] ?? 0,
-          '3월': apiItem.monthlyAmounts[2] ?? 0,
-          '4월': apiItem.monthlyAmounts[3] ?? 0,
-          '5월': apiItem.monthlyAmounts[4] ?? 0,
-          '6월': apiItem.monthlyAmounts[5] ?? 0,
-          '7월': apiItem.monthlyAmounts[6] ?? 0,
-          '8월': apiItem.monthlyAmounts[7] ?? 0,
-          '9월': apiItem.monthlyAmounts[8] ?? 0,
-          '10월': apiItem.monthlyAmounts[9] ?? 0,
-          '11월': apiItem.monthlyAmounts[10] ?? 0,
-          '12월': apiItem.monthlyAmounts[11] ?? 0,
-        };
-      });
-  
-      setData(formattedData);
+
+        const response = await axios.get(url);
+
+        if (response.status === 404) {
+            const errorMessage = response.data?.title || 'Data not found';
+            throw new Error(errorMessage);
+        }
+
+        const apiResponse: ApiResponse[] = response.data;
+
+        // API에서 반환된 데이터를 중복 제거하면서 매핑
+        const uniqueItems = Array.from(new Set(apiResponse.map((item) => item.inputType)));
+
+        const formattedData: Input[] = uniqueItems.map((uniqueInputType) => {
+            const apiItem = apiResponse.find((item) => item.inputType === uniqueInputType);
+
+            if (!apiItem) {
+                return {
+                    ids: Array(12).fill(0), // 기본 ID 배열
+                    inputType: uniqueInputType,
+                    unit: '',
+                    year: year || '전체',
+                    '1월': 0,
+                    '2월': 0,
+                    '3월': 0,
+                    '4월': 0,
+                    '5월': 0,
+                    '6월': 0,
+                    '7월': 0,
+                    '8월': 0,
+                    '9월': 0,
+                    '10월': 0,
+                    '11월': 0,
+                    '12월': 0,
+                };
+            }
+
+            return {
+                ids: apiItem.ids, // IDs 배열 유지
+                inputType: apiItem.inputType,
+                unit: apiItem.unit,
+                year: apiItem.year,
+                '1월': apiItem.monthlyAmounts[0] ?? 0,
+                '2월': apiItem.monthlyAmounts[1] ?? 0,
+                '3월': apiItem.monthlyAmounts[2] ?? 0,
+                '4월': apiItem.monthlyAmounts[3] ?? 0,
+                '5월': apiItem.monthlyAmounts[4] ?? 0,
+                '6월': apiItem.monthlyAmounts[5] ?? 0,
+                '7월': apiItem.monthlyAmounts[6] ?? 0,
+                '8월': apiItem.monthlyAmounts[7] ?? 0,
+                '9월': apiItem.monthlyAmounts[8] ?? 0,
+                '10월': apiItem.monthlyAmounts[9] ?? 0,
+                '11월': apiItem.monthlyAmounts[10] ?? 0,
+                '12월': apiItem.monthlyAmounts[11] ?? 0,
+            };
+        });
+
+        setData(formattedData);
     } catch (error: unknown) {
-      console.error('Error fetching data:', error);
-      if (axios.isAxiosError(error) && error.response?.status === 404) {
-        setError('데이터가 존재하지 않습니다. 데이터를 추가해주시길 바랍니다');
-      } else if (error instanceof Error) {
-        setError(`데이터를 불러오는데 실패했습니다: ${error.message}`);
-      } else {
-        setError('데이터를 불러오는데 실패했습니다.');
-      }
+        console.error('Error fetching data:', error);
+        if (axios.isAxiosError(error) && error.response?.status === 404) {
+            setError('데이터가 존재하지 않습니다. 데이터를 추가해주시길 바랍니다');
+        } else if (error instanceof Error) {
+            setError(`데이터를 불러오는데 실패했습니다: ${error.message}`);
+        } else {
+            setError('데이터를 불러오는데 실패했습니다.');
+        }
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  }, [items]);
+  }, []);
+
   
   useEffect(() => {
     if (selectedCompany && selectedYear) {
