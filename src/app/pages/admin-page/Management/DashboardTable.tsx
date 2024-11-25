@@ -186,7 +186,7 @@ export const DashboardTable = () => {
                     zIndex: 1,
                   }}
                 >
-                  RC 명
+                  분석 대상
                 </TableCell>
                 <TableCell
                   align="right"
@@ -263,7 +263,7 @@ export const DashboardTable = () => {
                     zIndex: 1,
                   }}
                 >
-                  분석 대상
+                  업체 명
                 </TableCell>
                 <TableCell
                   align="right"

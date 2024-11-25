@@ -580,7 +580,11 @@ export function LCI_Item() {
         </Button>
       </div>
 
-      <TableContainer component={Paper} style={{ maxHeight: 545, overflowY: 'auto'}} className="custom-scrollbar custom-table">
+      <TableContainer 
+        component={Paper}
+        style={{ maxHeight: 545, overflowY: 'auto'}}
+        className="custom-scrollbar custom-table"
+      >
         <Table>
           {loading ? (
             <TableBody>
