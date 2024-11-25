@@ -515,7 +515,7 @@ export function Ad_UseFacility() {
                           overflow: 'hidden',
                           textOverflow: 'ellipsis',
                           position: 'sticky',
-                          top: 0,
+                          top: -1,
                           backgroundColor: '#cfcfcf',
                           zIndex: 1,
                         }}

@@ -260,7 +260,7 @@ export function Ad_Input() {
       return;
     }
   
-    const monthIndex = parseInt(columnId.replace('월', ''), 10) - 1; // 1월 -> 0, 2월 -> 1
+    const monthIndex = parseInt(columnId.replace('월', ''), 10) - 1;
     const ids = row.original.ids;
   
     // 해당 월의 id 가져오기

@@ -283,11 +283,13 @@ export function CompositionSet() {
     setSelectedFile(null);
   };
 
-  const handleCellClick = (componentName: string) => {
+  const handleCellClick = async (componentName: string) => {
     setSelectedComponent(componentName);
     setSelectedYearModal(selectedYear);
-    fetchCompanies(); // API 호출하여 업체 목록 가져오기
-    setModalOpen(true);
+  
+    fetchCompanies(); // 업체 목록 가져오기
+    await fetchSelectedCompanies(selectedYear, componentName); // 선택된 업체 가져오기
+    setModalOpen(true); // 모달 열기
   };
 
   const handleCompanyToggle = (companyId: string) => {
@@ -296,6 +298,19 @@ export function CompositionSet() {
         ? prev.filter((id) => id !== companyId)
         : [...prev, companyId]
     );
+  };
+
+  const fetchSelectedCompanies = async (year: string, componentName: string) => {
+    try {
+      const url = `https://lcaapi.acess.co.kr/Compositions/CompanyPlastic?year=${year}&lciItemName=${encodeURIComponent(
+        componentName
+      )}`;
+      const response = await axios.get<{ companyCodes: string[] }>(url);
+      setSelectedCompanies(response.data.companyCodes); // 선택된 업체 설정
+    } catch (error) {
+      console.error('선택된 업체 데이터를 가져오는 중 오류 발생:', error);
+      setSelectedCompanies([]); // 오류 발생 시 초기화
+    }
   };
   
   const handleRegister = async () => {
@@ -556,8 +571,10 @@ export function CompositionSet() {
                   label={`${company.name} (${company.code})`} // Chip에 이름과 코드 표시
                   onClick={() => handleCompanyToggle(company.id.toString())}
                   sx={{
-                    backgroundColor: selectedCompanies.includes(company.id.toString()) ? '#1976d2' : '#e0e0e0',
-                    color: selectedCompanies.includes(company.id.toString()) ? '#fff' : '#000',
+                    backgroundColor: selectedCompanies.includes(company.code)
+                      ? '#1976d2'
+                      : '#e0e0e0',
+                    color: selectedCompanies.includes(company.code) ? '#fff' : '#000',
                     cursor: 'pointer',
                   }}
                 />

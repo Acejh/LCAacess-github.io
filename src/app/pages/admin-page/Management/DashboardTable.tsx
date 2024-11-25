@@ -182,6 +182,7 @@ export const DashboardTable = () => {
                     textAlign: "center",
                     backgroundColor: "#cfcfcf",
                     position: "sticky",
+                    left: -1,
                     top: -2,
                     zIndex: 1,
                   }}
