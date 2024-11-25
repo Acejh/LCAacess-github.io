@@ -269,7 +269,7 @@ export function SupplyTable() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         유가물 관리표
       </Typography>
-        <div style={{ display: 'flex', flexWrap: 'wrap'}}>
+        <div style={{ display: 'flex', alignItems: 'center', }}>
           <UseCompany onCompanyChange={setSelectedCompany} label='업체선택'/>
           <FormControl style={{ marginRight: '10px' }}>
             <InputLabel id="year-label">연도</InputLabel>

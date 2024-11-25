@@ -649,7 +649,7 @@ export function SupMapping() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         유가물 매핑
       </Typography>
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} showAllOption={false} />
         <FormControl style={{ marginRight: '10px' }}>
           <InputLabel id="year-label">연도</InputLabel>

@@ -275,7 +275,7 @@ export function DisposalTable() {
       <Typography variant="h5" gutterBottom style={{marginBottom: '10px'}}>
         폐기물 관리표
       </Typography>
-      <div style={{ display: 'flex', flexWrap: 'wrap'}}>
+      <div style={{ display: 'flex', alignItems: 'center', }}>
         <UseCompany onCompanyChange={setSelectedCompany} />
         <FormControl style={{ marginRight: '10px' }}>
           <InputLabel id="year-label">연도</InputLabel>

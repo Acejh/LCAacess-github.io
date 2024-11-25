@@ -391,7 +391,7 @@ export function UserControl() {
         >
           조회
         </Button>
-        <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '50px', fontSize: '12px' }} onClick={handleOpen}>
+        <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '20px', fontSize: '12px' }} onClick={handleOpen}>
           계정 등록
         </Button>
       </div>
