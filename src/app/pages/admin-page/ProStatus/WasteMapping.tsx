@@ -505,7 +505,7 @@ export function WasteMapping() {
 
   return (
     <div style={{ margin: '0 30px' }}>
-      <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
+      <Typography gutterBottom style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '10px' }}>
         폐기물 처리품목&middot;방법 관리
       </Typography>
 

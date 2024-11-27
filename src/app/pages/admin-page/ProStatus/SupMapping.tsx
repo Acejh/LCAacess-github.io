@@ -76,14 +76,14 @@ type Basic = {
   item3: string;
   weight: number;
   ecoasWeight: number;
-  reccSupplyCar: {
+  reccValuableCar: {
     id: number;
     carId: number;
     inOutType: string;
     carNo: string;
     spec: number;
   };
-  reccSupplyClient: {
+  reccValuableClient: {
     id: number;
     clientId: number;
     inOutType: string;
@@ -91,7 +91,7 @@ type Basic = {
     clientName: string;
     bizNo: string;
   };
-  reccSupplyClient2nd: {
+  reccValuableExtraClient: {
     id: number;
     clientId: number;
     inOutType: string;
@@ -99,10 +99,9 @@ type Basic = {
     clientName: string;
     bizNo: string;
   } | null;
-  reccSupplyItem: {
+  reccValuableItem: {
     id: number;
     valuableThingId: number;
-    valuableThingTitle: string;
   } | null;
   selectedValuableThingId?: number; 
 };
@@ -137,14 +136,14 @@ export function SupMapping() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [clientModalOpen, setClientModalOpen] = useState(false);
   const [carModalOpen, setCarModalOpen] = useState(false);
-  const [selectedClient, setSelectedClient] = useState<Basic['reccSupplyClient'] | null>(null);
-  const [selectedCar, setSelectedCar] = useState<Basic['reccSupplyCar'] | null>(null);
+  const [selectedClient, setSelectedClient] = useState<Basic['reccValuableClient'] | null>(null);
+  const [selectedCar, setSelectedCar] = useState<Basic['reccValuableCar'] | null>(null);
   const [client2ndModalOpen, setClient2ndModalOpen] = useState(false);
-  const [clients, setClients] = useState<Basic['reccSupplyClient'][]>([]);
-  const [clients2nd, setClients2nd] = useState<Basic['reccSupplyClient'][]>([]);
-  const [cars, setCars] = useState<Basic['reccSupplyCar'][]>([]);
+  const [clients, setClients] = useState<Basic['reccValuableClient'][]>([]);
+  const [clients2nd, setClients2nd] = useState<Basic['reccValuableClient'][]>([]);
+  const [cars, setCars] = useState<Basic['reccValuableCar'][]>([]);
   const [clientTypes, setClientTypes] = useState<ClientType[]>([]);
-  const [selectedClient2nd, setSelectedClient2nd] = useState<Basic['reccSupplyClient'] | null>(null);
+  const [selectedClient2nd, setSelectedClient2nd] = useState<Basic['reccValuableClient'] | null>(null);
   const navigate = useNavigate();
   
   const fetchClientTypes = async () => {
@@ -340,13 +339,13 @@ export function SupMapping() {
       };
       
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/ReccSupplyMapping/Client', postData);
+        const response = await axios.post('https://lcaapi.acess.co.kr/ReccValuableMapping/Client', postData);
   
         if (response.status === 204) {
           setData((prevData) =>
             prevData.map((item) =>
               item.id === selectedRowId
-                ? { ...item, reccSupplyClient: { ...item.reccSupplyClient, id: selectedClient.id + 1 } }
+                ? { ...item, reccValuableClient: { ...item.reccValuableClient, id: selectedClient.id + 1 } }
                 : item
             )
           );
@@ -367,13 +366,13 @@ export function SupMapping() {
       
   
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/ReccSupplyMapping/Car', postData);
+        const response = await axios.post('https://lcaapi.acess.co.kr/ReccValuableMapping/Car', postData);
   
         if (response.status === 204) {
           setData((prevData) =>
             prevData.map((item) =>
               item.id === selectedRowId
-                ? { ...item, reccSupplyCar: { ...item.reccSupplyCar, id: selectedCar.id + 1 } }
+                ? { ...item, reccValuableCar: { ...item.reccValuableCar, id: selectedCar.id + 1 } }
                 : item
             )
           );
@@ -394,13 +393,13 @@ export function SupMapping() {
   
     
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/ReccSupplyMapping/Item', postData);
+        const response = await axios.post('https://lcaapi.acess.co.kr/ReccValuableMapping/Item', postData);
   
         if (response.status === 204) {
           setData((prevData) =>
             prevData.map((item) =>
               item.id === selectedRowId
-                ? { ...item, reccSupplyItem: { id: selectedItem, valuableThingId: selectedItem, valuableThingTitle: 'Updated Item' } }
+                ? { ...item, reccValuableItem: { id: selectedItem, valuableThingId: selectedItem, } }
                 : item
             )
           );
@@ -421,13 +420,13 @@ export function SupMapping() {
   
   
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/ReccSupplyMapping/Client2nd', postData);
+        const response = await axios.post('https://lcaapi.acess.co.kr/ReccValuableMapping/Client2nd', postData);
   
         if (response.status === 204) {
           setData((prevData) =>
             prevData.map((item) =>
               item.id === selectedRowId
-                ? { ...item, reccSupplyClient2nd: { ...selectedClient2nd } }
+                ? { ...item, reccValuableExtraClient: { ...selectedClient2nd } }
                 : item
             )
           );
@@ -499,74 +498,74 @@ export function SupMapping() {
         <Button
           variant="contained"
           sx={{
-            backgroundColor: row.original.reccSupplyItem && row.original.reccSupplyItem.id ? 'success.main' : 'error.main',
+            backgroundColor: row.original.reccValuableItem && row.original.reccValuableItem.id ? 'success.main' : 'error.main',
             color: 'white',
             '&:hover': {
-              backgroundColor: row.original.reccSupplyItem && row.original.reccSupplyItem.id ? 'success.dark' : 'error.dark'
+              backgroundColor: row.original.reccValuableItem && row.original.reccValuableItem.id ? 'success.dark' : 'error.dark'
             }
           }}
-          onClick={() => handleOpenItemModal(row.original.id, row.original.reccSupplyItem?.id || 0)}
+          onClick={() => handleOpenItemModal(row.original.id, row.original.reccValuableItem?.id || 0)}
         >
-          {row.original.reccSupplyItem && row.original.reccSupplyItem.id ? '완료' : '미완료'}
+          {row.original.reccValuableItem && row.original.reccValuableItem.id ? '완료' : '미완료'}
         </Button>
       ),
     },
     { accessorKey: 'weight', header: () => <div style={{ textAlign: 'center' }}>무게(kg)</div>},
     { accessorKey: 'ecoasWeight', header: () => <div style={{ textAlign: 'center' }}>EcoAS무게(kg)</div>},
     {
-      id: 'reccSupplyClient',
+      id: 'reccValuableClient',
       header: '거래처 매핑 상태',
       cell: ({ row }) => (
         <Button
           variant="contained"
           sx={{
-            backgroundColor: row.original.reccSupplyClient?.id ? 'success.main' : 'error.main',
+            backgroundColor: row.original.reccValuableClient?.id ? 'success.main' : 'error.main',
             color: 'white',
             '&:hover': {
-              backgroundColor: row.original.reccSupplyClient?.id ? 'success.dark' : 'error.dark'
+              backgroundColor: row.original.reccValuableClient?.id ? 'success.dark' : 'error.dark'
             }
           }}
-          onClick={() => handleOpenClientModal(row.original.reccSupplyClient || { id: 0, clientId: 0, inOutType: '', clientType: '', clientName: '', bizNo: '' }, row.original.id)}
+          onClick={() => handleOpenClientModal(row.original.reccValuableClient || { id: 0, clientId: 0, inOutType: '', clientType: '', clientName: '', bizNo: '' }, row.original.id)}
         >
-          {row.original.reccSupplyClient?.id ? '완료' : '미완료'}
+          {row.original.reccValuableClient?.id ? '완료' : '미완료'}
         </Button>
       ),
     },
     {
-      id: 'reccSupplyClient2nd',
+      id: 'reccValuableExtraClient',
       header: '2차 거래처 매핑 상태',
       cell: ({ row }) => (
         <Button
           variant="contained"
           sx={{
-            backgroundColor: row.original.reccSupplyClient2nd && row.original.reccSupplyClient2nd.id ? 'success.main' : 'error.main',
+            backgroundColor: row.original.reccValuableExtraClient && row.original.reccValuableExtraClient.id ? 'success.main' : 'error.main',
             color: 'white',
             '&:hover': {
-              backgroundColor: row.original.reccSupplyClient2nd && row.original.reccSupplyClient2nd.id ? 'success.dark' : 'error.dark'
+              backgroundColor: row.original.reccValuableExtraClient && row.original.reccValuableExtraClient.id ? 'success.dark' : 'error.dark'
             }
           }}
-          onClick={() => handleOpenClient2ndModal(row.original.reccSupplyClient2nd || { id: 0, clientId: 0, inOutType: '', clientType: '', clientName: '', bizNo: '' }, row.original.id)}
+          onClick={() => handleOpenClient2ndModal(row.original.reccValuableExtraClient || { id: 0, clientId: 0, inOutType: '', clientType: '', clientName: '', bizNo: '' }, row.original.id)}
         >
-          {row.original.reccSupplyClient2nd && row.original.reccSupplyClient2nd.id ? '완료' : '미완료'}
+          {row.original.reccValuableExtraClient && row.original.reccValuableExtraClient.id ? '완료' : '미완료'}
         </Button>
       ),
     },
     {
-      id: 'reccSupplyCar',
+      id: 'reccValuableCar',
       header: '차량 매핑 상태',
       cell: ({ row }) => (
         <Button
           variant="contained"
           sx={{
-            backgroundColor: row.original.reccSupplyCar?.id ? 'success.main' : 'error.main',
+            backgroundColor: row.original.reccValuableCar?.id ? 'success.main' : 'error.main',
             color: 'white',
             '&:hover': {
-              backgroundColor: row.original.reccSupplyCar?.id ? 'success.dark' : 'error.dark'
+              backgroundColor: row.original.reccValuableCar?.id ? 'success.dark' : 'error.dark'
             }
           }}
-          onClick={() => handleOpenCarModal(row.original.reccSupplyCar, row.original.id)}
+          onClick={() => handleOpenCarModal(row.original.reccValuableCar, row.original.id)}
         >
-          {row.original.reccSupplyCar?.id ? '완료' : '미완료'}
+          {row.original.reccValuableCar?.id ? '완료' : '미완료'}
         </Button>
       ),
     },
@@ -589,13 +588,13 @@ export function SupMapping() {
     autoResetPageIndex: false,
   });
 
-  const handleOpenClientModal = (client: Basic['reccSupplyClient'], id: number) => {
+  const handleOpenClientModal = (client: Basic['reccValuableClient'], id: number) => {
     setSelectedClient(client);
     setSelectedRowId(id);
     setClientModalOpen(true);
   };
   
-  const handleOpenCarModal = (car: Basic['reccSupplyCar'], id: number) => {
+  const handleOpenCarModal = (car: Basic['reccValuableCar'], id: number) => {
     setSelectedCar(car);
     setSelectedRowId(id);
     setCarModalOpen(true);
@@ -607,7 +606,7 @@ export function SupMapping() {
     setItemModalOpen(true);
   };
   
-  const handleOpenClient2ndModal = (client2nd: Basic['reccSupplyClient2nd'], id: number) => {
+  const handleOpenClient2ndModal = (client2nd: Basic['reccValuableExtraClient'], id: number) => {
     setSelectedClient2nd(client2nd);
     setSelectedRowId(id);
     if (selectedCompany) {
@@ -844,7 +843,7 @@ export function SupMapping() {
                       overflow: 'hidden',
                       textOverflow: 'ellipsis',
                       position: 'sticky',
-                      top: 0,
+                      top: -2,
                       backgroundColor: '#cfcfcf',
                       zIndex: 1,
                     }}

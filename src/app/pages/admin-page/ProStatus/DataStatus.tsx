@@ -37,14 +37,18 @@ type Status = {
   transCount: number;
   supplyCount: number;
   wasteCount: number;
+  noAddressClientCount: number;
+  noSpecCarCount: number;
   transClientMappingCount: number;
   transCarMappingCount: number;
-  supplyClientMappingCount: number;
-  supplyCarMappingCount: number;
-  supplyItemMappingCount: number;
+  valuableClientMappingCount: number;
+  valuableCarMappingCount: number;
+  valuableItemMappingCount: number;
+  valuableExtraClientMappingCount: number;
   wasteClientMappingCount: number;
   wasteCarMappingCount: number;
   wasteItemMappingCount: number;
+  state: string; // 상태 필드
 };
 
 type ApiData = {
@@ -54,14 +58,18 @@ type ApiData = {
   transCount: number;
   supplyCount: number;
   wasteCount: number;
+  noAddressClientCount: number;
+  noSpecCarCount: number;
   transClientMappingCount: number;
   transCarMappingCount: number;
-  supplyClientMappingCount: number;
-  supplyCarMappingCount: number;
-  supplyItemMappingCount: number;
+  valuableClientMappingCount: number;
+  valuableCarMappingCount: number;
+  valuableItemMappingCount: number;
+  valuableExtraClientMappingCount: number;
   wasteClientMappingCount: number;
   wasteCarMappingCount: number;
   wasteItemMappingCount: number;
+  state: string; // 상태 필드
 };
 
 type CompanyData = {
@@ -84,33 +92,33 @@ const columns: ColumnDef<Status>[] = [
     cell: ({ row }) => `${row.original.transCarMappingCount}/${row.original.transCount}` 
   },
   { 
-    accessorKey: 'supplyClientMappingCount', 
-    header: () => <div style={{ textAlign: 'center' }}>공급 거래처</div>, 
-    cell: ({ row }) => `${row.original.supplyClientMappingCount}/${row.original.supplyCount}` 
+    accessorKey: 'valuableClientMappingCount', 
+    header: () => <div style={{ textAlign: 'center' }}>유가물 거래처</div>, 
+    cell: ({ row }) => `${row.original.valuableClientMappingCount}/${row.original.supplyCount}` 
   },
   { 
-    accessorKey: 'supplyCarMappingCount', 
-    header: () => <div style={{ textAlign: 'center' }}>공급 차량</div>, 
-    cell: ({ row }) => `${row.original.supplyCarMappingCount}/${row.original.supplyCount}` 
+    accessorKey: 'valuableCarMappingCount', 
+    header: () => <div style={{ textAlign: 'center' }}>유가물 차량</div>, 
+    cell: ({ row }) => `${row.original.valuableCarMappingCount}/${row.original.supplyCount}` 
   },
   { 
-    accessorKey: 'supplyItemMappingCount', 
-    header: () => <div style={{ textAlign: 'center' }}>공급 품목</div>, 
-    cell: ({ row }) => `${row.original.supplyItemMappingCount}/${row.original.supplyCount}` 
+    accessorKey: 'valuableItemMappingCount', 
+    header: () => <div style={{ textAlign: 'center' }}>유가물 품목</div>, 
+    cell: ({ row }) => `${row.original.valuableItemMappingCount}/${row.original.supplyCount}` 
   },
   { 
     accessorKey: 'wasteClientMappingCount', 
-    header: () => <div style={{ textAlign: 'center' }}>폐기 거래처</div>, 
+    header: () => <div style={{ textAlign: 'center' }}>폐기물 거래처</div>, 
     cell: ({ row }) => `${row.original.wasteClientMappingCount}/${row.original.wasteCount}` 
   },
   { 
     accessorKey: 'wasteCarMappingCount', 
-    header: () => <div style={{ textAlign: 'center' }}>폐기 차량</div>, 
+    header: () => <div style={{ textAlign: 'center' }}>폐기물 차량</div>, 
     cell: ({ row }) => `${row.original.wasteCarMappingCount}/${row.original.wasteCount}` 
   },
   { 
     accessorKey: 'wasteItemMappingCount', 
-    header: () => <div style={{ textAlign: 'center' }}>폐기 품목</div>, 
+    header: () => <div style={{ textAlign: 'center' }}>폐기물 품목</div>, 
     cell: ({ row }) => `${row.original.wasteItemMappingCount}/${row.original.wasteCount}` 
   },
 ];
@@ -147,27 +155,34 @@ export function DataStatus() {
       });
   }, []);
 
-  const transformData = useCallback((apiData: ApiData[]): Status[] => {
-    return apiData.map(item => {
-      const company = companies.find(c => c.code === item.companyCode);
-      return {
-        companyName: company ? company.name : `사업회원 ${item.companyCode}`,
-        year: item.year,
-        month: item.month,
-        transCount: item.transCount,
-        supplyCount: item.supplyCount,
-        wasteCount: item.wasteCount,
-        transClientMappingCount: item.transClientMappingCount,
-        transCarMappingCount: item.transCarMappingCount,
-        supplyClientMappingCount: item.supplyClientMappingCount,
-        supplyCarMappingCount: item.supplyCarMappingCount,
-        supplyItemMappingCount: item.supplyItemMappingCount,
-        wasteClientMappingCount: item.wasteClientMappingCount,
-        wasteCarMappingCount: item.wasteCarMappingCount,
-        wasteItemMappingCount: item.wasteItemMappingCount,
-      };
-    });
-  }, [companies]);
+  const transformData = useCallback(
+    (apiData: ApiData[]): Status[] => {
+      return apiData.map((item) => {
+        const company = companies.find((c) => c.code === item.companyCode);
+        return {
+          companyName: company ? company.name : `사업회원 ${item.companyCode}`,
+          year: item.year,
+          month: item.month,
+          transCount: item.transCount,
+          supplyCount: item.supplyCount,
+          wasteCount: item.wasteCount,
+          noAddressClientCount: item.noAddressClientCount,
+          noSpecCarCount: item.noSpecCarCount,
+          transClientMappingCount: item.transClientMappingCount,
+          transCarMappingCount: item.transCarMappingCount,
+          valuableClientMappingCount: item.valuableClientMappingCount,
+          valuableCarMappingCount: item.valuableCarMappingCount,
+          valuableItemMappingCount: item.valuableItemMappingCount,
+          valuableExtraClientMappingCount: item.valuableExtraClientMappingCount,
+          wasteClientMappingCount: item.wasteClientMappingCount,
+          wasteCarMappingCount: item.wasteCarMappingCount,
+          wasteItemMappingCount: item.wasteItemMappingCount,
+          state: item.state, // 상태 값 포함
+        };
+      });
+    },
+    [companies]
+  );
 
   const fetchData = useCallback(async (pageIndex: number, pageSize: number, params: typeof searchParams) => {
     setLoading(true);
@@ -210,9 +225,9 @@ export function DataStatus() {
         ...original,
         collTrans: `${original.transClientMappingCount}/${original.transCount}`,
         collCar: `${original.transCarMappingCount}/${original.transCount}`,
-        supItem: `${original.supplyItemMappingCount}/${original.supplyCount}`,
-        supTrans: `${original.supplyClientMappingCount}/${original.supplyCount}`,
-        supCar: `${original.supplyCarMappingCount}/${original.supplyCount}`,
+        supItem: `${original.valuableItemMappingCount}/${original.supplyCount}`,
+        supTrans: `${original.valuableClientMappingCount}/${original.supplyCount}`,
+        supCar: `${original.valuableCarMappingCount}/${original.supplyCount}`,
         dispItem: `${original.wasteItemMappingCount}/${original.wasteCount}`,
         dispTrans: `${original.wasteClientMappingCount}/${original.wasteCount}`,
         dispCar: `${original.wasteCarMappingCount}/${original.wasteCount}`,
@@ -300,7 +315,7 @@ export function DataStatus() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        데이터 입력 현황
+        데이터 매핑 현황
       </Typography>
       <Button
         variant="contained"
@@ -419,7 +434,7 @@ export function DataStatus() {
                       backgroundColor: '#d8d8d8',
                     }}
                   >
-                    수집운반관리표
+                    수집운반 관리표
                   </TableCell>
                   <TableCell
                     colSpan={3}
@@ -430,7 +445,7 @@ export function DataStatus() {
                       backgroundColor: '#d8d8d8',
                     }}
                   >
-                    공급관리표
+                    유가물 관리표
                   </TableCell>
                   <TableCell
                     colSpan={3}
@@ -441,7 +456,7 @@ export function DataStatus() {
                       backgroundColor: '#d8d8d8',
                     }}
                   >
-                    폐기관리표
+                    폐기물 관리표
                   </TableCell>
                   {role !== 'User' && (
                     <TableCell
@@ -497,17 +512,41 @@ export function DataStatus() {
                   table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id}>
                       {row.getVisibleCells().map((cell) => (
-                        <TableCell key={cell.id} style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                          textAlign: ['year' , 'month' , 'transClientMappingCount' , 'transCarMappingCount' ,
-                          'supplyClientMappingCount' , 'supplyCarMappingCount' , 'supplyItemMappingCount' ,
-                          'wasteClientMappingCount' , 'wasteCarMappingCount' , 'wasteItemMappingCount'].includes(cell.column.id) ? 'right' : 'left',
-                        }}>
+                        <TableCell
+                          key={cell.id}
+                          style={{
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            textAlign: [
+                              'year',
+                              'month',
+                              'transClientMappingCount',
+                              'transCarMappingCount',
+                              'valuableClientMappingCount',
+                              'valuableCarMappingCount',
+                              'valuableItemMappingCount',
+                              'wasteClientMappingCount',
+                              'wasteCarMappingCount',
+                              'wasteItemMappingCount',
+                            ].includes(cell.column.id)
+                              ? 'right'
+                              : 'left',
+                          }}
+                        >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
                       {role === 'Admin' && (
                         <TableCell style={{ textAlign: 'center' }}>
-                          <Button variant="contained">산출</Button>
+                          {/* row.original 접근이 제대로 이루어지는지 확인 */}
+                          <Button
+                            variant="contained"
+                            disabled={row.original?.state !== 'Done'} // "Done"인 경우에만 버튼 활성화
+                            onClick={() => console.log(`산출: ${row.original?.companyName}`)}
+                          >
+                            산출
+                          </Button>
                         </TableCell>
                       )}
                     </TableRow>

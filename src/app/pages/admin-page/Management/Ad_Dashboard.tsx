@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./css/Ad_Dashboard.css";
 import { NoticeList } from "./NoticeList";
-// import { LineChart } from './TotalLineChart'; 
-// import { LineChartPro } from './LineChartPro';
-import { DashboardTable } from "./DashboardTable"; 
+import { DashboardTable } from "./DashboardTable";
+import { Notification } from "./Notification";
 
 export function Ad_Dashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -29,17 +28,7 @@ export function Ad_Dashboard() {
   };
 
   return (
-    <div className="dashboard-container">
-      {/* <div className="graph-section">
-        <div className="graph-box">
-          <h2>총 온실가스 저감효과 그래프 (연도별)</h2>
-          <LineChart /> 
-        </div>
-        <div className="graph-box">
-          <h2>사업회원별 및 제품군별 온실가스 저감효과 그래프 (연도별)</h2>
-          <LineChartPro /> 
-        </div>
-      </div> */}
+    <div className={`dashboard-container ${isAdmin ? "admin-view" : "user-view"}`}>
       {isAdmin && (
         <div className="table-section">
           <h2>LCA 결과 테이블</h2>
@@ -47,7 +36,6 @@ export function Ad_Dashboard() {
         </div>
       )}
 
-      {/* 오른쪽 공지사항/알림 섹션 (3) */}
       <div className="info-section">
         <div className="announcement-section">
           <NoticeList isAdmin={isAdmin} handleAdminClick={handleAdminClick} />
@@ -55,6 +43,7 @@ export function Ad_Dashboard() {
 
         <div className="notification-section">
           <h2>알림</h2>
+          <Notification />
         </div>
       </div>
     </div>

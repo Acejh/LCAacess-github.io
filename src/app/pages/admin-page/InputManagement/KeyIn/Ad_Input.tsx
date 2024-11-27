@@ -416,7 +416,7 @@ export function Ad_Input() {
           case 'Fuel':
             setGuideMessage(
               '재활용 공정 내 사용되는 연료에 대해 [L] 단위의 사용량을 기재해 주세요.<br />' + 
-              '지게차 경유 사용량은 제외해주세요.'
+              '<span style="color: red;">지게차 경유 사용량은 제외해주세요.</span>'
             );
             break;
           case 'Water':
@@ -525,7 +525,7 @@ export function Ad_Input() {
 
   return (
     <div style={{ margin: '0 30px' }}>
-      <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
+      <Typography gutterBottom style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '10px' }}>
         투입물 관리
       </Typography>
       
@@ -585,11 +585,17 @@ export function Ad_Input() {
             - 한전 고지서에 기입된 [kWh] 단위의 사용량을 기재해 주세요.<br />
             - 재활용 공장동과 사무동이 별도로 관리되고 있다면 공장동만 입력해주세요.
           </Typography>
-          <Typography variant="body2" paragraph>
-            ● 경유 및 등유 <br />
-            - 재활용 공정 내 사용되는 연료에 대해 [L] 단위의 사용량을 기재해 주세요.<br />
-            - 지게차 경유 사용량은 제외해주세요.
-          </Typography>
+          <Typography
+            variant="body2"
+            paragraph
+            dangerouslySetInnerHTML={{
+              __html: `
+                ● 경유 및 등유 <br />
+                - 재활용 공정 내 사용되는 연료에 대해 [L] 단위의 사용량을 기재해 주세요.<br />
+                <span style="color: red;">- 지게차 경유 사용량은 제외해주세요.</span>
+              `,
+            }}
+          />
           <Typography variant="body2" paragraph>
             ● 상수 및 공업용수 <br />
             - 외부에서 투입되는 상수, 공업용수에 대해 [㎥] 단위의 사용량을 기재해 주세요.<br />
@@ -687,9 +693,14 @@ export function Ad_Input() {
         aria-describedby="modal-modal-description"
       >
         <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h5" component="h2" style={{ marginBottom: 20 }}>
-            투입물 등록
-          </Typography>
+        <Typography
+          id="modal-modal-title"
+          variant="h5"
+          component="h2"
+          sx={{ marginBottom: 2, fontWeight: 'bold' }}
+        >
+          투입물 등록
+        </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <TextField

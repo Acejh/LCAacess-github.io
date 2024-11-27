@@ -1,10 +1,41 @@
-/* Ad_Dashboard.css */
+/* 기본 스타일 */
 .dashboard-container {
   display: grid;
   grid-template-columns: 6fr 4fr;
   grid-template-rows: auto auto;
   gap: 20px;
   padding: 20px;
+}
+
+/* 어드민 뷰 */
+.admin-view .info-section {
+  grid-column: 2;
+}
+
+/* 유저 뷰 - 공지사항과 알림을 가운데 정렬 */
+.user-view {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.user-view .info-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 800px; /* 적절한 최대 너비 설정 */
+  width: 100%;
+}
+
+.table-section {
+  width: 100%; /* 부모 컨테이너 너비 설정 */
+  overflow-x: auto; /* 가로 스크롤 활성화 */
+  overflow-y: hidden; /* 세로 스크롤 비활성화 */
+  height: auto; /* 높이는 내용에 따라 자동 조정 */
+  padding: 20px; /* 여백 추가 */
+  box-sizing: border-box;
 }
 
 .graph-section {

@@ -16,45 +16,44 @@ import {
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 export function LineChart() {
-  // 하드코딩된 데이터 (연도별 총 온실가스 저감효과)
   const data = {
     labels: ['2018', '2019', '2020', '2021', '2022', '2023', '2024'],
     datasets: [
       {
-        label: '총 온실가스 저감효과 (연도별)',
+        label: '제품별 LCA 결과값',
         data: [
-          6.89946e-03, // 2018
-          8.25689e-03, // 2019 (조금 더 크게 설정)
-          7.05645e-03, // 2020 (다른 값)
-          9.12456e-03, // 2021 (가장 큰 값)
-          6.55456e-03, // 2022 (작게 설정)
-          8.04567e-03, // 2023
-          7.39923e-03, // 2024
+          6.89946e-03,
+          8.25689e-03,
+          7.05645e-03,
+          9.12456e-03,
+          6.55456e-03,
+          8.04567e-03,
+          7.39923e-03,
         ],
         borderColor: 'rgba(75,192,192,1)',
         backgroundColor: 'rgba(79, 218, 218, 0.637)',
         fill: true,
-        tension: 0.1, // 선을 부드럽게
+        tension: 0.1,
       },
     ],
   };
 
   const options = {
     responsive: true,
-    maintainAspectRatio: false, // 비율 유지를 비활성화하여 전체 너비를 채움
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         position: 'top' as const,
       },
       tooltip: {
         callbacks: {
-          label: function (context: TooltipItem<'bar'>) { // TooltipItem<'line'> 타입 명시
+          label: function (context: TooltipItem<'bar'>) {
             let label = context.dataset.label || '';
             if (label) {
               label += ': ';
             }
             if (context.raw !== null) {
-              label += Number(context.raw).toExponential(2); // 지수 형식으로 변환
+              label += Number(context.raw).toExponential(2);
             }
             return label;
           },
@@ -66,7 +65,7 @@ export function LineChart() {
         ticks: {
           callback: function (tickValue: string | number) {
             if (typeof tickValue === 'number') {
-              return tickValue.toExponential(2); // Y축에 지수 표기
+              return tickValue.toExponential(2);
             }
             return tickValue;
           },

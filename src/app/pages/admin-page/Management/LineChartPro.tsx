@@ -66,7 +66,7 @@ export function LineChartPro() {
     labels: ['제품군 1', '제품군 2', '제품군 3', '제품군 4', '제품군 5', '제품군 6', '제품군 7'],
     datasets: [
       {
-        label: '제품군별 온실가스 저감효과',
+        label: '사업회원별 LCA 결과값',
         data: [
           7.12345e-03,
           5.23456e-03,

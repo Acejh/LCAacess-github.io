@@ -32,7 +32,6 @@ import {
   Grid,
   CircularProgress,
 } from '@mui/material';
-import * as XLSX from 'xlsx';
 
 type Car = {
   id: number;
@@ -70,6 +69,7 @@ export function CarsControl() {
   const [loading, setLoading] = useState(true);
   const [isFormValid, setIsFormValid] = useState(false);
   const [open, setOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
@@ -210,15 +210,57 @@ export function CarsControl() {
     }
   }, []);
 
-  // 엑셀 다운로드
-  const handleDownloadExcel = () => {
-    const tableData = table.getRowModel().rows.map(row => row.original);
-    const worksheet = XLSX.utils.json_to_sheet(tableData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
-    XLSX.writeFile(workbook, '차량관리.xlsx');
+  //엑셀 다운로드
+  const handleDownloadExcel = async () => {
+    if (!selectedCompany) {
+      console.error('회사를 선택해 주세요.');
+      return;
+    }
+  
+    setDownloading(true); // 다운로드 시작
+  
+    try {
+      let url = `https://lcaapi.acess.co.kr/Cars/export?companyCode=${selectedCompany.code}`;
+  
+      // Optional parameters
+      if (selectedTypeInOut) {
+        url += `&inOutType=${selectedTypeInOut}`; 
+      }
+  
+      const response = await axios.get(url, {
+        responseType: 'blob',
+        timeout: 180000, // 3분 타임아웃 설정
+      });
+  
+      const contentDisposition = response.headers['content-disposition'];
+      let filename = '수집운반_관리표.xlsx'; // 기본 파일 이름
+  
+      if (contentDisposition) {
+        const filenameMatch = contentDisposition.match(/filename\*?=['"]?UTF-8['"]?''(.+?)['"]?(;|$)/);
+        if (filenameMatch && filenameMatch[1]) {
+          filename = decodeURIComponent(filenameMatch[1]);
+        } else {
+          const simpleFilenameMatch = contentDisposition.match(/filename="?(.+?)['"]?(;|$)/);
+          if (simpleFilenameMatch && simpleFilenameMatch[1]) {
+            filename = simpleFilenameMatch[1];
+          }
+        }
+      }
+  
+      const blob = new Blob([response.data]);
+      const urlBlob = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = urlBlob;
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+    } catch (error) {
+      console.error('엑셀 파일 다운로드 중 오류 발생:', error);
+    } finally {
+      setDownloading(false); // 다운로드 완료
+    }
   };
-
   // 데이터 추가
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -410,14 +452,6 @@ export function CarsControl() {
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
         차량 관리
       </Typography>
-      <Button
-        variant="contained"
-        color="secondary"
-        style={{ height: '35px', marginBottom: '20px', padding: '0 10px', fontSize: '14px', display: 'none' }}
-        onClick={handleDownloadExcel}
-      >
-        엑셀 다운로드
-      </Button>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} onCompanyListChange={setCompanies} />
         <FormControl style={{ marginRight: '10px', display: 'none' }}>
@@ -472,6 +506,19 @@ export function CarsControl() {
         </Button>
         <Button variant="contained" color="secondary" style={{ height: '35px', marginLeft: '10px', fontSize: '12px' }} onClick={handleOpen}>
           차량 등록
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          style={{ height: '35px', marginLeft:'10px', padding: '0 10px', fontSize: '12px' }}
+          onClick={handleDownloadExcel}
+          disabled={
+            !selectedCompany || 
+            downloading || 
+            (selectedCompany.name === '전체' || selectedCompany.name === '공통')
+          }
+        >
+          {downloading ? '다운로드 중...' : '엑셀 다운로드'}
         </Button>
       </div>
       <TableContainer
