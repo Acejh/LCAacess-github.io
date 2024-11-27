@@ -505,7 +505,7 @@ export function WasteMapping() {
 
   return (
     <div style={{ margin: '0 30px' }}>
-      <Typography gutterBottom style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '10px' }}>
+      <Typography variant='h5'gutterBottom style={{ marginBottom: '10px' }}>
         폐기물 처리품목&middot;방법 관리
       </Typography>
 
@@ -541,13 +541,12 @@ export function WasteMapping() {
         </Button>
       </div>
       <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: '5px', backgroundColor: '#f9f9f9', marginBottom: '20px' }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography sx={{ fontSize:'20px', fontWeight:'bold'}} gutterBottom>
           폐기물 처리품목&middot;방법 관리 입력 방법
         </Typography>
         <Typography variant="body2" paragraph>
-        ● 처리방법 : 배출하는 폐기물의 거래처를 확인 한 후, 처리방법(소각, 매립, 열회수)을 선택해주세요.<br/>
-        ● 처리제품 : 어떤 제품에서 해당 폐기물이 발생하는지 세부제품을 선택해주세요.
-
+        <strong>● 처리방법</strong> : 배출하는 폐기물의 거래처를 확인 한 후, 처리방법(소각, 매립, 열회수)을 선택해주세요.<br/>
+        <strong>● 처리제품</strong> : 어떤 제품에서 해당 폐기물이 발생하는지 세부제품을 선택해주세요.
         </Typography>
       </Box>
       <TableContainer

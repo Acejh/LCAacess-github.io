@@ -446,7 +446,7 @@ export function Ad_Effluent() {
 
   return (
     <div style={{ margin: '0 30px' }}>
-      <Typography gutterBottom style={{ fontSize: '22px', fontWeight: 'bold' , marginBottom: '10px' }}>
+      <Typography variant='h5'gutterBottom style={{ marginBottom: '10px' }}>
         수계배출물 관리
       </Typography>
       <Button
@@ -506,7 +506,7 @@ export function Ad_Effluent() {
       </div>
       {/* Guidelines Section */}
       <Box sx={{ p: 2, border: '1px solid #ddd', borderRadius: '5px', backgroundColor: '#f9f9f9', marginBottom: '20px' }}>
-        <Typography variant="h6" gutterBottom>
+        <Typography sx={{ fontSize:'20px', fontWeight:'bold'}} gutterBottom>
           수계배출물 입력방법
         </Typography>
         <Typography variant="body2" paragraph>
