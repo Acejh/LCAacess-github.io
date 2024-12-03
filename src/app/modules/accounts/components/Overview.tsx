@@ -17,12 +17,20 @@ export function Overview() {
 
   const fetchData = async () => {
     try {
+      // 로컬스토리지에서 사용자 정보를 가져옵니다.
       const userInfo = JSON.parse(localStorage.getItem('kt-auth-react-v') || '{}').userInfo
-      const { companyCode, role } = userInfo
-
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Users?companyCode=${companyCode}&role=${role}`)
-      const userData = response.data.list[0]
-
+      const { userName } = userInfo
+  
+      if (!userName) {
+        setApiError('UserName을 찾을 수 없습니다.')
+        setLoading(false)
+        return
+      }
+  
+      // 수정된 GET API 호출
+      const response = await axios.get(`https://lcaapi.acess.co.kr/Users/username/${userName}`)
+      const userData = response.data
+  
       setUserProfile({
         name: userData.name,
         phoneNumber: userData.phoneNumber,

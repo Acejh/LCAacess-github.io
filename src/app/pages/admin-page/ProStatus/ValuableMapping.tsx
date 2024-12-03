@@ -167,6 +167,16 @@ export function ValuableMapping() {
     }
   }, []);
 
+  // LCI 품목 데이터 가져오기
+  const fetchLCIItems = async (year: string) => {
+    try {
+      const response = await axios.get(`https://lcaapi.acess.co.kr/ValuableMaps/LciItems?Year=${year}`);
+      setMappingItems(response.data.lciItems); // Autocomplete 데이터 설정
+    } catch (error) {
+      console.error('Error fetching LCI items:', error);
+    }
+  };
+
   // 컴포넌트 초기 로드 시 매핑 데이터 가져오기
   useEffect(() => {
     fetchMappings();
@@ -201,23 +211,32 @@ export function ValuableMapping() {
     setModalOpen(true);
   };
 
+  // 수정 버튼 클릭 시 매핑 모달로 전환
+  const handleEditMapping = async () => {
+    if (modalData) {
+      setCurrentRowId(modalData.id); // 현재 아이템의 ID 저장
+      setModalOpen(false); // 기존 모달 닫기
+      setMappingModalOpen(true); // 매핑 모달 열기
+
+      // 현재 연도를 기반으로 LCI 아이템 데이터 가져오기
+      const year = modalData.year.toString();
+      await fetchLCIItems(year); // LCI 데이터 호출
+    }
+  };
+
   // 모달 창 닫기
   const handleCloseModal = () => {
     setModalOpen(false);
     setModalData(null);
   };
-
-  // 매핑 모달 열기
+  
   const handleMappingClick = async (row: ValuableMappingData) => {
-    setCurrentRowId(row.id); 
-
+    setCurrentRowId(row.id); // 현재 행 ID 저장
+    setMappingModalOpen(true); // 매핑 모달 열기
+  
     try {
-      // lciItem이 없으면 searchParams.year 사용
-      const year = row.lciItem ? row.lciItem.year : searchParams.year;
-
-      const response = await axios.get(`https://lcaapi.acess.co.kr/ValuableMaps/LciItems?Year=${year}`);
-      setMappingItems(response.data.lciItems);  
-      setMappingModalOpen(true);
+      const year = row.lciItem ? row.lciItem.year.toString() : searchParams.year; // 연도 설정
+      await fetchLCIItems(year); // LCI 데이터 호출
     } catch (error) {
       console.error('Error fetching LCI items:', error);
     }
@@ -454,13 +473,17 @@ export function ValuableMapping() {
       </TableContainer>
 
       {/* 모달 창 */}
-      <Dialog open={modalOpen} onClose={handleCloseModal}>
+      <Dialog open={modalOpen} onClose={handleCloseModal} maxWidth="sm" fullWidth>
         <DialogTitle>LCI 품목 상세 정보</DialogTitle>
         <DialogContent>
           {modalData ? (
             <>
-              <Typography variant="body1"><strong>품목명:</strong> {modalData.name || 'N/A'}</Typography>
-              <Typography variant="body1"><strong>연도:</strong> {modalData.year}</Typography>
+              <Typography variant="body1">
+                <strong>품목명:</strong> {modalData.name || 'N/A'}
+              </Typography>
+              <Typography variant="body1">
+                <strong>연도:</strong> {modalData.year}
+              </Typography>
               <Typography variant="body1">
                 <strong>유형:</strong> {typeMapping[modalData.type] || modalData.type || '알 수 없음'}
               </Typography>
@@ -470,16 +493,27 @@ export function ValuableMapping() {
                   ? categoryMapping[modalData.type][modalData.category]
                   : modalData.category || '알 수 없음'}
               </Typography>
-              <Typography variant="body1"><strong>단위:</strong> {modalData.unit}</Typography>
-              <Typography variant="body1"><strong>GWP:</strong> {modalData.gwp}</Typography>
-              <Typography variant="body1"><strong>GWP 대체:</strong> {modalData.gwpAlt}</Typography>
+              <Typography variant="body1">
+                <strong>단위:</strong> {modalData.unit}
+              </Typography>
+              <Typography variant="body1">
+                <strong>GWP:</strong> {modalData.gwp}
+              </Typography>
+              <Typography variant="body1">
+                <strong>GWP 대체:</strong> {modalData.gwpAlt}
+              </Typography>
             </>
           ) : (
             <Typography variant="body1">데이터를 불러오는 중입니다...</Typography>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseModal} color="primary">닫기</Button>
+          <Button onClick={handleEditMapping} color="primary">
+            수정
+          </Button>
+          <Button onClick={handleCloseModal} color="secondary">
+            닫기
+          </Button>
         </DialogActions>
       </Dialog>
       <Dialog open={mappingModalOpen} onClose={handleCloseMappingModal} maxWidth="sm" fullWidth>

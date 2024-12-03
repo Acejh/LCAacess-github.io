@@ -36,7 +36,6 @@ import {
   Autocomplete,
 } from '@mui/material';
 import * as XLSX from 'xlsx';
-import ValuableMap from '../../ComponentBox/ValuableMap';
 
 type Car = {
   id: number;
@@ -44,12 +43,6 @@ type Car = {
   inOutType: string;
   carNo: string;
   spec: number;
-};
-
-type ClientType = {
-  inOutType: string;
-  code: string;
-  title: string;
 };
 
 type Client = {
@@ -89,7 +82,7 @@ type Basic = {
     inOutType: string;
     clientType: string;
     clientName: string;
-    bizNo: string;
+    bizNo: string | null;
   };
   reccValuableExtraClient: {
     id: number;
@@ -97,13 +90,14 @@ type Basic = {
     inOutType: string;
     clientType: string;
     clientName: string;
-    bizNo: string;
+    bizNo: string | null;
   } | null;
   reccValuableItem: {
-    id: number;
-    valuableThingId: number;
+    id?: number; // 선택적 필드로 변경
+    lciItemId: number;
+    lciItemTitle: string;
   } | null;
-  selectedValuableThingId?: number; 
+  selectedValuableThingId?: number;
 };
 
 export function SupMapping() {
@@ -115,9 +109,16 @@ export function SupMapping() {
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [totalCount, setTotalCount] = useState(0);
+  const [mappingYear, setMappingYear] = useState<string>(new Date().getFullYear().toString());
+  const [lciItems, setLciItems] = useState<{ id: number; name: string }[]>([]);
+  const [selectedLciItem, setSelectedLciItem] = useState<number | null>(null);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [selectedRowId, setSelectedRowId] = useState<number | null>(null);
   const [itemModalOpen, setItemModalOpen] = useState(false);
+  const [clientMappingModalOpen, setClientMappingModalOpen] = useState(false);
+  const [client2ndMappingModalOpen, setClient2ndMappingModalOpen] = useState(false);
+  const [carMappingModalOpen, setCarMappingModalOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedItem, setSelectedItem] = useState<number | null>(null);
   const [itemMappingStatus, setItemMappingStatus] = useState<string>('');
   const [clientMappingStatus, setClientMappingStatus] = useState<string>('');
@@ -131,7 +132,7 @@ export function SupMapping() {
     itemMappingStatus: '', // 유가물 매핑 상태
     clientMappingStatus: '', // 거래처 매핑 상태
     extraClientMappingStatus: '', // 2차 거래처 매핑 상태
-    carMappingStatus: '', // 차량 매핑 상태
+    carMappingStatus: '', 
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [clientModalOpen, setClientModalOpen] = useState(false);
@@ -142,22 +143,33 @@ export function SupMapping() {
   const [clients, setClients] = useState<Basic['reccValuableClient'][]>([]);
   const [clients2nd, setClients2nd] = useState<Basic['reccValuableClient'][]>([]);
   const [cars, setCars] = useState<Basic['reccValuableCar'][]>([]);
-  const [clientTypes, setClientTypes] = useState<ClientType[]>([]);
   const [selectedClient2nd, setSelectedClient2nd] = useState<Basic['reccValuableClient'] | null>(null);
+  const [itemMappingModalOpen, setItemMappingModalOpen] = useState(false);
   const navigate = useNavigate();
   
-  const fetchClientTypes = async () => {
+
+  const fetchLciItems = async (year: string) => {
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/Clients/types');
-      setClientTypes(response.data);
+      const response = await axios.get(`https://lcaapi.acess.co.kr/ValuableMaps/LciItems?Year=${year}`);
+      setLciItems(response.data.lciItems || []);
     } catch (error) {
-      console.error('거래처 타입 데이터를 가져오는 중 에러 발생:', error);
+      console.error('LCI 항목 데이터를 가져오는 중 에러 발생:', error);
+      setLciItems([]);
     }
   };
   
   useEffect(() => {
-    fetchClientTypes();
-  }, []);
+    fetchLciItems(mappingYear);
+  }, [mappingYear]);
+  
+  const handleMappingYearChange = (event: SelectChangeEvent<string>) => {
+    setMappingYear(event.target.value);
+  };
+  
+  // const handleLciItemChange = (event: SelectChangeEvent<string>) => {
+  //   const selectedId = parseInt(event.target.value, 10); 
+  //   setSelectedLciItem(selectedId); // 상태 업데이트
+  // };
 
   const fetchCars = async (companyCode: string) => {
     try {
@@ -203,18 +215,20 @@ export function SupMapping() {
       setClients([]);
     }
   };
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const fetchClients2nd = async (companyCode: string) => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Clients?companyCode=${companyCode}&inOutType=OUT&type=VP&withPagination=false`);
-      const clients = Array.isArray(response.data.list) ? response.data.list.map((client: Client) => ({
-        id: client.id,
-        clientId: client.id,
-        inOutType: client.inOutType,
-        clientType: client.type,
-        clientName: client.name,
-        bizNo: client.bizNo,
-      })) : [];
+      const response = await axios.get('https://lcaapi.acess.co.kr/ExtraClientMaps/clients');
+  
+      // 응답 데이터에서 리스트 추출
+      const clients = Array.isArray(response.data.list)
+            ? response.data.list.map((client: { id: number; name: string; address: string }) => ({
+                id: client.id,
+                clientName: client.name, // 이름 필드
+                address: client.address, // 주소 필드
+              }))
+            : [];
+  
       setClients2nd(clients);
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 403) {
@@ -223,7 +237,7 @@ export function SupMapping() {
         console.error('2차 거래처 데이터를 가져오는 중 에러 발생:', error);
         setErrorMessage('데이터를 가져오는 중 에러 발생');
       }
-      setClients2nd([]);
+      setClients2nd([]); // 실패 시 빈 배열로 초기화
     }
   };
   
@@ -289,15 +303,6 @@ export function SupMapping() {
 
   const totalPages = Math.ceil(totalCount / pageSize);
 
-  const getClientTypeTitle = (inOutType: string, code: string): string => {
-    const clientType = clientTypes.find((type) => type.inOutType === inOutType && type.code === code);
-    return clientType ? clientType.title : code;
-  };
-  
-  const convertInOutType = (inOutType: string): string => {
-    return inOutType === 'IN' ? '입고' : '출고';
-  };
-
   const handleDownloadExcel = () => {
     const tableData = table.getRowModel().rows.map((row) => row.original);
     const worksheet = XLSX.utils.json_to_sheet(tableData);
@@ -334,107 +339,128 @@ export function SupMapping() {
   const handleConfirmClientMapping = async () => {
     if (selectedClient && selectedRowId !== null) {
       const postData = {
-        reccSupplyId: selectedRowId,
+        reccValuableId: selectedRowId,
         clientId: selectedClient.clientId,
       };
-      
+  
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/ReccValuableMapping/Client', postData);
+        const response = await axios.post(
+          'https://lcaapi.acess.co.kr/ReccValuableMapping/Client',
+          postData
+        );
   
         if (response.status === 204) {
-          setData((prevData) =>
-            prevData.map((item) =>
-              item.id === selectedRowId
-                ? { ...item, reccValuableClient: { ...item.reccValuableClient, id: selectedClient.id + 1 } }
-                : item
-            )
-          );
+          handleCloseClientModal(); // 모달 닫기
+          handleCloseClientMappingModal(); // 매핑 모달 닫기
+          await fetchData(pageIndex, pageSize); // 테이블 데이터 새로고침
         }
-        handleCloseClientModal();
       } catch (error) {
-        console.error('거래처 매핑 확인 중 에러 발생:', error);
+        console.error('거래처 매핑 요청 에러:', error);
       }
+    } else {
+      console.warn('선택된 거래처 또는 Row ID가 없습니다.');
     }
   };
 
   const handleConfirmCarMapping = async () => {
     if (selectedCar && selectedRowId !== null) {
       const postData = {
-        reccSupplyId: selectedRowId,
+        reccValuableId: selectedRowId,
         carId: selectedCar.carId,
       };
-      
   
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/ReccValuableMapping/Car', postData);
+        const response = await axios.post(
+          'https://lcaapi.acess.co.kr/ReccValuableMapping/Car',
+          postData
+        );
   
         if (response.status === 204) {
-          setData((prevData) =>
-            prevData.map((item) =>
-              item.id === selectedRowId
-                ? { ...item, reccValuableCar: { ...item.reccValuableCar, id: selectedCar.id + 1 } }
-                : item
-            )
-          );
+          handleCloseCarModal(); // 모달 닫기
+          handleCloseCarMappingModal(); // 매핑 모달 닫기
+          await fetchData(pageIndex, pageSize); // 테이블 데이터 새로고침
         }
-        handleCloseCarModal();
       } catch (error) {
-        console.error('차량 매핑 확인 중 에러 발생:', error);
+        console.error('차량 매핑 요청 에러:', error);
       }
+    } else {
+      console.warn('선택된 차량 또는 Row ID가 없습니다.');
     }
   };
 
   const handleConfirmItemMapping = async () => {
-    if (selectedItem !== null && selectedRowId !== null) {
+  
+    if (selectedLciItem !== null && selectedRowId !== null) {
       const postData = {
-        reccSupplyId: selectedRowId,
-        valuableThingId: selectedItem,
+        reccValuableId: selectedRowId,
+        lciItemId: selectedLciItem, // 드롭다운에서 선택된 값
       };
   
-    
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/ReccValuableMapping/Item', postData);
+        const response = await axios.post(
+          'https://lcaapi.acess.co.kr/ReccValuableMapping/Item',
+          postData
+        );
+  
   
         if (response.status === 204) {
-          setData((prevData) =>
-            prevData.map((item) =>
-              item.id === selectedRowId
-                ? { ...item, reccValuableItem: { id: selectedItem, valuableThingId: selectedItem, } }
-                : item
-            )
-          );
+          handleCloseItemMappingModal();
+          await fetchData(pageIndex, pageSize);
         }
-        handleCloseItemModal();
       } catch (error) {
-        console.error('제품 매핑 확인 중 에러 발생:', error);
+        if (axios.isAxiosError(error)) {
+          console.error('유가물 매핑 요청 에러:', {
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data,
+          });
+        } else {
+          console.error('알 수 없는 에러 발생:', error);
+        }
       }
+    } else {
+      console.warn('선택된 항목 또는 Row ID가 없습니다.');
     }
   };
+
+  useEffect(() => {
+  }, [lciItems]);
+  
+  useEffect(() => {
+    fetchLciItems(mappingYear);
+  }, [mappingYear]);
 
   const handleConfirmClient2ndMapping = async () => {
     if (selectedClient2nd && selectedRowId !== null) {
       const postData = {
-        reccSupplyId: selectedRowId,
-        clientId: selectedClient2nd.clientId,
+        reccValuableId: selectedRowId, // 선택된 Row ID
+        clientId: selectedClient2nd.id, // 2차 거래처 ID
       };
   
-  
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/ReccValuableMapping/Client2nd', postData);
+        const response = await axios.post(
+          'https://lcaapi.acess.co.kr/ReccValuableMapping/Client2nd',
+          postData
+        );
   
         if (response.status === 204) {
-          setData((prevData) =>
-            prevData.map((item) =>
-              item.id === selectedRowId
-                ? { ...item, reccValuableExtraClient: { ...selectedClient2nd } }
-                : item
-            )
-          );
+          handleCloseClient2ndModal();
+          handleCloseClient2ndMappingModal();
+          fetchData(pageIndex, pageSize); // 테이블 데이터 새로고침
         }
-        handleCloseClient2ndModal();
       } catch (error) {
-        console.error('2차 거래처 매핑 확인 중 에러 발생:', error);
+        if (axios.isAxiosError(error)) {
+          console.error('2차 거래처 매핑 요청 에러:', {
+            message: error.message,
+            status: error.response?.status,
+            data: error.response?.data,
+          });
+        } else {
+          console.error('알 수 없는 에러 발생:', error);
+        }
       }
+    } else {
+      console.warn('선택된 2차 거래처 또는 Row ID가 없습니다.');
     }
   };
 
@@ -488,9 +514,9 @@ export function SupMapping() {
     { accessorKey: 'clientBizno', header: '거래처 사업자번호' },
     { accessorKey: 'clientName', header: '거래처 이름' },
     { accessorKey: 'carNo', header: '차량번호' },
-    { accessorKey: 'item1', header: '품목군' },
-    { accessorKey: 'item2', header: '제품군' },
-    { accessorKey: 'item3', header: '제품분류' },
+    { accessorKey: 'item1', header: '품목1' },
+    { accessorKey: 'item2', header: '품목2' },
+    { accessorKey: 'item3', header: '품목3' },
     {
       id: 'valuableMapping',
       header: '유가물 매핑 상태',
@@ -504,7 +530,7 @@ export function SupMapping() {
               backgroundColor: row.original.reccValuableItem && row.original.reccValuableItem.id ? 'success.dark' : 'error.dark'
             }
           }}
-          onClick={() => handleOpenItemModal(row.original.id, row.original.reccValuableItem?.id || 0)}
+          onClick={() => handleOpenItemModal(row.original.id, row.original.reccValuableItem)}
         >
           {row.original.reccValuableItem && row.original.reccValuableItem.id ? '완료' : '미완료'}
         </Button>
@@ -597,22 +623,43 @@ export function SupMapping() {
   const handleOpenCarModal = (car: Basic['reccValuableCar'], id: number) => {
     setSelectedCar(car);
     setSelectedRowId(id);
-    setCarModalOpen(true);
+  
+    if (!car || car.carId === 0) {
+      // 미완료 상태에서는 차량 매핑 모달 열기
+      setCarMappingModalOpen(true);
+    } else {
+      // 완료 상태에서는 차량 정보 확인 모달 열기
+      setCarModalOpen(true);
+    }
+  };
+  
+  const handleCloseCarMappingModal = () => {
+    setCarMappingModalOpen(false);
   };
 
-  const handleOpenItemModal = (rowId: number, value: number) => {
-    setSelectedRowId(rowId);
-    setSelectedItem(value);
-    setItemModalOpen(true);
+  const handleOpenItemModal = (rowId: number, reccValuableItem: Basic['reccValuableItem'] | null) => {
+    setSelectedRowId(rowId); // 최상위 ID 설정
+    setSelectedItem(reccValuableItem?.lciItemId || null); // LCI 항목 ID만 설정
+  
+    if (!reccValuableItem?.lciItemId) {
+      fetchLciItems(mappingYear); // LCI 항목 데이터 새로 로드
+      setItemMappingModalOpen(true); // 매핑 모달 열기
+    } else {
+      setItemModalOpen(true); // 확인 모달 열기
+    }
   };
   
   const handleOpenClient2ndModal = (client2nd: Basic['reccValuableExtraClient'], id: number) => {
     setSelectedClient2nd(client2nd);
     setSelectedRowId(id);
-    if (selectedCompany) {
-      fetchClients2nd(selectedCompany.code);
+  
+    if (!client2nd || client2nd.clientId === 0) {
+      // "미완료" 상태일 경우 바로 매핑 모달로 전환
+      setClient2ndMappingModalOpen(true);
+    } else {
+      // "완료" 상태일 경우 확인 모달 열기
+      setClient2ndModalOpen(true);
     }
-    setClient2ndModalOpen(true);
   };
   
   const handleCloseClient2ndModal = () => {
@@ -635,12 +682,38 @@ export function SupMapping() {
     setSelectedCar(null);
   };
 
+  const handleCloseClient2ndMappingModal = () => {
+    setClient2ndMappingModalOpen(false); // 2차 거래처 매핑 모달 닫기
+  };
+
+  const handleEditMapping = () => {
+    // 기존 모달 닫기
+    setItemModalOpen(false);
+  
+    // 유가물 매핑 모달 열기 및 데이터 로드
+    fetchLciItems(mappingYear);
+    setItemMappingModalOpen(true);
+  };
+  
+  const handleCloseClientMappingModal = () => {
+    setClientMappingModalOpen(false); // 거래처 매핑 모달 닫기
+  };
+
+  // 유가물 매핑 모달 닫기 핸들러
+  const handleCloseItemMappingModal = () => {
+    setItemMappingModalOpen(false);
+  };
+
   const navigateToCarsManagement = () => {
     navigate('/CarsControl');
   }
 
   const navigateToClientManagement = () => {
     navigate('/AdminClient');
+  };
+
+  const navigateToClient2Management = () => {
+    navigate('/ClientMap');
   };
 
   return (
@@ -908,33 +981,66 @@ export function SupMapping() {
           {selectedClient && selectedClient.clientId !== 0 ? (
             <>
               <Typography variant="h6" gutterBottom>거래처 정보</Typography>
-              <Typography variant="body1"><strong>거래처 ID:</strong> {selectedClient.clientId}</Typography>
-              <Typography variant="body1"><strong>거래처 명칭:</strong> {selectedClient.clientName}</Typography>
-              <Typography variant="body1"><strong>거래처 사업자번호:</strong> {selectedClient.bizNo}</Typography>
-              <Typography variant="body1"><strong>거래처 구분:</strong> {getClientTypeTitle(selectedClient.inOutType, selectedClient.clientType)}</Typography>
-              <Typography variant="body1"><strong>입출고 구분:</strong> {convertInOutType(selectedClient.inOutType)}</Typography>
+              <Typography variant="body1">
+                <strong>거래처 ID:</strong> {selectedClient.clientId}
+              </Typography>
+              <Typography variant="body1">
+                <strong>거래처 명칭:</strong> {selectedClient.clientName}
+              </Typography>
             </>
           ) : (
-            <>
-              <Typography variant="h6" gutterBottom>거래처 정보</Typography>
-              <Autocomplete
-                options={clients}
-                getOptionLabel={(option) => option.clientName}
-                renderInput={(params) => <TextField {...params} label="거래처 선택" variant="outlined" />}
-                value={selectedClient}
-                onChange={(event, newValue) => {
-                  setSelectedClient(newValue || null);
-                }}
-                isOptionEqualToValue={(option, value) => option.clientId === value.clientId}
-              />
-            </>
+            <Typography variant="body1" color="error">매핑된 거래처가 없습니다.</Typography>
           )}
+        </DialogContent>
+        <DialogActions style={{ justifyContent: 'space-between' }}>
+          <Button onClick={navigateToClientManagement} color="primary" variant="contained">
+            거래처 관리
+          </Button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button
+              onClick={() => {
+                setClientModalOpen(false); // 현재 모달 닫기
+                setClientMappingModalOpen(true); // 매핑 모달 열기
+              }}
+              color="primary"
+              variant="contained"
+            >
+              수정
+            </Button>
+            <Button onClick={handleCloseClientModal} color="secondary" variant="outlined">
+              닫기
+            </Button>
+          </div>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={clientMappingModalOpen} onClose={handleCloseClientMappingModal} maxWidth="sm" fullWidth>
+        <DialogTitle>거래처 매핑</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="h6" gutterBottom>거래처 선택</Typography>
+          <Autocomplete
+            options={clients}
+            getOptionLabel={(option) => option.clientName}
+            renderInput={(params) => <TextField {...params} label="거래처 선택" variant="outlined" />}
+            value={selectedClient}
+            onChange={(event, newValue) => {
+              setSelectedClient(newValue || null);
+            }}
+            isOptionEqualToValue={(option, value) => option.clientId === value.clientId}
+            style={{ marginBottom: '16px' }}
+          />
         </DialogContent>
         <DialogActions style={{ justifyContent: 'space-between' }}>
           <Button onClick={navigateToClientManagement} color="primary" variant="contained">거래처 관리</Button>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button onClick={handleCloseClientModal} color="secondary" variant="outlined">닫기</Button>
-            <Button onClick={handleConfirmClientMapping} color="primary" variant="contained">확정</Button>
+            <Button
+              onClick={handleConfirmClientMapping}
+              color="primary"
+              variant="contained"
+            >
+              확정
+            </Button>
+            <Button onClick={handleCloseClientMappingModal} color="secondary" variant="outlined">닫기</Button>
           </div>
         </DialogActions>
       </Dialog>
@@ -942,36 +1048,72 @@ export function SupMapping() {
       <Dialog open={carModalOpen} onClose={handleCloseCarModal} maxWidth="sm" fullWidth>
         <DialogTitle>차량 매핑 확인</DialogTitle>
         <DialogContent dividers>
-          {selectedCar && selectedCar.carId !== 0 ? (
+          <Typography variant="h6" gutterBottom>차량 정보</Typography>
+          {selectedCar ? (
             <>
-              <Typography variant="h6" gutterBottom>차량 정보</Typography>
               <Typography variant="body1"><strong>차량 ID:</strong> {selectedCar.carId}</Typography>
               <Typography variant="body1"><strong>차량번호:</strong> {selectedCar.carNo}</Typography>
               <Typography variant="body1"><strong>차량규격:</strong> {selectedCar.spec}</Typography>
-              <Typography variant="body1"><strong>입출고 구분:</strong> {convertInOutType(selectedCar.inOutType)}</Typography>
             </>
           ) : (
-            <>
-              <Typography variant="h6" gutterBottom>차량 정보</Typography>
-              <Autocomplete
-                options={cars}
-                getOptionLabel={(option) => option.carNo}
-                renderInput={(params) => <TextField {...params} label="차량 선택" variant="outlined" />}
-                value={selectedCar}
-                onChange={(event, newValue) => {
-                  setSelectedCar(newValue || null);
-                }}
-                isOptionEqualToValue={(option, value) => option.carId === value.carId}
-                style={{ maxHeight: 224, overflowY: 'auto' }}
-              />
-            </>
+            <Typography variant="body1" color="error">차량 정보를 불러오는 중입니다...</Typography>
           )}
         </DialogContent>
         <DialogActions style={{ justifyContent: 'space-between' }}>
-          <Button onClick={navigateToCarsManagement} color="primary" variant="contained">차량 관리</Button>
+          <Button onClick={navigateToCarsManagement} color="primary" variant="contained">
+            차량 관리
+          </Button>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button onClick={handleCloseCarModal} color="secondary" variant="outlined">닫기</Button>
-            <Button onClick={handleConfirmCarMapping} color="primary" variant="contained">확정</Button>
+            <Button
+              onClick={() => {
+                setCarModalOpen(false);
+                setCarMappingModalOpen(true); // 차량 매핑 모달로 이동
+              }}
+              color="primary"
+              variant="contained"
+            >
+              수정
+            </Button>
+            <Button onClick={handleCloseCarModal} color="secondary" variant="outlined">
+              닫기
+            </Button>
+          </div>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={carMappingModalOpen} onClose={handleCloseCarMappingModal} maxWidth="sm" fullWidth>
+        <DialogTitle>차량 매핑</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="h6" gutterBottom>차량 선택</Typography>
+          <Autocomplete
+            options={cars}
+            getOptionLabel={(option) => option.carNo}
+            renderInput={(params) => <TextField {...params} label="차량 선택" variant="outlined" />}
+            value={selectedCar}
+            onChange={(event, newValue) => {
+              setSelectedCar(newValue || null);
+            }}
+            isOptionEqualToValue={(option, value) => option.carId === value.carId}
+            style={{ maxHeight: 224, overflowY: 'auto' }}
+          />
+        </DialogContent>
+        <DialogActions style={{ justifyContent: 'space-between' }}>
+          <Button onClick={navigateToCarsManagement} color="primary" variant="contained">
+            차량 관리
+          </Button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            
+            <Button
+              onClick={handleConfirmCarMapping}
+              color="primary"
+              variant="contained"
+              disabled={!selectedCar || !selectedRowId}
+            >
+              확정
+            </Button>
+            <Button onClick={handleCloseCarMappingModal} color="secondary" variant="outlined">
+              닫기
+            </Button>
           </div>
         </DialogActions>
       </Dialog>
@@ -980,18 +1122,100 @@ export function SupMapping() {
         <DialogTitle>유가물 매핑 확인</DialogTitle>
         <DialogContent dividers>
           <Typography variant="h6" gutterBottom>유가물 정보</Typography>
-          <ValuableMap
-            value={selectedItem || null}
-            onChange={(value) => setSelectedItem(value)}
-            menuWidth="160px"
-            fontSize="12px"
-          />
+          {selectedRowId !== null && data.length > 0 ? (
+            (() => {
+              const selectedItem = data.find((item) => item.id === selectedRowId)?.reccValuableItem;
+              if (selectedItem) {
+                return (
+                  <Typography variant="body1">
+                    <strong>LCI 항목:</strong> {selectedItem.lciItemTitle || 'N/A'}
+                  </Typography>
+                );
+              } else {
+                return (
+                  <Typography variant="body1" color="error">
+                    유가물 매핑이 없습니다.
+                  </Typography>
+                );
+              }
+            })()
+          ) : (
+            <Typography variant="body1" color="error">
+              데이터를 불러오는 중입니다...
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Button onClick={handleCloseItemModal} color="secondary" variant="outlined">닫기</Button>
-          <Button onClick={handleConfirmItemMapping} color="primary" variant="contained">확정</Button>
-        </div>
+          <Button onClick={handleEditMapping} color="primary" variant="contained">
+            수정
+          </Button>
+          <Button onClick={handleCloseItemModal} color="secondary" variant="outlined">
+            닫기
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={itemMappingModalOpen} onClose={handleCloseItemMappingModal} maxWidth="sm" fullWidth>
+        <DialogTitle>유가물 매핑</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="h6" gutterBottom>유가물 선택</Typography>
+          <FormControl fullWidth style={{ marginBottom: '16px' }}>
+            <InputLabel id="mapping-year-select-label">연도</InputLabel>
+            <Select
+              labelId="mapping-year-select-label"
+              label="연도"
+              value={mappingYear}
+              onChange={handleMappingYearChange}
+              style={{ width: '100%' }}
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 120,
+                  },
+                },
+              }}
+            >
+              {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                <MenuItem key={year} value={year.toString()}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl fullWidth style={{ marginBottom: '16px' }}>
+            <InputLabel id="lci-item-select-label">LCI 항목 선택</InputLabel>
+            <Select
+              labelId="lci-item-select-label"
+              label="LCI 항목 선택"
+              value={selectedLciItem !== null ? String(selectedLciItem) : ''} // 값이 null일 경우 빈 문자열
+              onChange={(event) => {
+                const selectedId = parseInt(event.target.value, 10); // 문자열을 숫자로 변환
+                setSelectedLciItem(selectedId); // 상태 업데이트
+              }}
+              style={{ width: '100%' }}
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 200,
+                  },
+                },
+              }}
+            >
+              {lciItems.map((item) => (
+                <MenuItem key={item.id} value={String(item.id)}> {/* value를 문자열로 변환 */}
+                  {item.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleConfirmItemMapping} color="primary" variant="contained">
+            확정
+          </Button>
+          <Button onClick={handleCloseItemMappingModal} color="secondary" variant="outlined">
+            닫기
+          </Button>
         </DialogActions>
       </Dialog>
 
@@ -1001,35 +1225,59 @@ export function SupMapping() {
           {selectedClient2nd && selectedClient2nd.clientId !== 0 ? (
             <>
               <Typography variant="h6" gutterBottom>2차 거래처 정보</Typography>
-              <Typography variant="body1"><strong>2차 거래처 ID:</strong> {selectedClient2nd.clientId}</Typography>
-              <Typography variant="body1"><strong>2차 거래처 명칭:</strong> {selectedClient2nd.clientName}</Typography>
-              <Typography variant="body1"><strong>2차 거래처 사업자번호:</strong> {selectedClient2nd.bizNo}</Typography>
-              <Typography variant="body1"><strong>2차 거래처 구분:</strong> {getClientTypeTitle(selectedClient2nd.inOutType, selectedClient2nd.clientType)}</Typography>
-              <Typography variant="body1"><strong>입출고 구분:</strong> {convertInOutType(selectedClient2nd.inOutType)}</Typography>
+              <Typography variant="body1">
+                <strong>2차 거래처 ID:</strong> {selectedClient2nd.clientId}
+              </Typography>
+              <Typography variant="body1">
+                <strong>2차 거래처 명칭:</strong> {selectedClient2nd.clientName}
+              </Typography>
             </>
           ) : (
-            <>
-              <Typography variant="h6" gutterBottom>2차 거래처 정보</Typography>
-              <Autocomplete
-                options={clients2nd}
-                getOptionLabel={(option) => option.clientName}
-                renderInput={(params) => <TextField {...params} label="2차 거래처 선택" variant="outlined" />}
-                value={selectedClient2nd}
-                onChange={(event, newValue) => {
-                  setSelectedClient2nd(newValue || null);
-                }}
-                isOptionEqualToValue={(option, value) => option.clientId === value.clientId}
-                style={{ maxHeight: 224, overflowY: 'auto' }}
-              />
-            </>
+            <Typography variant="body1" color="error">매핑된 2차 거래처가 없습니다.</Typography>
           )}
         </DialogContent>
         <DialogActions style={{ justifyContent: 'space-between' }}>
-          <Button onClick={navigateToClientManagement} color="primary" variant="contained">거래처 관리</Button>
+          <Button onClick={navigateToClient2Management} color="primary" variant="contained">
+            2차 거래처 관리
+          </Button>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button onClick={handleCloseClient2ndModal} color="secondary" variant="outlined">닫기</Button>
-            <Button onClick={handleConfirmClient2ndMapping} color="primary" variant="contained">확정</Button>
+            <Button
+              onClick={() => {
+                setClient2ndModalOpen(false); // 현재 모달 닫기
+                setClient2ndMappingModalOpen(true); // 매핑 모달 열기
+              }}
+              color="primary"
+              variant="contained"
+            >
+              수정
+            </Button>
+            <Button onClick={handleCloseClient2ndModal} color="secondary" variant="outlined">
+              닫기
+            </Button>
           </div>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={client2ndMappingModalOpen} onClose={handleCloseClient2ndMappingModal} maxWidth="sm" fullWidth>
+        <DialogTitle>2차 거래처 매핑</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="h6" gutterBottom>2차 거래처 선택</Typography>
+          <Autocomplete
+            options={clients2nd} // 수정된 데이터 사용
+            getOptionLabel={(option) => option.clientName || ''} // clientName 필드로 드롭다운 표시
+            renderInput={(params) => (
+              <TextField {...params} label="2차 거래처 선택" variant="outlined" />
+            )}
+            value={selectedClient2nd}
+            onChange={(event, newValue) => {
+              setSelectedClient2nd(newValue || null); // 선택된 값을 상태에 반영
+            }}
+            isOptionEqualToValue={(option, value) => option.id === value?.id} // ID로 선택 비교
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleConfirmClient2ndMapping} color="primary" variant="contained">확정</Button>
+          <Button onClick={handleCloseClient2ndMappingModal} color="secondary" variant="outlined">닫기</Button>
         </DialogActions>
       </Dialog>
 

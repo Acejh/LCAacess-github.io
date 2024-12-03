@@ -454,10 +454,11 @@ export function CarsControl() {
       </Typography>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <UseCompany onCompanyChange={setSelectedCompany} onCompanyListChange={setCompanies} />
-        <FormControl style={{ marginRight: '10px', display: 'none' }}>
+        <FormControl style={{ marginRight: '10px' }}>
           <InputLabel id="year-select-label">연도</InputLabel>
           <Select
             labelId="year-select-label"
+            label="연도"
             value={selectedYear ?? ''}  
             onChange={(e) => setSelectedYear(e.target.value ? Number(e.target.value) : null)}
             style={{ height: '45px' , width: '100px' }}

@@ -15,7 +15,7 @@ import {
 } from 'chart.js';
 import { Button } from '@mui/material';
 
-// Chart.js 모듈 등록
+
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
 export function LineChartPro() {
@@ -44,7 +44,7 @@ export function LineChartPro() {
     labels: ['회사 A', '회사 B', '회사 C', '회사 D', '회사 E', '회사 F', '회사 G'],
     datasets: [
       {
-        label: '사업회원별 온실가스 저감효과',
+        label: '사업회원별 LCA 결과값',
         data: [
           6.12345e-03,
           7.67891e-03,
@@ -66,7 +66,7 @@ export function LineChartPro() {
     labels: ['제품군 1', '제품군 2', '제품군 3', '제품군 4', '제품군 5', '제품군 6', '제품군 7'],
     datasets: [
       {
-        label: '사업회원별 LCA 결과값',
+        label: '제품별 LCA 결과값',
         data: [
           7.12345e-03,
           5.23456e-03,

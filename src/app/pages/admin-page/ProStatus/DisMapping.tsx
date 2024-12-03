@@ -37,12 +37,49 @@ import {
 } from '@mui/material';
 import * as XLSX from 'xlsx';
 
-type ClientType = {
-  inOutType: string;
-  code: string;
-  title: string;
+type WasteMap = {
+  id: number;
+  year: number;
+  companyCode: string;
+  client: {
+    id: number;
+    companyCode: string;
+    companyName: string | null;
+    inOutType: string;
+    type: string;
+    name: string;
+    bizNo: string;
+    address: string;
+    latitude: number;
+    longitude: number;
+    distance: number;
+  };
+  item1: string;
+  item2: string;
+  item3: string;
+  wasteMethod: string;
+  lciItem: {
+    id: number;
+    year: number;
+    type: string;
+    category: string;
+    name: string;
+    unit: string;
+    gwp: number;
+    gwpAlt: number;
+  };
+  itemCodes: string[];
 };
 
+type Item = {
+  id: number;
+  categoryCode: string;
+  categoryName: string;
+  midItemCode: string;
+  midItemName: string;
+  itemCode: string;
+  itemName: string;
+};
 
 type Car = {
   id: number;
@@ -65,7 +102,9 @@ type Client = {
 
 type WasteItem = {
   id: number;
-  wasteGroup: string;
+  lciItemId: number;
+  lciItemTitle: string;
+  itemCodes: string[];
   name: string;
 };
 
@@ -102,11 +141,10 @@ type Basic = {
   };
   reccWasteItem: {
     id: number;
-    wasteItemId: number;
-    wasteGroup: string;
-    name: string;
-    items: string[];
-  } | null;
+    lciItemId: number;
+    lciItemTitle: string;
+    itemCodes: string[];
+  } | null; 
   selectedValuableThingId?: number; 
 };
 
@@ -129,7 +167,6 @@ export function DisMapping() {
   const [wasteItems, setWasteItems] = useState<WasteItem[]>([]);
   const [clients, setClients] = useState<Basic['reccWasteClient'][]>([]);
   const [cars, setCars] = useState<Basic['reccWasteCar'][]>([]);
-  const [clientTypes, setClientTypes] = useState<ClientType[]>([]);
   const [searchParams, setSearchParams] = useState({
     query: '',
     year: '',
@@ -140,24 +177,34 @@ export function DisMapping() {
     carMappingStatus: '',
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [itemMappingData, setItemMappingData] = useState<Record<string, string>>({}); 
   const [clientModalOpen, setClientModalOpen] = useState(false);
+  const [clientMappingModalOpen, setClientMappingModalOpen] = useState(false); // 거래처 매핑 모달 상태
   const [carModalOpen, setCarModalOpen] = useState(false);
+  const [carMappingModalOpen, setCarMappingModalOpen] = useState(false); // 차량 매핑 모달 상태
   const [selectedClient, setSelectedClient] = useState<Basic['reccWasteClient'] | null>(null);
   const [selectedCar, setSelectedCar] = useState<Basic['reccWasteCar'] | null>(null);
+  const [itemMappingModalOpen, setItemMappingModalOpen] = useState(false);
+  const [mappingYear, setMappingYear] = useState<string>(new Date().getFullYear().toString());
+  
 
   const navigate = useNavigate();
 
-  const fetchClientTypes = async () => {
+  const fetchItemMappingData = async () => {
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/Clients/types');
-      setClientTypes(response.data);
+      const response = await axios.get<Item[]>('https://lcaapi.acess.co.kr/Items');
+      const mappingData = response.data.reduce((acc: Record<string, string>, item: Item) => {
+        acc[item.itemCode] = item.itemName; // itemCode -> itemName 매핑
+        return acc;
+      }, {});
+      setItemMappingData(mappingData);
     } catch (error) {
-      console.error('거래처 타입 데이터를 가져오는 중 에러 발생:', error);
+      console.error('아이템 매핑 데이터를 가져오는 중 에러 발생:', error);
     }
   };
   
   useEffect(() => {
-    fetchClientTypes();
+    fetchItemMappingData(); // 컴포넌트 초기화 시 데이터 Fetch
   }, []);
 
   const fetchCars = async (companyCode: string) => {
@@ -212,21 +259,31 @@ export function DisMapping() {
     }
   }, [selectedCompany]);
 
-  const fetchWasteItems = async (companyCode: string) => {
+  const fetchWasteItems = async (year: string, companyCode: string) => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/WasteItems?companyCode=${companyCode}`);
-      const { wasteItems } = response.data;
-      setWasteItems(wasteItems);
+      const response = await axios.get(
+        `https://lcaapi.acess.co.kr/WasteMaps/?year=${year}&companyCode=${companyCode}`
+      );
+  
+      // 필요한 데이터로 변환
+      const items = response.data?.wasteMaps?.map((map: WasteMap) => ({
+        id: map.id, // 최상위 id
+        name: map.lciItem?.name || '알 수 없음', // lciItem의 name
+        itemCodes: map.itemCodes || [], // itemCodes
+      })) || [];
+  
+      setWasteItems(items); // 상태에 저장
     } catch (error) {
       console.error('폐기물 항목을 가져오는 중 에러 발생:', error);
+      setWasteItems([]); // 에러 발생 시 빈 배열로 초기화
     }
   };
 
   useEffect(() => {
-    if (selectedCompany) {
-      fetchWasteItems(selectedCompany.code);
+    if (itemMappingModalOpen && selectedCompany) {
+      fetchWasteItems(mappingYear, selectedCompany.code); // 회사 코드와 연도를 전달
     }
-  }, [selectedCompany]);
+  }, [itemMappingModalOpen, mappingYear, selectedCompany]);  
 
   const fetchData = useCallback(async (pageIndex: number, pageSize: number, searchQuery = '') => {
     setLoading(true);
@@ -273,15 +330,6 @@ export function DisMapping() {
   }, [pageIndex, pageSize, fetchData, searchParams]);
 
   const totalPages = Math.ceil(totalCount / pageSize);
-
-  const getClientTypeTitle = (inOutType: string, code: string): string => {
-    const clientType = clientTypes.find((type) => type.inOutType === inOutType && type.code === code);
-    return clientType ? clientType.title : code;
-  };
-  
-  const convertInOutType = (inOutType: string): string => {
-    return inOutType === 'IN' ? '입고' : '출고';
-  };
 
   const handleDownloadExcel = () => {
     const tableData = table.getRowModel().rows.map((row) => row.original);
@@ -337,6 +385,8 @@ export function DisMapping() {
           );
         }
         handleCloseClientModal();
+        handleCloseClientMappingModal();
+        await fetchData(pageIndex, pageSize);
       } catch (error) {
         console.error('거래처 매핑 확인 중 에러 발생:', error);
       }
@@ -364,6 +414,8 @@ export function DisMapping() {
           );
         }
         handleCloseCarModal();
+        closeCarModals();
+        await fetchData(pageIndex, pageSize);
       } catch (error) {
         console.error('차량 매핑 확인 중 에러 발생:', error);
       }
@@ -372,12 +424,12 @@ export function DisMapping() {
 
   const handleConfirmItemMapping = async () => {
     if (selectedItem !== null && selectedRowId !== null) {
-      const selectedWasteItem = wasteItems.find(item => item.id === selectedItem);
+      const selectedWasteItem = wasteItems.find((item) => item.id === selectedItem);
+  
       const postData = {
         reccWasteId: selectedRowId,
-        wasteItemId: selectedItem,
+        wasteMapId: selectedItem, // 최상위 id 전송
       };
-  
   
       try {
         const response = await axios.post('https://lcaapi.acess.co.kr/ReccWasteMapping/Item', postData);
@@ -386,14 +438,22 @@ export function DisMapping() {
           setData((prevData) =>
             prevData.map((item) =>
               item.id === selectedRowId
-                ? { ...item, reccWasteItem: { id: selectedItem, wasteItemId: selectedItem, wasteGroup: selectedWasteItem.wasteGroup, name: selectedWasteItem.name, items: [] } }
+                ? {
+                    ...item,
+                    reccWasteItem: {
+                      id: selectedWasteItem.id,
+                      lciItemId: selectedWasteItem.id, // 동일한 최상위 id 사용
+                      lciItemTitle: selectedWasteItem.name,
+                      itemCodes: selectedWasteItem.itemCodes,
+                    },
+                  }
                 : item
             )
           );
         }
-        handleCloseItemModal();
+        handleCloseItemMappingModal();
       } catch (error) {
-        console.error('제품 매핑 확인 중 에러 발생:', error);
+        console.error('폐기물 매핑 확정 중 에러 발생:', error);
       }
     }
   };
@@ -448,9 +508,9 @@ export function DisMapping() {
     { accessorKey: 'clientBizno', header: '거래처 사업자번호' },
     { accessorKey: 'clientName', header: '거래처 이름' },
     { accessorKey: 'carNo', header: '차량번호' },
-    { accessorKey: 'item1', header: '품목군' },
-    { accessorKey: 'item2', header: '제품군' },
-    { accessorKey: 'item3', header: '제품분류' },
+    { accessorKey: 'item1', header: '품목1' },
+    { accessorKey: 'item2', header: '품목2' },
+    { accessorKey: 'item3', header: '품목3' },
     { accessorKey: 'etcMethod', header: '처리방법'},
     {
       id: 'valuableMapping',
@@ -530,6 +590,27 @@ export function DisMapping() {
     autoResetPageIndex: false,
   });
 
+  const handleCloseItemMappingModal = () => {
+    setItemMappingModalOpen(false); // 폐기물 매핑 모달 닫기
+  };
+
+  // 모달 열기 및 전환 함수
+  const openCarModal = () => {
+    setCarModalOpen(true);
+    setCarMappingModalOpen(false); // 다른 모달은 닫기
+  };
+
+  const openCarMappingModal = () => {
+    setCarMappingModalOpen(true);
+    setCarModalOpen(false); // 다른 모달은 닫기
+  };
+
+  // 모달 닫기 함수
+  const closeCarModals = () => {
+    setCarModalOpen(false);
+    setCarMappingModalOpen(false);
+  };
+
   const handleOpenClientModal = (client: Basic['reccWasteClient'], id: number) => {
     setSelectedClient(client);
     setSelectedRowId(id);
@@ -539,7 +620,7 @@ export function DisMapping() {
   const handleOpenCarModal = (car: Basic['reccWasteCar'], id: number) => {
     setSelectedCar(car);
     setSelectedRowId(id);
-    setCarModalOpen(true);
+    openCarModal(); // 차량 정보 모달 열기
   };
   
   const handleOpenItemModal = (rowId: number, value: number) => {
@@ -547,7 +628,7 @@ export function DisMapping() {
     setSelectedItem(value);
     setItemModalOpen(true);
   };
-  
+
   const handleCloseItemModal = () => {
     setItemModalOpen(false);
     setSelectedItem(null);
@@ -557,10 +638,18 @@ export function DisMapping() {
     setClientModalOpen(false);
     setSelectedClient(null);
   };
+
+  const handleCloseClientMappingModal = () => {
+    setClientMappingModalOpen(false);
+  };
   
   const handleCloseCarModal = () => {
     setCarModalOpen(false);
     setSelectedCar(null);
+  };
+
+  const handleMappingYearChange = (event: SelectChangeEvent<string>) => {
+    setMappingYear(event.target.value);
   };
 
   const navigateToClientManagement = () => {
@@ -568,9 +657,9 @@ export function DisMapping() {
   };
   
   const navigateToWasteManagement = () => {
-    navigate('/Ad_Waste'); // React Router로 페이지 이동
+    navigate('/WasteMapping'); // React Router로 페이지 이동
   };
-  
+
   const navigateToCarsManagement = () => {
     navigate('/CarsControl'); // React Router로 페이지 이동
   };
@@ -808,44 +897,73 @@ export function DisMapping() {
         </Table>
       </TableContainer>
       <Dialog open={clientModalOpen} onClose={handleCloseClientModal} maxWidth="sm" fullWidth>
-        <DialogTitle>거래처 매핑 확인</DialogTitle>
+        <DialogTitle>거래처 정보</DialogTitle>
         <DialogContent dividers>
           {selectedClient && selectedClient.clientId !== 0 ? (
             <>
               <Typography variant="h6" gutterBottom>거래처 정보</Typography>
               <Typography variant="body1"><strong>거래처 ID:</strong> {selectedClient.clientId}</Typography>
               <Typography variant="body1"><strong>거래처 이름:</strong> {selectedClient.clientName}</Typography>
-              <Typography variant="body1"><strong>사업자번호:</strong> {selectedClient.bizNo}</Typography>
-              <Typography variant="body1"><strong>거래처 구분:</strong> {getClientTypeTitle(selectedClient.inOutType, selectedClient.clientType)}</Typography>
-              <Typography variant="body1"><strong>입출고 구분:</strong> {convertInOutType(selectedClient.inOutType)}</Typography>
             </>
           ) : (
-            <>
-              <Typography variant="h6" gutterBottom>거래처 정보</Typography>
-              <Autocomplete
-                options={clients}
-                getOptionLabel={(option) => option.clientName}
-                renderInput={(params) => <TextField {...params} label="거래처 선택" variant="outlined" />}
-                value={selectedClient}
-                onChange={(event, newValue) => {
-                  setSelectedClient(newValue || null);
-                }}
-                isOptionEqualToValue={(option, value) => option.clientId === value.clientId}
-              />
-            </>
+            <Typography variant="body1" color="error">
+              매핑된 거래처가 없습니다.
+            </Typography>
           )}
         </DialogContent>
         <DialogActions style={{ justifyContent: 'space-between' }}>
-          <Button onClick={navigateToClientManagement} color="primary" variant="contained">거래처 관리</Button>
+          <Button onClick={navigateToClientManagement} color="primary" variant="contained">
+            거래처 관리
+          </Button>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button onClick={handleCloseClientModal} color="secondary" variant="outlined">닫기</Button>
-            <Button onClick={handleConfirmClientMapping} color="primary" variant="contained">확정</Button>
+            <Button
+              onClick={() => {
+                setClientModalOpen(false); // 현재 모달 닫기
+                setClientMappingModalOpen(true); // 매핑 모달 열기
+              }}
+              color="primary"
+              variant="contained"
+            >
+              수정
+            </Button>
+            <Button onClick={handleCloseClientModal} color="secondary" variant="outlined">
+              닫기
+            </Button>
           </div>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={carModalOpen} onClose={handleCloseCarModal} maxWidth="sm" fullWidth>
-        <DialogTitle>차량 매핑 확인</DialogTitle>
+      <Dialog open={clientMappingModalOpen} onClose={handleCloseClientMappingModal} maxWidth="sm" fullWidth>
+        <DialogTitle>거래처 매핑</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="h6" gutterBottom>거래처 선택</Typography>
+          <Autocomplete
+            options={clients}
+            getOptionLabel={(option) => option.clientName}
+            renderInput={(params) => <TextField {...params} label="거래처 선택" variant="outlined" />}
+            value={selectedClient}
+            onChange={(event, newValue) => {
+              setSelectedClient(newValue || null);
+            }}
+            isOptionEqualToValue={(option, value) => option.clientId === value.clientId}
+            style={{ marginBottom: '16px' }}
+          />
+        </DialogContent>
+        <DialogActions style={{ justifyContent: 'space-between' }}>
+          <Button onClick={navigateToClientManagement} color="primary" variant="contained">거래처 관리</Button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button onClick={handleConfirmClientMapping} color="primary" variant="contained">
+              확정
+            </Button>
+            <Button onClick={handleCloseClientMappingModal} color="secondary" variant="outlined">
+              닫기
+            </Button>
+          </div>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={carModalOpen} onClose={closeCarModals} maxWidth="sm" fullWidth>
+        <DialogTitle>차량 정보</DialogTitle>
         <DialogContent dividers>
           {selectedCar && selectedCar.carId !== 0 ? (
             <>
@@ -853,55 +971,177 @@ export function DisMapping() {
               <Typography variant="body1"><strong>차량 ID:</strong> {selectedCar.carId}</Typography>
               <Typography variant="body1"><strong>차량번호:</strong> {selectedCar.carNo}</Typography>
               <Typography variant="body1"><strong>차량규격:</strong> {selectedCar.spec}</Typography>
-              <Typography variant="body1"><strong>입출고 구분:</strong> {convertInOutType(selectedCar.inOutType)}</Typography>
             </>
           ) : (
-            <>
-              <Typography variant="h6" gutterBottom>차량 정보</Typography>
-              <Autocomplete
-                options={cars}
-                getOptionLabel={(option) => option.carNo}
-                renderInput={(params) => <TextField {...params} label="차량 선택" variant="outlined" />}
-                value={selectedCar}
-                onChange={(event, newValue) => {
-                  setSelectedCar(newValue || null);
-                }}
-                isOptionEqualToValue={(option, value) => option.carId === value.carId}
-                style={{ maxHeight: 224, overflowY: 'auto' }}
-              />
-            </>
+            <Typography variant="body1" color="error">차량 정보를 불러오는 중입니다...</Typography>
           )}
         </DialogContent>
         <DialogActions style={{ justifyContent: 'space-between' }}>
-          <Button onClick={navigateToCarsManagement} color="primary" variant="contained">차량 관리</Button>
+          <Button onClick={navigateToCarsManagement} color="primary" variant="contained">
+            차량 관리
+          </Button>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <Button onClick={handleCloseCarModal} color="secondary" variant="outlined">닫기</Button>
-            <Button onClick={handleConfirmCarMapping} color="primary" variant="contained">확정</Button>
+            <Button
+              onClick={openCarMappingModal}
+              color="primary"
+              variant="contained"
+            >
+              수정
+            </Button>
+            <Button onClick={closeCarModals} color="secondary" variant="outlined">
+              닫기
+            </Button>
+          </div>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={carMappingModalOpen} onClose={closeCarModals} maxWidth="sm" fullWidth>
+        <DialogTitle>차량 매핑</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="h6" gutterBottom>차량 선택</Typography>
+          <Autocomplete
+            options={cars}
+            getOptionLabel={(option) => option.carNo}
+            renderInput={(params) => <TextField {...params} label="차량 선택" variant="outlined" />}
+            value={selectedCar}
+            onChange={(event, newValue) => {
+              setSelectedCar(newValue || null);
+            }}
+            isOptionEqualToValue={(option, value) => option.carId === value.carId}
+            style={{ maxHeight: 224, overflowY: 'auto', }}
+          />
+        </DialogContent>
+        <DialogActions style={{ justifyContent: 'space-between' }}>
+          <Button onClick={navigateToCarsManagement} color="primary" variant="contained">
+            차량 관리
+          </Button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button
+              onClick={handleConfirmCarMapping}
+              color="primary"
+              variant="contained"
+              disabled={!selectedCar || !selectedRowId}
+            >
+              확정
+            </Button>
+            <Button onClick={closeCarModals} color="secondary" variant="outlined">
+              닫기
+            </Button>
           </div>
         </DialogActions>
       </Dialog>
 
       <Dialog open={itemModalOpen} onClose={handleCloseItemModal} maxWidth="sm" fullWidth>
-        <DialogTitle>폐기물 매핑 확인</DialogTitle>
+        <DialogTitle>폐기물 정보</DialogTitle>
         <DialogContent dividers>
-          <Typography variant="h6" gutterBottom>폐기물 정보</Typography>
+          {selectedRowId !== null ? (
+            (() => {
+              // 선택된 Row 찾기
+              const selectedRow = data?.find((row) => row.id === selectedRowId);
+
+              // 데이터가 없거나 매핑된 항목이 없는 경우
+              if (!selectedRow || !selectedRow.reccWasteItem) {
+                return (
+                  <Typography variant="body1" color="error">
+                    폐기물 정보가 없습니다.
+                  </Typography>
+                );
+              }
+
+              // 데이터가 존재할 때 처리
+              const { lciItemTitle, itemCodes } = selectedRow.reccWasteItem;
+
+              // itemCodes를 itemMappingData를 통해 itemName으로 변환
+              const formattedItems = itemCodes
+                ?.map((code) => itemMappingData[code] || code) // itemMappingData에서 값이 없으면 원래 코드 사용
+                .join(', ') || '제품 정보 없음';
+
+              return (
+                <>
+                  <Typography variant="body1">
+                    <strong>LCI 항목:</strong> {lciItemTitle || '항목 정보 없음'}
+                  </Typography>
+                  <Typography variant="body1">
+                    <strong>제품:</strong> {formattedItems}
+                  </Typography>
+                </>
+              );
+            })()
+          ) : (
+            <Typography variant="body1" color="error">
+              선택된 폐기물이 없습니다.
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setItemModalOpen(false); // 현재 모달 닫기
+              setItemMappingModalOpen(true); // 매핑 모달 열기
+            }}
+            color="primary"
+            variant="contained"
+          >
+            수정
+          </Button>
+          <Button onClick={handleCloseItemModal} color="secondary" variant="outlined">닫기</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={itemMappingModalOpen} onClose={handleCloseItemMappingModal} maxWidth="sm" fullWidth>
+        <DialogTitle>폐기물 매핑</DialogTitle>
+        <DialogContent dividers>
+          <Typography variant="h6" gutterBottom>폐기물 선택</Typography>
+
+          {/* 연도 선택 추가 */}
+          <FormControl fullWidth style={{ marginBottom: '16px' }}>
+            <InputLabel id="mapping-year-label">연도</InputLabel>
+            <Select
+              labelId="mapping-year-label"
+              label="연도"
+              value={mappingYear}
+              onChange={handleMappingYearChange}
+              style={{ width: '100%' }}
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    maxHeight: 200,
+                  },
+                },
+              }}
+            >
+              {Array.from({ length: 5 }, (_, i) => (new Date().getFullYear() - i).toString()).map((year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* 폐기물 선택 */}
           <Autocomplete
-            options={wasteItems}
-            getOptionLabel={(option) => option.name}
+            options={wasteItems} // wasteItems 상태에서 데이터 가져오기
+            getOptionLabel={(option) => option.name} // 드롭다운에 표시될 이름
             renderInput={(params) => <TextField {...params} label="폐기물 선택" variant="outlined" />}
-            value={wasteItems.find(item => item.id === selectedItem) || null}
+            value={wasteItems.find((item) => item.id === selectedItem) || null} // 선택된 항목 찾기
             onChange={(event, newValue) => {
-              setSelectedItem(newValue ? newValue.id : null);
+              setSelectedItem(newValue ? newValue.id : null); // 최상위 id를 선택 상태로 저장
             }}
             style={{ maxHeight: 224, overflowY: 'auto' }}
           />
         </DialogContent>
         <DialogActions style={{ justifyContent: 'space-between' }}>
-        <Button onClick={navigateToWasteManagement} color="primary" variant="contained">폐기물 관리</Button>
-        <div style={{ display: 'flex', gap: '8px' }}>
-          <Button onClick={handleCloseItemModal} color="secondary" variant="outlined">닫기</Button>
-          <Button onClick={handleConfirmItemMapping} color="primary" variant="contained">확정</Button>
-        </div>
+          <Button onClick={navigateToWasteManagement} color="primary" variant="contained">
+            폐기물 처리품목 방법관리
+          </Button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <Button onClick={handleConfirmItemMapping} color="primary" variant="contained" disabled={!selectedItem}>
+              확정
+            </Button>
+            <Button onClick={handleCloseItemMappingModal} color="secondary" variant="outlined">
+              닫기
+            </Button>
+          </div>
         </DialogActions>
       </Dialog>
 

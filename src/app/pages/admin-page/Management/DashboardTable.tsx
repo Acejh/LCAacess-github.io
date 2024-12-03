@@ -177,8 +177,8 @@ export const DashboardTable = () => {
         <Button
           variant="contained"
           onClick={() => {
-            setActiveTable("item"); // 테이블과 그래프를 "제품별"로 설정
-            setShowChart(true); // 그래프 표시
+            setActiveTable("item"); 
+            setShowChart(true); 
           }}
           style={{ marginRight: "10px" }}
         >
@@ -187,11 +187,11 @@ export const DashboardTable = () => {
         <Button
           variant="contained"
           onClick={() => {
-            setActiveTable("company"); // 테이블과 그래프를 "사업회원별"로 설정
-            setShowChart(true); // 그래프 표시
+            setActiveTable("company"); 
+            setShowChart(true); 
           }}
         >
-          사업회원별 LCA 결과 그래프프
+          사업회원별 LCA 결과 그래프
         </Button>
       </div>
       {/* 테이블 */}

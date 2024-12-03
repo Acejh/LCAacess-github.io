@@ -17,12 +17,21 @@ const AccountHeader: FC = () => {
 
   const fetchData = async () => {
     try {
+      // 로컬스토리지에서 사용자 정보 가져오기
       const userInfo = JSON.parse(localStorage.getItem('kt-auth-react-v') || '{}').userInfo
-      const { companyCode, role } = userInfo
-
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Users?companyCode=${companyCode}&role=${role}`)
-      const userData = response.data.list[0]
-
+      const { userName } = userInfo
+  
+      if (!userName) {
+        setApiError('UserName을 찾을 수 없습니다.')
+        setLoading(false)
+        return
+      }
+  
+      // 수정된 GET API 호출
+      const response = await axios.get(`https://lcaapi.acess.co.kr/Users/username/${userName}`)
+      const userData = response.data
+  
+      // 사용자 세부 정보 업데이트
       setUserDetails({
         name: userData.name,
         role: userData.role,

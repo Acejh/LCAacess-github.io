@@ -38,12 +38,19 @@ const ProfileDetails: FC = () => {
   const fetchData = async () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('kt-auth-react-v') || '{}').userInfo
-      const { companyCode, role } = userInfo
-
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Users?companyCode=${companyCode}&role=${role}`)
-      const userData = response.data.list[0]
-      setUserId(userData.id)
-
+      const { userName } = userInfo
+  
+      if (!userName) {
+        setApiError('UserName을 찾을 수 없습니다.')
+        return
+      }
+  
+      // 수정된 GET API 엔드포인트
+      const response = await axios.get(`https://lcaapi.acess.co.kr/Users/username/${userName}`)
+      const userData = response.data
+  
+      setUserId(userData.id) // 사용자 ID 설정
+  
       setData({
         name: userData.name,
         contactPhone: userData.phoneNumber,
@@ -67,13 +74,15 @@ const ProfileDetails: FC = () => {
     onSubmit: async (values) => {
       setLoading(true)
       try {
+        // 수정된 PUT API 엔드포인트
         await axios.put(`https://lcaapi.acess.co.kr/Users/${userId}`, {
           name: values.name,
           phoneNumber: values.contactPhone,
           email: values.communications.email,
         })
+  
         setData(values)
-        
+  
         // Update localStorage
         const updatedUserInfo = {
           ...JSON.parse(localStorage.getItem('kt-auth-react-v') || '{}'),
@@ -81,12 +90,12 @@ const ProfileDetails: FC = () => {
             ...JSON.parse(localStorage.getItem('kt-auth-react-v') || '{}').userInfo,
             name: values.name,
             contactPhone: values.contactPhone,
-            email: values.communications.email 
-          }
-        };
-        localStorage.setItem('kt-auth-react-v', JSON.stringify(updatedUserInfo));
-        
-        navigate('/crafted/account/overview') 
+            email: values.communications.email,
+          },
+        }
+        localStorage.setItem('kt-auth-react-v', JSON.stringify(updatedUserInfo))
+  
+        navigate('/crafted/account/overview')
       } catch (error) {
         setApiError('Failed to update data')
       } finally {

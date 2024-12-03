@@ -741,7 +741,7 @@ export function LCI_Item() {
               <TextField
                 fullWidth
                 margin="normal"
-                label="유가물 대체효과"
+                label="GWP 유가물 대체효과"
                 type="number"
                 value={editItem.gwpAlt}
                 onChange={(e) => handleInputChange('gwpAlt', parseFloat(e.target.value))}  
