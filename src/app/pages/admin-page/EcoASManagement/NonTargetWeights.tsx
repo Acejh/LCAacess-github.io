@@ -28,7 +28,18 @@ import {
   Typography,
   FormControl,
   CircularProgress,
+  Modal,
+  Box,
+  TextField,
+  InputLabel,
 } from '@mui/material';
+
+type WeightPayload = {
+  companyCode: string | undefined;
+  year: string;
+  month: string;
+  weight: number;
+};
 
 type WeightData = {
   id: number;
@@ -69,6 +80,14 @@ export function NonTargetWeights() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [hasSearched, setHasSearched] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false); // 모달 열림 상태
+  const [modalType, setModalType] = useState<'register' | 'edit' | null>(null); // 모달 타입 (등록 or 수정)
+  const [modalData, setModalData] = useState({
+  company: null as Company | null,
+  year: '',
+  month: '',
+  weight: '',
+}); // 모달에 사용할 데이터
   const [searchParams, setSearchParams] = useState({
     company: null as Company | null,
     year: '',
@@ -178,9 +197,31 @@ export function NonTargetWeights() {
     });
     setPageIndex(0);
     setHasSearched(true);
-    setInitialLoad(false); 
-    setLoading(true);       
-    fetchData(0, pageSize);
+    setInitialLoad(false);
+    setLoading(true);
+    fetchData(0, pageSize); 
+  };
+
+  const postWeightData = async (data: WeightPayload) => {
+    try {
+      await axios.post(`https://lcaapi.acess.co.kr/NonTargetWeights`, data);
+      alert('등록이 완료되었습니다.');
+      setIsModalOpen(false);
+      handleSearch(); // 등록 후 데이터 다시 조회
+    } catch (error) {
+      alert('등록 중 오류가 발생했습니다.');
+    }
+  };
+  
+  const putWeightData = async (data: WeightPayload) => {
+    try {
+      await axios.put(`https://lcaapi.acess.co.kr/NonTargetWeights`, data);
+      alert('수정이 완료되었습니다.');
+      setIsModalOpen(false);
+      handleSearch(); // 수정 후 데이터 다시 조회
+    } catch (error) {
+      alert('수정 중 오류가 발생했습니다.');
+    }
   };
 
   const handlePaginationChange = (updater: Updater<PaginationState>) => {
@@ -214,6 +255,29 @@ export function NonTargetWeights() {
     getPaginationRowModel: getPaginationRowModel(),
     autoResetPageIndex: false,
   });
+
+  useEffect(() => {
+    const fetchWeightData = async () => {
+      if (modalType === 'edit' && modalData.company && modalData.year && modalData.month) {
+        try {
+          const response = await axios.get(
+            `https://lcaapi.acess.co.kr/NonTargetWeights?companyCode=${modalData.company.code}&year=${modalData.year}`
+          );
+          const monthlyWeights = response.data.list[0]?.monthlyWeights || [];
+          const monthWeight = monthlyWeights[parseInt(modalData.month, 10) - 1] || 0;
+  
+          setModalData((prev) => ({
+            ...prev,
+            weight: monthWeight.toString(),
+          }));
+        } catch (error) {
+          console.error('Error fetching weight data:', error);
+        }
+      }
+    };
+  
+    fetchWeightData();
+  }, [modalData.company, modalData.year, modalData.month, modalType]); 
 
   const renderPageNumbers = () => {
     const startPage = Math.floor(pageIndex / 5) * 5;
@@ -272,6 +336,42 @@ export function NonTargetWeights() {
           disabled={!selectedCompany || !year}
         >
           조회
+        </Button>
+
+        <Button
+          variant="contained"
+          color="primary"
+          style={{ height: '35px',  padding: '0 10px', fontSize: '14px' }}
+          onClick={() => {
+            setModalType('register');
+            setModalData({ company: selectedCompany, year, month: '', weight: '' });
+            setIsModalOpen(true);
+          }}
+          disabled={!selectedCompany || !year}
+        >
+          등록
+        </Button>
+        <Button
+          variant="contained"
+          color="secondary"
+          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
+          onClick={() => {
+            if (!selectedCompany || !year || !searchParams.company) return;
+            setModalType('edit');
+            setIsModalOpen(true);
+
+            // 업체 및 연도 정보 설정
+            setModalData((prev) => ({
+              ...prev,
+              company: selectedCompany,
+              year,
+              month: '',
+              weight: '',
+            }));
+          }}
+          disabled={!selectedCompany || !year}
+        >
+          수정
         </Button>
 
         <Button
@@ -409,6 +509,120 @@ export function NonTargetWeights() {
           </Select>
         </div>
       </div>
+      <Modal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            p: 4,
+            width: 400,
+          }}
+        >
+          <Typography variant="h6" gutterBottom>
+            {modalType === 'register' ? '등록' : '수정'} 모달
+          </Typography>
+
+          <UseCompany
+            onCompanyChange={(company) =>
+              setModalData((prev) => ({
+                ...prev,
+                company,
+                weight: '', // 업체 변경 시 무게 초기화
+              }))
+            }
+            label="업체 선택"
+            selectedCompany={modalData.company}
+            showAllOption={false}
+          />
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="year-select-label">연도</InputLabel>
+          <Select
+            labelId="year-select-label"
+            label="연도"
+            id="year-select"
+            value={modalData.year}
+            onChange={(e) =>
+              setModalData((prev) => ({
+                ...prev,
+                year: e.target.value,
+                weight: '', // 연도 변경 시 무게 초기화
+              }))
+            }
+            displayEmpty
+          >
+            {Array.from({ length: 5 }, (_, i) => (new Date().getFullYear() - i).toString()).map(
+              (year) => (
+                <MenuItem key={year} value={year}>
+                  {year}
+                </MenuItem>
+              )
+            )}
+          </Select>
+        </FormControl>
+        <FormControl fullWidth margin="normal">
+          <InputLabel id="month-select-label">월</InputLabel>
+          <Select
+            labelId="month-select-label"
+            label="월"
+            id="month-select"
+            value={modalData.month}
+            onChange={(e) =>
+              setModalData((prev) => ({
+                ...prev,
+                month: e.target.value,
+                weight: '', // 월 변경 시 무게 초기화
+              }))
+            }
+            displayEmpty
+          >
+            {Array.from({ length: 12 }, (_, i) => (
+              <MenuItem key={i + 1} value={(i + 1).toString()}>
+                {i + 1}월
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+          <TextField
+            label="무게 (kg)"
+            fullWidth
+            margin="normal"
+            value={modalData.weight}
+            onChange={(e) => setModalData((prev) => ({ ...prev, weight: e.target.value }))}
+          />
+
+          <Box sx={{ mt: 2, textAlign: 'right' }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              const payload: WeightPayload = {
+                companyCode: modalData.company?.code,
+                year: modalData.year,
+                month: modalData.month,
+                weight: parseFloat(modalData.weight), // 무게를 숫자로 변환
+              };
+
+              if (modalType === 'register') {
+                // 등록 API 호출
+                postWeightData(payload);
+              } else if (modalType === 'edit') {
+                // 수정 API 호출
+                putWeightData(payload);
+              }
+            }}
+          >
+            저장
+          </Button>
+            <Button onClick={() => setIsModalOpen(false)} sx={{ ml: 2 }}>
+              취소
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
     </div>
   );
 }
