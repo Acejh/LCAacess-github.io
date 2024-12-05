@@ -44,6 +44,7 @@ import { LCI_Data } from '../pages/admin-page/ProStatus/LCI_Data'
 import { LCI_Com_Data } from '../pages/admin-page/ProStatus/LCI_Com_Data'
 import { ValuableDeduction } from '../pages/admin-page/ProStatus/ValuableDeduction'
 import { ClientMap } from '../pages/admin-page/ProStatus/ClientMap'
+import { RefrigerantGWP } from '../pages/admin-page/ProStatus/RefrigerantGWP'
 
 const PrivateRoutes = () => {
     const ProfilePage = lazy(() => import('../modules/profile/ProfilePage'))
@@ -85,6 +86,8 @@ const PrivateRoutes = () => {
         <Route path='/SupplyScale' element={<SupplyScale />} />
         <Route path='/DisposalScale' element={<DisposalScale />} />
         <Route path='/CompositionSet' element={<CompositionSet />} />
+        <Route path='/RefrigerantGWP' element={<RefrigerantGWP />} />
+
 
         {/* 관리자 사업회원 데이터 관리 */}
         <Route path='/Ad_Effluent' element={<Ad_Effluent />} />

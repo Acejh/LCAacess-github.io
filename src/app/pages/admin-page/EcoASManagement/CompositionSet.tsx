@@ -472,8 +472,11 @@ export function CompositionSet() {
                   table.getRowModel().rows.map((row) => (
                     <TableRow key={row.id}>
                     {row.getVisibleCells().map((cell) => {
+                      const isStickyColumn =
+                        cell.column.id === 'componentType' || cell.column.id === 'componentName';
                       const isPlastic = row.original.isPlastic; // isPlastic 값 가져오기
                       const isComponentNameCell = cell.column.id === 'componentName';
+
                       return (
                         <TableCell
                           key={cell.id}
@@ -484,6 +487,15 @@ export function CompositionSet() {
                             textAlign: isComponentNameCell ? 'left' : 'right',
                             cursor: isPlastic && isComponentNameCell ? 'pointer' : 'default',
                             color: isPlastic && isComponentNameCell ? '#6c9fff' : undefined,
+                            position: isStickyColumn ? 'sticky' : undefined,
+                            left:
+                              cell.column.id === 'componentType'
+                                ? 0
+                                : cell.column.id === 'componentName'
+                                ? `${leftOffsets.item2}px`
+                                : undefined,
+                            zIndex: isStickyColumn ? 1 : undefined, // Sticky columns should have a higher z-index
+                            backgroundColor: isStickyColumn ? '#ffffff' : undefined, // Set a background color for sticky cells
                           }}
                           onClick={() => {
                             if (isPlastic && isComponentNameCell) {

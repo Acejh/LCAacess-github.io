@@ -172,6 +172,7 @@ const SidebarMenuMain = () => {
             <SidebarMenuItemWithSub to='/admin-page/Management' title='기준정보 관리' fontIcon='bi-chat-left'>
               <SidebarMenuItem to='/CompositionSet' title='출고 구성비율 관리' hasBullet={true} />
               <SidebarMenuItem to='/LCI_Item' title='LCI 항목 및 GWP 관리' hasBullet={true} />
+              <SidebarMenuItem to='/RefrigerantGWP' title='냉매 GWP 관리' hasBullet={true} />
             </SidebarMenuItemWithSub>
             <SidebarMenuItemWithSub to='/admin-page/Management' title='기타 관리' fontIcon='bi-chat-left'>
               <SidebarMenuItem to='/MemberControl' title='사업회원 기본 정보' hasBullet={true} />
