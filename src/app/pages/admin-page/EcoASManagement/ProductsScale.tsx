@@ -303,7 +303,7 @@ export function ProductsScale() {
                           textAlign: 'center', // 헤더 가운데 정렬
                           border: '1px solid #ddd', // border 스타일 추가
                           position: 'sticky',
-                          top: 0,
+                          top: -1,
                           left:
                             header.column.id === 'categoryName'
                               ? 0

@@ -609,7 +609,7 @@ export function LCI_Item() {
                           textAlign: 'center', 
                           backgroundColor: '#cfcfcf',
                           position: 'sticky',
-                          top: 0,
+                          top: -1,
                           zIndex: 1,
                         }}
                       >

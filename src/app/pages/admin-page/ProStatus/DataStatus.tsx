@@ -387,6 +387,30 @@ export function DataStatus() {
         >
           조회
         </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleSearch}
+        >
+          수집운반 자동 매핑
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleSearch}
+        >
+          유가물 자동 매핑
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleSearch}
+        >
+          폐기물 자동 매핑
+        </Button>
       </div>
       <TableContainer
         component={Paper}

@@ -297,7 +297,7 @@ export function SupplyScale() {
                           overflow: 'hidden', 
                           textOverflow: 'ellipsis', 
                           position: 'sticky', 
-                          top: 0, 
+                          top: -1, 
                           left: 
                             header.column.id === 'item1'
                               ? 0
