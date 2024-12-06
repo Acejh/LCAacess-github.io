@@ -393,7 +393,7 @@ export function DataStatus() {
           style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
           onClick={handleSearch}
         >
-          수집운반 자동 매핑
+          자동 매핑
         </Button>
         <Button
           variant="contained"
@@ -401,7 +401,7 @@ export function DataStatus() {
           style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
           onClick={handleSearch}
         >
-          유가물 자동 매핑
+          GTG결과 가져오기
         </Button>
         <Button
           variant="contained"
@@ -409,7 +409,15 @@ export function DataStatus() {
           style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
           onClick={handleSearch}
         >
-          폐기물 자동 매핑
+          LCA결과 가져오기
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
+          onClick={handleSearch}
+        >
+          EcoAS관리표 가져오기
         </Button>
       </div>
       <TableContainer
