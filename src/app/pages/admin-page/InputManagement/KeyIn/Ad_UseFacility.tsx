@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
 // import numeral from 'numeral';
 import '../../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -107,7 +108,7 @@ export function Ad_UseFacility() {
       if (newInput.facilityId && newInput.year && newInput.month) {
         try {
           const response = await axios.get(
-            `https://lcaapi.acess.co.kr/FacilityOpTimes/Exist?facilityId=${newInput.facilityId}&year=${newInput.year}&month=${newInput.month}`
+            `${getApiUrl}/FacilityOpTimes/Exist?facilityId=${newInput.facilityId}&year=${newInput.year}&month=${newInput.month}`
           );
           const { isExist, facilityOpTime } = response.data;
 
@@ -132,7 +133,7 @@ export function Ad_UseFacility() {
   }, [newInput.facilityId, newInput.year, newInput.month]); 
 
   const fetchFacilities = async (companyCode: string): Promise<Facility[]> => {
-    const response = await axios.get(`https://lcaapi.acess.co.kr/Facilities?companyCode=${companyCode}`);
+    const response = await axios.get(`${getApiUrl}/Facilities?companyCode=${companyCode}`);
     return response.data.facilities;
   };
   
@@ -155,7 +156,7 @@ export function Ad_UseFacility() {
       const facilities = await fetchFacilities(company.code);
       setFacilities(facilities); 
   
-      let url = `https://lcaapi.acess.co.kr/FacilityOpTimes?companyCode=${company.code}`;
+      let url = `${getApiUrl}/FacilityOpTimes?companyCode=${company.code}`;
       if (year) {
         url += `&year=${year}`;
       }
@@ -230,7 +231,7 @@ export function Ad_UseFacility() {
     }
   
     try {
-      await axios.put(`https://lcaapi.acess.co.kr/FacilityOpTimes/${ids[0]}`, {
+      await axios.put(`${getApiUrl}/FacilityOpTimes/${ids[0]}`, {
         opTime: Number(editValue), // Only sending opTime as required
       });
       setEditValue(null);
@@ -337,7 +338,7 @@ export function Ad_UseFacility() {
   // const handleSave = async (facilityId: number, year: number, month: string, newValue: number) => {
   //   try {
   //     const monthIndex = ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'].indexOf(month) + 1;
-  //     await axios.put(`https://lcaapi.acess.co.kr/FacilityOpTimes/${facilityId}`, {
+  //     await axios.put(`${getApiUrl}/FacilityOpTimes/${facilityId}`, {
   //       year,
   //       month: monthIndex,
   //       opTime: newValue,
@@ -354,14 +355,14 @@ export function Ad_UseFacility() {
     try {
       const { facilityId, year, month, opTime } = newInput;
   
-      const checkUrl = `https://lcaapi.acess.co.kr/FacilityOpTimes/Exist?facilityId=${facilityId}&year=${year}&month=${month}`;
+      const checkUrl = `${getApiUrl}/FacilityOpTimes/Exist?facilityId=${facilityId}&year=${year}&month=${month}`;
   
       const checkResponse = await axios.get(checkUrl);
       const exists = checkResponse.data.isExist;
   
       if (exists) {
         // If the data exists, update it
-        const updateUrl = `https://lcaapi.acess.co.kr/FacilityOpTimes/${checkResponse.data.facilityOpTime.id}`;
+        const updateUrl = `${getApiUrl}/FacilityOpTimes/${checkResponse.data.facilityOpTime.id}`;
         const updatePayload = {
           opTime: Number(opTime),
         };
@@ -369,7 +370,7 @@ export function Ad_UseFacility() {
         await axios.put(updateUrl, updatePayload);
       } else {
         // If the data does not exist, create a new record
-        const createUrl = 'https://lcaapi.acess.co.kr/FacilityOpTimes';
+        const createUrl = `${getApiUrl}/FacilityOpTimes`;
         const createPayload = {
           facilityId: Number(facilityId),
           year: Number(year),

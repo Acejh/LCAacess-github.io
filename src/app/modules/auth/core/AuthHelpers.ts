@@ -1,5 +1,6 @@
 import axios, { AxiosError, InternalAxiosRequestConfig, AxiosHeaders, AxiosResponse } from 'axios'
 import { AuthModel } from './_models'
+import { getApiUrl } from '../../../../main'
 
 const AUTH_LOCAL_STORAGE_KEY = 'kt-auth-react-v'
 
@@ -61,7 +62,7 @@ const logout = () => {
 
 const refreshToken = async (accessToken: string, refreshToken: string): Promise<AuthModel | undefined> => {
   try {
-    const response: AxiosResponse<AuthModel> = await axios.post('https://lcaapi.acess.co.kr/Auth/refresh-token', {
+    const response: AxiosResponse<AuthModel> = await axios.post(`${getApiUrl}/Auth/refresh-token`, {
       accessToken,
       refreshToken,
     })

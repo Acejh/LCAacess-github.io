@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import ClientType from '../../ComponentBox/ClientType'; 
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -129,7 +130,7 @@ export function CarsControl() {
   
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/Cars?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `${getApiUrl}/Cars?page=${pageIndex + 1}&pageSize=${pageSize}`;
       
       if (searchParams.company) {
         url += `&companyCode=${searchParams.company.code}`;
@@ -180,7 +181,7 @@ export function CarsControl() {
 
   // 사업회원 데이터 변환
   useEffect(() => {
-    axios.get('https://lcaapi.acess.co.kr/Companies')
+    axios.get(`${getApiUrl}/Companies`)
       .then(response => {
         const sortedCompanies = response.data.list.sort((a: Company, b: Company) =>
           a.name.localeCompare(b.name)
@@ -220,7 +221,7 @@ export function CarsControl() {
     setDownloading(true); // 다운로드 시작
   
     try {
-      let url = `https://lcaapi.acess.co.kr/Cars/export?companyCode=${selectedCompany.code}`;
+      let url = `${getApiUrl}/Cars/export?companyCode=${selectedCompany.code}`;
   
       // Optional parameters
       if (selectedTypeInOut) {
@@ -284,7 +285,7 @@ export function CarsControl() {
     };
 
 
-    axios.post('https://lcaapi.acess.co.kr/Cars', newCarData)
+    axios.post(`${getApiUrl}/Cars`, newCarData)
       .then(() => {
         fetchData(pageIndex, pageSize);
       })
@@ -334,7 +335,7 @@ export function CarsControl() {
         spec: editCar.spec,
       };
   
-      axios.put(`https://lcaapi.acess.co.kr/Cars/${editCar.id}`, updatedCarData)
+      axios.put(`${getApiUrl}/Cars/${editCar.id}`, updatedCarData)
         .then(() => {
           fetchData(pageIndex, pageSize); 
         })
@@ -364,7 +365,7 @@ export function CarsControl() {
 
   const handleDeleteSubmit = () => {
     if (deleteIndex !== null) {
-      const url = `https://lcaapi.acess.co.kr/Cars/${deleteIndex}`;
+      const url = `${getApiUrl}/Cars/${deleteIndex}`;
 
       axios.delete(url)
         .then(() => {

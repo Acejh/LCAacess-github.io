@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
 import numeral from 'numeral';
+import { getApiUrl } from '../../../../../main';
 import '../../../CSS/SCbar.css';
 import {
   useReactTable,
@@ -111,7 +112,7 @@ export function Ad_Input() {
 
   const fetchItems = useCallback(async () => {
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/Inputs/items');
+      const response = await axios.get(`${getApiUrl}/Inputs/items`);
       setItems(response.data);
     } catch (error) {
       console.error('Error fetching items:', error);
@@ -129,7 +130,7 @@ export function Ad_Input() {
     setLoading(true);
 
     try {
-        let url = `https://lcaapi.acess.co.kr/Inputs?companyCode=${company.code}`;
+        let url = `${getApiUrl}/Inputs?companyCode=${company.code}`;
         if (year) {
             url += `&year=${year}`;
         }
@@ -219,7 +220,7 @@ export function Ad_Input() {
       if (newInput.companyCode && newInput.lciItemId && newInput.year && newInput.month) {
         try {
           const response = await axios.get(
-            `https://lcaapi.acess.co.kr/Inputs/Exist?lciItemId=${newInput.lciItemId}&companyCode=${newInput.companyCode}&year=${newInput.year}&month=${newInput.month}`
+            `${getApiUrl}/Inputs/Exist?lciItemId=${newInput.lciItemId}&companyCode=${newInput.companyCode}&year=${newInput.year}&month=${newInput.month}`
           );
           const { isExist, amount } = response.data;
   
@@ -274,7 +275,7 @@ export function Ad_Input() {
     if (id && !isNaN(monthIndex)) {
       try {
   
-        await axios.put(`https://lcaapi.acess.co.kr/Inputs/${id}`, {
+        await axios.put(`${getApiUrl}/Inputs/${id}`, {
           month: monthIndex + 1, 
           amount: Number(editValue),
         });
@@ -361,7 +362,7 @@ export function Ad_Input() {
       if (newInput.companyCode && newInput.lciItemId && newInput.year && newInput.month) {
         try {
           const response = await axios.get(
-            `https://lcaapi.acess.co.kr/Inputs/Exist?lciItemId=${newInput.lciItemId}&companyCode=${newInput.companyCode}&year=${newInput.year}&month=${newInput.month}`
+            `${getApiUrl}/Inputs/Exist?lciItemId=${newInput.lciItemId}&companyCode=${newInput.companyCode}&year=${newInput.year}&month=${newInput.month}`
           );
           const { isExist, amount } = response.data;
   
@@ -453,7 +454,7 @@ export function Ad_Input() {
       }
   
       if (isExist) {
-        const fetchUrl = `https://lcaapi.acess.co.kr/Inputs?year=${year}&companyCode=${companyCode}`;
+        const fetchUrl = `${getApiUrl}/Inputs?year=${year}&companyCode=${companyCode}`;
   
         try {
           const response = await axios.get<ApiResponse[]>(fetchUrl); 
@@ -469,7 +470,7 @@ export function Ad_Input() {
             throw new Error('해당 월에 대한 데이터가 없습니다.');
           }
   
-          const putUrl = `https://lcaapi.acess.co.kr/Inputs/${id}`;
+          const putUrl = `${getApiUrl}/Inputs/${id}`;
           const putPayload = {
             companyCode,
             lciItemId: Number(lciItemId),
@@ -484,7 +485,7 @@ export function Ad_Input() {
           console.error('데이터를 확인하는 중 오류 발생:', fetchError);
         }
       } else {
-        const postUrl = `https://lcaapi.acess.co.kr/Inputs`;
+        const postUrl = `${getApiUrl}/Inputs`;
         const postPayload = {
           lciItemId: Number(lciItemId),
           companyCode: companyCode,

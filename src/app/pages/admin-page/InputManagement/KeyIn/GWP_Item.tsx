@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import numeral from 'numeral';
 import '../../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../../main';
 import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -125,7 +126,7 @@ export function GWP_Item() {
     setLoading(true);
 
     try {
-      const url = `https://lcaapi.acess.co.kr/LciItems/Gwp?year=${year}`;
+      const url = `${getApiUrl}/LciItems/Gwp?year=${year}`;
       const response = await axios.get<{ lciData: GWPData[] }>(url);
 
       setData(response.data.lciData);

@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import numeral from 'numeral';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -81,7 +82,7 @@ export function CTMWeight() {
   
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/EcoasTrans/Tkin?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `${getApiUrl}/EcoasTrans/Tkin?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) {
         url += `&transNo=${searchQuery}`;
       }

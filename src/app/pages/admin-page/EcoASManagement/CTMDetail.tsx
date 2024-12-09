@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -80,7 +81,7 @@ export function CTMDetail() {
   
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/EcoasTrans/Detail?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `${getApiUrl}/EcoasTrans/Detail?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) {
         url += `&transNo=${searchQuery}`;
       }

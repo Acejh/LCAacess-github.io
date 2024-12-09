@@ -4,6 +4,7 @@ import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import ClientType from '../../ComponentBox/ClientType';
 import numeral from 'numeral';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -183,7 +184,7 @@ export function AdminClient() {
 
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/Clients?&page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `${getApiUrl}/Clients?&page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchParams.company) {
         url += `&companyCode=${searchParams.company.code}`;
       }
@@ -235,7 +236,7 @@ export function AdminClient() {
   useEffect(() => {
     const fetchClientTypes = async () => {
       try {
-        const response = await axios.get<ClientType[]>('https://lcaapi.acess.co.kr/Clients/types');
+        const response = await axios.get<ClientType[]>(`${getApiUrl}/Clients/types`);
         setClientTypes(response.data);
       } catch (error) {
         console.error('Error fetching client types:', error);
@@ -262,7 +263,7 @@ export function AdminClient() {
 
   useEffect(() => {
     axios
-      .get('https://lcaapi.acess.co.kr/Companies')
+      .get(`${getApiUrl}/Companies`)
       .then((response) => {
         const sortedCompanies = response.data.list.sort((a: Company, b: Company) =>
           a.name.localeCompare(b.name)
@@ -284,7 +285,7 @@ export function AdminClient() {
     setDownloading(true); // 다운로드 시작
   
     try {
-      let url = `https://lcaapi.acess.co.kr/Clients/export?companyCode=${selectedCompany.code}`;
+      let url = `${getApiUrl}/Clients/export?companyCode=${selectedCompany.code}`;
   
       // Optional parameters
       if (selectedTypeInOut) {
@@ -388,7 +389,7 @@ export function AdminClient() {
     };
   
     axios
-      .post('https://lcaapi.acess.co.kr/Clients', newMemberData)
+      .post(`${getApiUrl}/Clients`, newMemberData)
       .then(() => {
         fetchData(pageIndex, pageSize);
       })
@@ -438,7 +439,7 @@ export function AdminClient() {
         bizNo: editMember.bizNo.replace(/\D/g, ''), 
       };
   
-      const url = `https://lcaapi.acess.co.kr/Clients/${editMember.id}`;
+      const url = `${getApiUrl}/Clients/${editMember.id}`;
   
       axios
         .put(url, updatedMemberData)
@@ -470,7 +471,7 @@ export function AdminClient() {
 
   const handleDeleteSubmit = () => {
     if (deleteIndex !== null) {
-      const url = `https://lcaapi.acess.co.kr/Clients/${deleteIndex}`;
+      const url = `${getApiUrl}/Clients/${deleteIndex}`;
 
       axios
         .delete(url)

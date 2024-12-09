@@ -6,6 +6,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogTitle from '@mui/material/DialogTitle';
 import './css/NoticeList.css';
+import { getApiUrl } from '../../../../main';
 
 interface FileInfo {
   id: number;
@@ -39,7 +40,7 @@ export function NoticeList({ isAdmin, handleAdminClick }: NoticeListProps) {
   // 파일 다운로드 처리
   const handleFileDownload = async (fileId: number, fileName: string) => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Boards/Files/${fileId}`, {
+      const response = await axios.get(`${getApiUrl}/Boards/Files/${fileId}`, {
         responseType: 'blob',
       });
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -59,7 +60,7 @@ export function NoticeList({ isAdmin, handleAdminClick }: NoticeListProps) {
   const fetchNotices = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/Boards');
+      const response = await axios.get(`${getApiUrl}/Boards`);
       setNotices(response.data.list);
     } catch (error) {
       console.error('공지사항을 불러오는데 실패했습니다:', error);
@@ -76,7 +77,7 @@ export function NoticeList({ isAdmin, handleAdminClick }: NoticeListProps) {
   const handleViewNotice = async (noticeId: number) => {
     setLoading(true);
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Boards/${noticeId}`);
+      const response = await axios.get(`${getApiUrl}/Boards/${noticeId}`);
       setSelectedNotice(response.data);
       setViewOpen(true);
     } catch (error) {

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Autocomplete, CircularProgress, TextField, AutocompleteRenderInputParams } from '@mui/material';
+import { getApiUrl } from '../../../main';
 
 interface ValuableThing {
   id: number;
@@ -22,7 +23,7 @@ const ValuableMap: React.FC<ValuableMapProps> = ({ value, onChange, menuWidth = 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get<ValuableThing[]>('https://lcaapi.acess.co.kr/ValuableThings');
+        const response = await axios.get<ValuableThing[]>(`${getApiUrl}/ValuableThings`);
         setData(response.data);
       } catch (error) {
         if (axios.isAxiosError(error) && error.response?.status === 403) {

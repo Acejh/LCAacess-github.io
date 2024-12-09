@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import numeral from 'numeral';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -78,7 +79,7 @@ export function CTMScale() {
   }, []);
 
   useEffect(() => {
-    axios.get('https://lcaapi.acess.co.kr/Companies')
+    axios.get(`${getApiUrl}/Companies`)
       .then(response => {
         setCompanies(response.data.list);
       })
@@ -97,7 +98,7 @@ export function CTMScale() {
   
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/EcoasTrans/Scaled?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `${getApiUrl}/EcoasTrans/Scaled?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) {
         url += `&transNo=${searchQuery}`;
       }
@@ -153,7 +154,7 @@ export function CTMScale() {
     setDownloading(true); // 다운로드 시작
   
     try {
-      const url = `https://lcaapi.acess.co.kr/EcoasTrans/Export-Scaled?page=${pageIndex + 1}&pageSize=${pageSize}&companyCode=${selectedCompany.code}&year=${year}&month=${month || ''}`;
+      const url = `${getApiUrl}/EcoasTrans/Export-Scaled?page=${pageIndex + 1}&pageSize=${pageSize}&companyCode=${selectedCompany.code}&year=${year}&month=${month || ''}`;
       
       const response = await axios.get(url, {
         responseType: 'blob',

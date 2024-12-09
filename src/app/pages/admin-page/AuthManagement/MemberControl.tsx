@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -130,7 +131,7 @@ export function MemberControl() {
 
   //데이터 쿼리
   useEffect(() => {
-    axios.get('https://lcaapi.acess.co.kr/Companies')
+    axios.get(`${getApiUrl}/Companies`)
       .then(response => {
         setData(response.data.list);
         setFilteredData(response.data.list); 
@@ -203,9 +204,9 @@ export function MemberControl() {
       ...newMember,
     };
 
-    axios.post('https://lcaapi.acess.co.kr/Companies', newMemberData)
+    axios.post(`${getApiUrl}/Companies`, newMemberData)
       .then(() => {
-        axios.get('https://lcaapi.acess.co.kr/Companies')
+        axios.get(`${getApiUrl}/Companies`)
           .then(response => {
             setData(response.data.list);
             setFilteredData(response.data.list); 
@@ -252,11 +253,11 @@ export function MemberControl() {
         ...editMember,
       };
 
-      const url = `https://lcaapi.acess.co.kr/Companies/${editMember.code}`;
+      const url = `${getApiUrl}/Companies/${editMember.code}`;
 
       axios.put(url, updatedMemberData)
         .then(() => {
-          axios.get('https://lcaapi.acess.co.kr/Companies')
+          axios.get(`${getApiUrl}/Companies`)
             .then(response => {
               setData(response.data.list);
               setFilteredData(response.data.list); 
@@ -289,11 +290,11 @@ export function MemberControl() {
   const handleDeleteSubmit = () => {
     if (deleteIndex !== null) {
       const memberToDelete = data[deleteIndex];
-      const url = `https://lcaapi.acess.co.kr/Companies/${memberToDelete.code}`;
+      const url = `${getApiUrl}/Companies/${memberToDelete.code}`;
 
       axios.delete(url)
         .then(() => {
-          axios.get('https://lcaapi.acess.co.kr/Companies')
+          axios.get(`${getApiUrl}/Companies`)
             .then(response => {
               setData(response.data.list);
               setFilteredData(response.data.list);

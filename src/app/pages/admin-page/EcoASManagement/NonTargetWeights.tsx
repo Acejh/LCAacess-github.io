@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import numeral from 'numeral';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -104,7 +105,7 @@ export function NonTargetWeights() {
     setLoading(true);
 
     try {
-        const url = `https://lcaapi.acess.co.kr/NonTargetWeights?page=${pageIndex + 1}&pageSize=${pageSize}&companyCode=${searchParams.company.code}&year=${searchParams.year}`;
+        const url = `${getApiUrl}/NonTargetWeights?page=${pageIndex + 1}&pageSize=${pageSize}&companyCode=${searchParams.company.code}&year=${searchParams.year}`;
         const response = await axios.get(url);
         const { list, totalCount } = response.data;
 
@@ -150,7 +151,7 @@ export function NonTargetWeights() {
     setDownloading(true); // 다운로드 시작
   
     try {
-      let url = `https://lcaapi.acess.co.kr/NonTargetWeights/export?companyCode=${selectedCompany.code}`;
+      let url = `${getApiUrl}/NonTargetWeights/export?companyCode=${selectedCompany.code}`;
   
       // Optional parameters
       if (year) url += `&year=${year}`;
@@ -204,7 +205,7 @@ export function NonTargetWeights() {
 
   const postWeightData = async (data: WeightPayload) => {
     try {
-      await axios.post(`https://lcaapi.acess.co.kr/NonTargetWeights`, data);
+      await axios.post(`${getApiUrl}/NonTargetWeights`, data);
       alert('등록이 완료되었습니다.');
       setIsModalOpen(false);
       handleSearch(); // 등록 후 데이터 다시 조회
@@ -215,7 +216,7 @@ export function NonTargetWeights() {
   
   const putWeightData = async (data: WeightPayload) => {
     try {
-      await axios.put(`https://lcaapi.acess.co.kr/NonTargetWeights`, data);
+      await axios.put(`${getApiUrl}/NonTargetWeights`, data);
       alert('수정이 완료되었습니다.');
       setIsModalOpen(false);
       handleSearch(); // 수정 후 데이터 다시 조회
@@ -261,7 +262,7 @@ export function NonTargetWeights() {
       if (modalType === 'edit' && modalData.company && modalData.year && modalData.month) {
         try {
           const response = await axios.get(
-            `https://lcaapi.acess.co.kr/NonTargetWeights?companyCode=${modalData.company.code}&year=${modalData.year}`
+            `${getApiUrl}/NonTargetWeights?companyCode=${modalData.company.code}&year=${modalData.year}`
           );
           const monthlyWeights = response.data.list[0]?.monthlyWeights || [];
           const monthWeight = monthlyWeights[parseInt(modalData.month, 10) - 1] || 0;

@@ -19,6 +19,7 @@ import {
   Select,
   MenuItem,
 } from '@mui/material';
+import { getApiUrl } from '../../../../main';
 import { useDropzone } from 'react-dropzone';
 import axios from 'axios';
 import '../../CSS/SCbar.css';
@@ -72,7 +73,7 @@ export function NoticeControl() {
     setNotices([]);
   
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/Boards', {
+      const response = await axios.get(`${getApiUrl}/Boards`, {
         params: {
           title: searchTitle,
           content: searchContent,
@@ -100,7 +101,7 @@ export function NoticeControl() {
       formData.append('file', file);
 
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/Boards/Files', formData);
+        const response = await axios.post(`${getApiUrl}/Boards/Files`, formData);
         setUploadedFiles((prevFiles) => [
           ...prevFiles,
           { id: response.data.boardFileId, fileName: file.name },
@@ -117,7 +118,7 @@ export function NoticeControl() {
 
   const handleDeleteFile = async (fileId: number) => {
     try {
-      await axios.delete(`https://lcaapi.acess.co.kr/Boards/files/${fileId}`);
+      await axios.delete(`${getApiUrl}/Boards/files/${fileId}`);
       setUploadedFiles((prevFiles) => prevFiles.filter((file) => file.id !== fileId));
     } catch (error) {
       console.error('파일 삭제에 실패했습니다:', error);
@@ -126,7 +127,7 @@ export function NoticeControl() {
 
   const handleDownloadFile = async (fileId: number) => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Boards/Files/${fileId}`, {
+      const response = await axios.get(`${getApiUrl}/Boards/Files/${fileId}`, {
         responseType: 'blob',
       });
 
@@ -173,9 +174,9 @@ export function NoticeControl() {
 
     try {
       if (editMode && currentNoticeId) {
-        await axios.put(`https://lcaapi.acess.co.kr/Boards/${currentNoticeId}`, newNotice);
+        await axios.put(`${getApiUrl}/Boards/${currentNoticeId}`, newNotice);
       } else {
-        await axios.post('https://lcaapi.acess.co.kr/Boards', newNotice);
+        await axios.post(`${getApiUrl}/Boards`, newNotice);
       }
       fetchNotices();
       handleClose();
@@ -192,7 +193,7 @@ export function NoticeControl() {
 
   const handleEditNotice = async (noticeId: number) => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Boards/${noticeId}`);
+      const response = await axios.get(`${getApiUrl}/Boards/${noticeId}`);
       const noticeData = response.data;
 
       setNewTitle(noticeData.title);
@@ -219,7 +220,7 @@ export function NoticeControl() {
   const handleViewNotice = async (noticeId: number) => {
     setLoading(true);
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Boards/${noticeId}`);
+      const response = await axios.get(`${getApiUrl}/Boards/${noticeId}`);
       setSelectedNotice(response.data);
       setViewOpen(true);
     } catch (error) {
@@ -234,11 +235,11 @@ export function NoticeControl() {
       const notice = notices.find((n) => n.id === noticeId);
       if (notice?.boardFiles) {
         for (const file of notice.boardFiles) {
-          await axios.delete(`https://lcaapi.acess.co.kr/Boards/files/${file.id}`);
+          await axios.delete(`${getApiUrl}/Boards/files/${file.id}`);
         }
       }
 
-      await axios.delete(`https://lcaapi.acess.co.kr/Boards/${noticeId}`);
+      await axios.delete(`${getApiUrl}/Boards/${noticeId}`);
       fetchNotices();
     } catch (error) {
       console.error('공지사항을 삭제하는데 실패했습니다:', error);

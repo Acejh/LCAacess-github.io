@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import numeral from 'numeral';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -104,7 +105,7 @@ export function SupplyTable() {
   
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/EcoasRecc/Valuable?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `${getApiUrl}/EcoasRecc/Valuable?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) url += `&reccNo=${searchQuery}`;
       if (searchParams.clientBizno) url += `&clientBizno=${searchParams.clientBizno}`;
       if (searchParams.clientName) url += `&clientName=${searchParams.clientName}`;
@@ -140,7 +141,7 @@ export function SupplyTable() {
     setDownloading(true); // 다운로드 시작
   
     try {
-      let url = `https://lcaapi.acess.co.kr/EcoasRecc/Valuable/Export?companyCode=${selectedCompany.code}`;
+      let url = `${getApiUrl}/EcoasRecc/Valuable/Export?companyCode=${selectedCompany.code}`;
   
       // Optional parameters
       if (year) url += `&year=${year}`;

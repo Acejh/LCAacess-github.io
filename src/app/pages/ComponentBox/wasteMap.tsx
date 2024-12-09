@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { getApiUrl } from '../../../main';
 
 interface Waste {
   id: number;
@@ -14,7 +15,7 @@ const WasteMap: React.FC<{ onWasteChange: (waste: Waste | null) => void }> = ({ 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get<Waste[]>('https://lcaapi.acess.co.kr/Wastes/');
+        const response = await axios.get<Waste[]>(`${getApiUrl}/Wastes/`);
         setData(response.data);
       } catch (error) {
         setError('An error occurred while fetching data.');

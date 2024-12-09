@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
 import numeral from 'numeral';
 import '../../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -107,7 +108,7 @@ export function Ad_Effluent() {
   
       try {
         const response = await axios.get(
-          `https://lcaapi.acess.co.kr/Outputs/Water/Exist`,
+          `${getApiUrl}/Outputs/Water/Exist`,
           {
             params: {
               CompanyCode: newInput.companyCode,
@@ -161,7 +162,7 @@ export function Ad_Effluent() {
     setLoading(true);
   
     try {
-      let url = `https://lcaapi.acess.co.kr/Outputs/Water?CompanyCode=${company.code}`;
+      let url = `${getApiUrl}/Outputs/Water?CompanyCode=${company.code}`;
       if (year) {
         url += `&Year=${year}`;
       }
@@ -256,7 +257,7 @@ export function Ad_Effluent() {
       console.log("New Value:", editValue);
   
       // API 요청으로 데이터 업데이트
-      await axios.put(`https://lcaapi.acess.co.kr/Outputs/Water/${id}`, {
+      await axios.put(`${getApiUrl}/Outputs/Water/${id}`, {
         amount: Number(editValue), // 수정된 값
         month: monthIndex + 1, // 월 정보 (1-based index)
       });
@@ -374,20 +375,20 @@ export function Ad_Effluent() {
       }
   
       // Check if the record exists
-      const checkUrl = `https://lcaapi.acess.co.kr/Outputs/Water/Exist?companyCode=${companyCode}&year=${year}&month=${month}`;
+      const checkUrl = `${getApiUrl}/Outputs/Water/Exist?companyCode=${companyCode}&year=${year}&month=${month}`;
       const checkResponse = await axios.get(checkUrl);
       const exists = checkResponse.data.isExist;
   
       if (exists) {
         // If the data exists, update it
-        const idsUrl = `https://lcaapi.acess.co.kr/Outputs/Water?CompanyCode=${companyCode}&Year=${year}`;
+        const idsUrl = `${getApiUrl}/Outputs/Water?CompanyCode=${companyCode}&Year=${year}`;
         const idsResponse = await axios.get(idsUrl);
         const ids: number[] = idsResponse.data.outputs[0]?.ids || [];
   
         if (ids.length > 0) {
           const id = ids[month - 1]; // Map the month to the correct ID
           if (id) {
-            const updateUrl = `https://lcaapi.acess.co.kr/Outputs/Water/${id}`;
+            const updateUrl = `${getApiUrl}/Outputs/Water/${id}`;
             await axios.put(updateUrl, {
               companyCode,
               year: Number(year),
@@ -402,7 +403,7 @@ export function Ad_Effluent() {
         }
       } else {
         // If the data does not exist, create a new record
-        const createUrl = "https://lcaapi.acess.co.kr/Outputs/Water";
+        const createUrl = `${getApiUrl}/Outputs/Water`;
         await axios.post(createUrl, {
           companyCode,
           year: Number(year),

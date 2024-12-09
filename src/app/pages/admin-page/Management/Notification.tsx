@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./css/Notification.css"
+import { getApiUrl } from "../../../../main";
 
 interface NotificationMessage {
   message: string;
@@ -17,7 +18,7 @@ export const Notification: React.FC = () => {
 
     // API 요청
     if (companyCode) {
-      fetch(`https://lcaapi.acess.co.kr/notices?companyCode=${companyCode}`)
+      fetch(`${getApiUrl}/notices?companyCode=${companyCode}`)
       .then((response) => response.json())
       .then((data) => {
         setNotifications(data);

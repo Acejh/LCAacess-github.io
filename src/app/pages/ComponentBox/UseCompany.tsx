@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import { Autocomplete, TextField, FormControlProps, FormControl } from '@mui/material';
 import { SxProps, Theme } from '@mui/system';
+import { getApiUrl } from '../../../main';
 
 export interface Company {
   id: number;
@@ -49,7 +50,7 @@ const UseCompany: React.FC<UseCompanyProps> = ({
 
   const fetchCompanies = useCallback(async () => {
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/Companies');
+      const response = await axios.get(`${getApiUrl}/Companies`);
       const companies: Company[] = response.data.list;
 
       if (showGeneralOption) {

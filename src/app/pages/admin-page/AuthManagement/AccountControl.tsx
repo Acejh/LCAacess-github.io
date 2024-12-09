@@ -2,6 +2,7 @@ import React, { useState, useEffect , useCallback} from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -128,7 +129,7 @@ export function UserControl() {
   const fetchData = useCallback(async (pageIndex: number, pageSize: number) => {
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/Users?&page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `${getApiUrl}/Users?&page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchParams.company) {
         url += `&companyCode=${searchParams.company.code}`;
       }
@@ -163,7 +164,7 @@ export function UserControl() {
 
   //사업회원 데이터 변환
   useEffect(() => {
-    axios.get('https://lcaapi.acess.co.kr/Companies')
+    axios.get(`${getApiUrl}/Companies`)
       .then(response => {
         const sortedCompanies = response.data.list.sort((a: Company, b: Company) =>
           a.name.localeCompare(b.name)
@@ -198,7 +199,7 @@ export function UserControl() {
     };  
   
   
-    axios.post('https://lcaapi.acess.co.kr/Users', newAccountData)
+    axios.post(`${getApiUrl}/Users`, newAccountData)
       .then(() => {
         fetchData(pageIndex, pageSize);
       })
@@ -239,7 +240,7 @@ export function UserControl() {
         ...editAccount
       };
   
-      const url = `https://lcaapi.acess.co.kr/Users/${editAccount.id}`;
+      const url = `${getApiUrl}/Users/${editAccount.id}`;
   
       axios.put(url, updatedAccountData)
         .then(() => {
@@ -273,7 +274,7 @@ export function UserControl() {
   const handleResetSubmit = async () => {
     if (resetUserName) {
       try {
-        const url = `https://lcaapi.acess.co.kr/Users/reset-password`;
+        const url = `${getApiUrl}/Users/reset-password`;
         await axios.put(url, { userName: resetUserName });
   
         console.log(`${resetUserName} 비밀번호 초기화 완료`);
@@ -303,7 +304,7 @@ export function UserControl() {
   
   const handleDeleteSubmit = () => {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
     if (deleteIndex !== null) {
-      const url = `https://lcaapi.acess.co.kr/Users/${deleteIndex}`;
+      const url = `${getApiUrl}/Users/${deleteIndex}`;
   
       axios.delete(url)
         .then(() => {

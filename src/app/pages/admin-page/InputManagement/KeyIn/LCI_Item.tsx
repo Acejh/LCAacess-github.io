@@ -3,6 +3,7 @@ import axios, { AxiosError } from 'axios';  // AxiosError 타입 import
 import '../../../CSS/SCbar.css';
 import { SelectChangeEvent } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
+import { getApiUrl } from '../../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -111,7 +112,7 @@ export function LCI_Item() {
   const fetchLciTypes = async () => {
     try {
       const response = await axios.get<LciType[]>(
-        'https://lcaapi.acess.co.kr/LciItems/LciTypes'
+        `${getApiUrl}/LciItems/LciTypes`
       );
       const typesMapping = response.data.reduce((acc, type) => {
         acc[type.key] = type.value;
@@ -126,7 +127,7 @@ export function LCI_Item() {
   const fetchLciCategories = async () => {
     try {
       const response = await axios.get<{ lciCategories: LciCategory }>(
-        'https://lcaapi.acess.co.kr/LciItems/LciCategories'
+        `${getApiUrl}/LciItems/LciCategories`
       );
       setLciCategories(response.data.lciCategories);
     } catch (error) {
@@ -140,7 +141,7 @@ export function LCI_Item() {
     setLoading(true);
 
     try {
-      const url = `https://lcaapi.acess.co.kr/LciItems?year=${year}`;
+      const url = `${getApiUrl}/LciItems?year=${year}`;
       const response = await axios.get<LciItem[]>(url);
 
       setData(response.data);
@@ -246,7 +247,7 @@ export function LCI_Item() {
           gwpAlt: editItem.gwpAlt,
         };
 
-        await axios.put(`https://lcaapi.acess.co.kr/LciItems/${editItem.id}`, postData);
+        await axios.put(`${getApiUrl}/LciItems/${editItem.id}`, postData);
 
         // 데이터 업데이트
         await fetchData();
@@ -275,7 +276,7 @@ export function LCI_Item() {
           gwpAlt: editItem.gwpAlt,
         };
 
-        await axios.post('https://lcaapi.acess.co.kr/LciItems', postData);
+        await axios.post(`${getApiUrl}/LciItems`, postData);
 
         // 데이터 업데이트
         await fetchData();
@@ -300,7 +301,7 @@ export function LCI_Item() {
   const handleDeleteConfirm = async () => {
     if (deleteItemId) {
       try {
-        await axios.delete(`https://lcaapi.acess.co.kr/LciItems/${deleteItemId}`);
+        await axios.delete(`${getApiUrl}/LciItems/${deleteItemId}`);
 
         // 데이터 업데이트
         await fetchData();
@@ -339,7 +340,7 @@ export function LCI_Item() {
     formData.append('uploadFile', selectedFile);
 
     try {
-      await axios.post('https://lcaapi.acess.co.kr/LciItems/import', formData, {
+      await axios.post(`${getApiUrl}/LciItems/import`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('파일이 성공적으로 업로드되었습니다.');
@@ -362,7 +363,7 @@ export function LCI_Item() {
     setDownloading(true); // 다운로드 시작
   
     try {
-      const url = `https://lcaapi.acess.co.kr/LciItems/Export?Year=${year}`;
+      const url = `${getApiUrl}/LciItems/Export?Year=${year}`;
       
       const response = await axios.get(url, {
         responseType: 'blob',

@@ -5,6 +5,7 @@ import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -115,7 +116,7 @@ export function CompositionSet() {
 
   const fetchCompanies = async () => {
     try {
-      const response = await axios.get<ApiResponse>('https://lcaapi.acess.co.kr/Companies');
+      const response = await axios.get<ApiResponse>(`${getApiUrl}/Companies`);
       const fetchedCompanies = response.data.list.map((company) => ({
         id: company.id,
         code: company.code,
@@ -137,7 +138,7 @@ export function CompositionSet() {
     setLoading(true);
   
     try {
-      const url = `https://lcaapi.acess.co.kr/Compositions?Year=${year}`;
+      const url = `${getApiUrl}/Compositions?Year=${year}`;
       const response = await axios.get(url);
       const { columns: productColumns = [], list = [] } = response.data;
   
@@ -214,7 +215,7 @@ export function CompositionSet() {
 
   const handleDownloadExcel = async () => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Compositions/export?year=${year}`, {
+      const response = await axios.get(`${getApiUrl}/Compositions/export?year=${year}`, {
         responseType: 'blob', 
       });
   
@@ -258,7 +259,7 @@ export function CompositionSet() {
     formData.append('uploadFile', selectedFile);
 
     try {
-      await axios.post('https://lcaapi.acess.co.kr/Compositions/import', formData, {
+      await axios.post(`${getApiUrl}/Compositions/import`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('파일이 성공적으로 업로드되었습니다.');
@@ -302,7 +303,7 @@ export function CompositionSet() {
 
   const fetchSelectedCompanies = async (year: string, componentName: string) => {
     try {
-      const url = `https://lcaapi.acess.co.kr/Compositions/CompanyPlastic?year=${year}&lciItemName=${encodeURIComponent(
+      const url = `${getApiUrl}/Compositions/CompanyPlastic?year=${year}&lciItemName=${encodeURIComponent(
         componentName
       )}`;
       const response = await axios.get<{ companyCodes: string[] }>(url);
@@ -323,7 +324,7 @@ export function CompositionSet() {
           .map((company) => company.code), // 선택된 회사의 코드
       };
   
-      await axios.post('https://lcaapi.acess.co.kr/Compositions/CompanyPlastic', payload);
+      await axios.post(`${getApiUrl}/Compositions/CompanyPlastic`, payload);
   
       alert('등록이 완료되었습니다.');
       setModalOpen(false); // 모달 닫기

@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
 import UseProduct from '../../../ComponentBox/UseProduct';
 import numeral from 'numeral';
+import { getApiUrl } from '../../../../../main';
 import { v4 as uuidv4 } from 'uuid';
 import '../../../CSS/SCbar.css';
 import {
@@ -138,7 +139,7 @@ export function Ad_Facility() {
     setError(null);
   
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Facilities?companyCode=${companyCode}`);
+      const response = await axios.get(`${getApiUrl}/Facilities?companyCode=${companyCode}`);
       const facilitiesData = response.data.facilities;
       setFacilities(facilitiesData);
   
@@ -275,7 +276,7 @@ export function Ad_Facility() {
 
   const handleEditModalOpen = async (facility: Facl) => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Facilities/${facility.id}`);
+      const response = await axios.get(`${getApiUrl}/Facilities/${facility.id}`);
       const facilityData = response.data;
       setEditFacility({
         id: facility.id.toString(),
@@ -319,7 +320,7 @@ export function Ad_Facility() {
         ...newFacility,
         items: newFacility.items.map(itemCode => itemCode)
       };
-      await axios.post('https://lcaapi.acess.co.kr/Facilities', payload); 
+      await axios.post(`${getApiUrl}/Facilities`, payload); 
       setOpen(false);
       if (selectedCompany) {
         fetchData(selectedCompany.code);
@@ -340,7 +341,7 @@ export function Ad_Facility() {
         capacity: parseFloat(editFacility.capacity),
         items: editFacility.items.map(itemCode => itemCode)
       };
-      await axios.put(`https://lcaapi.acess.co.kr/Facilities/${editFacility.id}`, payload);
+      await axios.put(`${getApiUrl}/Facilities/${editFacility.id}`, payload);
       setEditModalOpen(false);
       if (selectedCompany) {
         fetchData(selectedCompany.code);
@@ -357,7 +358,7 @@ export function Ad_Facility() {
   const handleDeleteFacility = async () => {
     if (deleteFacilityId !== null) {
       try {
-        await axios.delete(`https://lcaapi.acess.co.kr/Facilities/${deleteFacilityId}`);
+        await axios.delete(`${getApiUrl}/Facilities/${deleteFacilityId}`);
         setDeleteModalOpen(false);
         if (selectedCompany) {
           fetchData(selectedCompany.code);

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -27,8 +28,18 @@ import {
   FormControl,
   SelectChangeEvent,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogTitle,
+  DialogContent,
 } from '@mui/material';
 import * as XLSX from 'xlsx';
+
+type PostData = {
+  companyCode: string;
+  year: string;
+  month?: string; // LCA 모달에서는 제외되므로 optional
+};
 
 type Status = {
   companyName: string;
@@ -76,6 +87,9 @@ type CompanyData = {
   code: string;
   name: string;
 };
+
+const years = Array.from({ length: 5 }, (_, i) => (new Date().getFullYear() - i).toString());
+const months = Array.from({ length: 12 }, (_, i) => (i + 1).toString());
 
 const columns: ColumnDef<Status>[] = [
   { accessorKey: 'companyName', header: '업체명' },
@@ -131,6 +145,10 @@ export function DataStatus() {
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [searchInitiated, setSearchInitiated] = useState(false);
+  const [openModal, setOpenModal] = useState<string | null>(null);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [year, setYear] = useState<string>('');
+  const [month, setMonth] = useState<string>('');
   const [role, setRole] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useState({
     year: '',
@@ -138,6 +156,20 @@ export function DataStatus() {
     company: null as Company | null,
   });
   const [companies, setCompanies] = useState<CompanyData[]>([]);
+
+  const handleOpenModal = (modalType: string) => {
+    setOpenModal(modalType);
+    setSelectedCompany(null);
+    setYear('');
+    setMonth('');
+  };
+
+  const handleCloseModal = () => {
+    setOpenModal(null);
+    setSelectedCompany(null);
+    setYear('');
+    setMonth('');
+  };
 
   useEffect(() => {
     const storedData = JSON.parse(localStorage.getItem('kt-auth-react-v') || '{}');
@@ -187,7 +219,7 @@ export function DataStatus() {
   const fetchData = useCallback(async (pageIndex: number, pageSize: number, params: typeof searchParams) => {
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/ProcessStatus?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `${getApiUrl}/ProcessStatus?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (params.company) {
         url += `&companyCode=${params.company.code}`;
       }
@@ -237,6 +269,44 @@ export function DataStatus() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Sheet1');
     XLSX.writeFile(workbook, '데이터 현황.xlsx');
+  };
+
+  const handleSubmit = async () => {
+    if (!selectedCompany || !year || (openModal !== 'LCA' && !month)) {
+      alert('모든 필드를 선택해주세요.');
+      return;
+    }
+
+    const urlMap: Record<string, string> = {
+      EcoAS: 'https://lcaapi.acess.co.kr/EcoasData/fetch',
+      AutoMapping: 'https://lcaapi.acess.co.kr/Mapping',
+      GTG: 'https://lcaapi.acess.co.kr/Cals/gtog',
+      LCA: 'https://lcaapi.acess.co.kr/Cals/lca',
+    };
+
+    const postData: PostData = {
+      companyCode: selectedCompany?.code as string,
+      year: year,
+      ...(openModal !== 'LCA' && { month: month }), // LCA가 아닌 경우에만 month 추가
+    };
+
+    if (openModal !== 'LCA') {
+      postData.month = month;
+    }
+
+    setLoading(true);
+
+    try {
+      const response = await axios.post(urlMap[openModal!], postData);
+      console.log(`${openModal} 결과:`, response.data);
+      alert('작업이 성공적으로 완료되었습니다.');
+    } catch (error) {
+      console.error(`${openModal} 오류:`, error);
+      alert('작업 중 오류가 발생했습니다.');
+    } finally {
+      setLoading(false);
+      handleCloseModal();
+    }
   };
 
   const handlePaginationChange = (updater: Updater<PaginationState>) => {
@@ -391,7 +461,15 @@ export function DataStatus() {
           variant="contained"
           color="primary"
           style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
-          onClick={handleSearch}
+          onClick={() => handleOpenModal('EcoAS')}
+        >
+          EcoAS관리표 가져오기
+        </Button>
+        <Button
+          variant="contained"
+          color="primary"
+          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
+          onClick={() => handleOpenModal('AutoMapping')}
         >
           자동 매핑
         </Button>
@@ -399,7 +477,7 @@ export function DataStatus() {
           variant="contained"
           color="primary"
           style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
-          onClick={handleSearch}
+          onClick={() => handleOpenModal('GTG')}
         >
           GTG결과 가져오기
         </Button>
@@ -407,17 +485,9 @@ export function DataStatus() {
           variant="contained"
           color="primary"
           style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
-          onClick={handleSearch}
+          onClick={() => handleOpenModal('LCA')}
         >
           LCA결과 가져오기
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
-          onClick={handleSearch}
-        >
-          EcoAS관리표 가져오기
         </Button>
       </div>
       <TableContainer
@@ -639,6 +709,110 @@ export function DataStatus() {
           </Select>
         </div>
       </div>
+      {['EcoAS', 'AutoMapping', 'GTG', 'LCA'].map((modalType) => (
+        <Dialog
+          key={modalType}
+          open={openModal === modalType}
+          onClose={handleCloseModal}
+          maxWidth="sm"
+        >
+          <DialogTitle>
+            {modalType === 'EcoAS'
+              ? 'EcoAS 관리표 가져오기'
+              : modalType === 'AutoMapping'
+              ? '자동 매핑'
+              : modalType === 'GTG'
+              ? 'GTG 결과 가져오기'
+              : 'LCA 결과 가져오기'}
+          </DialogTitle>
+          <DialogContent
+            dividers
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1, // 요소 간 간격
+            }}
+          >
+            <UseCompany onCompanyChange={setSelectedCompany} showAllOption={false}/>
+            <FormControl
+              fullWidth
+              margin="normal"
+              sx={{
+                width: '100%',
+                maxWidth: '300px', // 원하는 최대 너비 설정
+              }}
+            >
+              <InputLabel id={`${modalType}-year-label`}>연도</InputLabel>
+              <Select
+                labelId={`${modalType}-year-label`}
+                label="연도"
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                MenuProps={{
+                  PaperProps: {
+                    style: {
+                      maxHeight: 200, // 드롭다운 높이 제한
+                    },
+                  },
+                }}
+              >
+                {years.map((y) => (
+                  <MenuItem key={y} value={y}>
+                    {y}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            {modalType !== 'LCA' && (
+              <FormControl
+                fullWidth
+                margin="normal"
+                sx={{
+                  width: '100%',
+                  maxWidth: '300px',
+                }}
+              >
+                <InputLabel id={`${modalType}-month-label`}>월</InputLabel>
+                <Select
+                  labelId={`${modalType}-month-label`}
+                  label="월"
+                  value={month}
+                  onChange={(e) => setMonth(e.target.value)}
+                  MenuProps={{
+                    PaperProps: {
+                      style: {
+                        maxHeight: 200, // 드롭다운 최대 높이
+                        overflowY: 'auto', // 스크롤 가능
+                      },
+                    },
+                  }}
+                >
+                  {months.map((m) => (
+                    <MenuItem key={m} value={m}>
+                      {m}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button
+              onClick={handleSubmit}
+              color="primary"
+              variant="contained"
+              disabled={loading}
+            >
+              {loading ? <CircularProgress size={24} /> : '진행'}
+            </Button>
+            <Button onClick={handleCloseModal} color="secondary" variant="outlined">
+              닫기
+            </Button>
+          </DialogActions>
+        </Dialog>
+      ))}
     </div>
   );
 }

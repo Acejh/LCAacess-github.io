@@ -34,6 +34,7 @@ setupAxios(axios)
 Chart.register(...registerables)
 
 const queryClient = new QueryClient()
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const container = document.getElementById('root')
 if (container) {
   createRoot(container).render(
@@ -47,3 +48,5 @@ if (container) {
     </QueryClientProvider>
   )
 }
+
+export const getApiUrl = API_BASE_URL;

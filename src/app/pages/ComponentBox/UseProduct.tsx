@@ -3,6 +3,7 @@ import axios from 'axios';
 import { FormControl, FormControlProps } from '@mui/material';
 import { SxProps, Theme } from '@mui/system';
 import { Grid, Chip, Typography } from '@mui/material';
+import { getApiUrl } from '../../../main';
 
 export interface Product {
   id: number;
@@ -33,7 +34,7 @@ const UseProduct: React.FC<UseProductProps> = ({
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    axios.get('https://lcaapi.acess.co.kr/Items')
+    axios.get(`${getApiUrl}/Items`)
       .then(response => {
         setProducts(response.data);
         if (onProductListChange) {

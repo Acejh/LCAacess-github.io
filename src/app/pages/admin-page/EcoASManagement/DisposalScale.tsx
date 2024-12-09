@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import numeral from 'numeral';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -87,7 +88,7 @@ export function DisposalScale() {
     setLoading(true);
 
     try {
-      const url = `https://lcaapi.acess.co.kr/MonthlyWeights/wastes?CompanyCode=${searchParams.company.code}&Year=${searchParams.year}`;
+      const url = `${getApiUrl}/MonthlyWeights/wastes?CompanyCode=${searchParams.company.code}&Year=${searchParams.year}`;
       const response = await axios.get(url);
       const { list } = response.data;
 
@@ -149,7 +150,7 @@ export function DisposalScale() {
     setDownloading(true); // 다운로드 시작
   
     try {
-      let url = `https://lcaapi.acess.co.kr/MonthlyWeights/wastes/export?companyCode=${selectedCompany.code}`;
+      let url = `${getApiUrl}/MonthlyWeights/wastes/export?companyCode=${selectedCompany.code}`;
   
       // Optional parameters
       if (year) url += `&year=${year}`;

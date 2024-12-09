@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import numeral from 'numeral';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -88,7 +89,7 @@ export function ProductsScale() {
     setLoading(true);
   
     try {
-      const url = `https://lcaapi.acess.co.kr/MonthlyWeights/scaled?CompanyCode=${searchParams.company.code}&Year=${searchParams.year}`;
+      const url = `${getApiUrl}/MonthlyWeights/scaled?CompanyCode=${searchParams.company.code}&Year=${searchParams.year}`;
       const response = await axios.get(url);
       const { list } = response.data;
   
@@ -151,7 +152,7 @@ export function ProductsScale() {
     }, 180000); 
   
     try {
-      let url = `https://lcaapi.acess.co.kr/MonthlyWeights/scaled/export?`;
+      let url = `${getApiUrl}/MonthlyWeights/scaled/export?`;
       if (selectedCompany) {
         url += `&companyCode=${selectedCompany.code}`;
       }

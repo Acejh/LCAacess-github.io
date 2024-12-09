@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -96,7 +97,7 @@ export function CTMBasic() {
   
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/EcoasTrans/Origin?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `${getApiUrl}/EcoasTrans/Origin?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) url += `&transNo=${searchQuery}`;
       if (searchParams.clientBizno) url += `&clientBizno=${searchParams.clientBizno}`;
       if (searchParams.clientName) url += `&clientName=${searchParams.clientName}`;
@@ -133,7 +134,7 @@ export function CTMBasic() {
     setDownloading(true); // 다운로드 시작
   
     try {
-      let url = `https://lcaapi.acess.co.kr/EcoasTrans/export?companyCode=${selectedCompany.code}`;
+      let url = `${getApiUrl}/EcoasTrans/export?companyCode=${selectedCompany.code}`;
   
       // Optional parameters
       if (year) url += `&year=${year}`;

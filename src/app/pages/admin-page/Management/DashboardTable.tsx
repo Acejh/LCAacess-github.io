@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { Bar } from "react-chartjs-2";
+import { getApiUrl } from "../../../../main";
 import {
   Table,
   TableBody,
@@ -49,7 +50,7 @@ export const DashboardTable = () => {
     setLoading(true);
     try {
       const response = await axios.get(
-        `https://lcaapi.acess.co.kr/LcaResults/summary?year=${year}`
+        `${getApiUrl}/LcaResults/summary?year=${year}`
       );
       setItemData(response.data.itemLcaSummaries || []);
       setCompanyData(response.data.companyLcaSummaries || []);

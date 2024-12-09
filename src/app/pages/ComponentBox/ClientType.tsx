@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { FormControl, InputLabel, MenuItem, Select, SelectChangeEvent, SelectProps, FormControlProps, Box } from '@mui/material';
 import { SxProps, Theme } from '@mui/system';
+import { getApiUrl } from '../../../main';
 
 interface ClientTypeData {
   code: string;
@@ -41,7 +42,7 @@ const ClientTypeDropdown: React.FC<ClientTypeDropdownProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get<ClientTypeData[]>('https://lcaapi.acess.co.kr/Clients/types');
+        const response = await axios.get<ClientTypeData[]>(`${getApiUrl}/Clients/types`);
         setData(response.data);
       } catch (error) {
         setError('An error occurred while fetching data.');
