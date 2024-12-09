@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://lcaapi.acess.co.kr"; 
+const API_URL = "https://lca-api.e-cycle.or.kr"; 
 
 export const LOGIN_URL = `${API_URL}/Auth/login`;
 export const REGISTER_URL = `${API_URL}/register`;
