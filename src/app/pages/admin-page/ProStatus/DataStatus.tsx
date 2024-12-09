@@ -178,7 +178,7 @@ export function DataStatus() {
   }, []);
 
   useEffect(() => {
-    axios.get('https://lcaapi.acess.co.kr/Companies')
+    axios.get(`${getApiUrl}/Companies`)
       .then(response => {
         setCompanies(response.data.list);
       })
@@ -278,10 +278,10 @@ export function DataStatus() {
     }
 
     const urlMap: Record<string, string> = {
-      EcoAS: 'https://lcaapi.acess.co.kr/EcoasData/fetch',
-      AutoMapping: 'https://lcaapi.acess.co.kr/Mapping',
-      GTG: 'https://lcaapi.acess.co.kr/Cals/gtog',
-      LCA: 'https://lcaapi.acess.co.kr/Cals/lca',
+      EcoAS: `${getApiUrl}/EcoasData/fetch`,
+      AutoMapping: `${getApiUrl}/Mapping`,
+      GTG: `${getApiUrl}/Cals/gtog`,
+      LCA: `${getApiUrl}/Cals/lca`,
     };
 
     const postData: PostData = {

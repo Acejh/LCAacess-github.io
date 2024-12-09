@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import numeral from 'numeral';
+import { getApiUrl } from '../../../../main';
 import { SelectChangeEvent, TextField } from '@mui/material';
 import {
   useReactTable,
@@ -91,7 +92,7 @@ export function RefrigerantGWP() {
 
     setLoading(true);
     try {
-      const url = `https://lcaapi.acess.co.kr/RefCoefficients?year=${year}`;
+      const url = `${getApiUrl}/RefCoefficients?year=${year}`;
       const response = await axios.get(url);
       const list: DataItem[] = response.data.list || [];
       setData(list);
@@ -104,7 +105,7 @@ export function RefrigerantGWP() {
 
   const fetchMidItems = useCallback(async () => {
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/RefCoefficients/midItems');
+      const response = await axios.get('${getApiUrl}/RefCoefficients/midItems');
       setMidItems(response.data.midItemCodes || {});
     } catch (error) {
       console.error('Error fetching mid items:', error);
@@ -150,7 +151,7 @@ export function RefrigerantGWP() {
         coefficient: Number(coefficient),
       };
 
-      await axios.post('https://lcaapi.acess.co.kr/RefCoefficients', payload);
+      await axios.post('${getApiUrl}/RefCoefficients', payload);
 
       alert('등록되었습니다.');
       handleRegisterModalClose();
@@ -181,7 +182,7 @@ export function RefrigerantGWP() {
         coefficient: Number(coefficient),
       };
 
-      await axios.put(`https://lcaapi.acess.co.kr/RefCoefficients/${selectedRow.id}`, payload);
+      await axios.put(`${getApiUrl}/RefCoefficients/${selectedRow.id}`, payload);
 
       alert('수정되었습니다.');
       handleEditModalClose();
@@ -196,7 +197,7 @@ export function RefrigerantGWP() {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
 
     try {
-      await axios.delete(`https://lcaapi.acess.co.kr/RefCoefficients/${id}`);
+      await axios.delete(`${getApiUrl}/RefCoefficients/${id}`);
       alert('삭제되었습니다.');
       fetchData(); // 데이터 갱신
     } catch (error) {

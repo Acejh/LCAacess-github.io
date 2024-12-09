@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import numeral from 'numeral';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -252,7 +253,7 @@ export function LCI_Com_Data() {
   const fetchMidItems = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await axios.get<MidItem[]>('https://lcaapi.acess.co.kr/Items/mid');
+      const response = await axios.get<MidItem[]>(`${getApiUrl}/Items/mid`);
       setMidItems(response.data);
     } catch (error) {
       console.error('Error fetching mid items:', error);
@@ -270,7 +271,7 @@ export function LCI_Com_Data() {
   
     setLoading(true);
     try {
-      const url = `https://lcaapi.acess.co.kr/LcaResults/mid-item?year=${year}&midItemCode=${selectedMidItem.midItemCode}`;
+      const url = `${getApiUrl}/LcaResults/mid-item?year=${year}&midItemCode=${selectedMidItem.midItemCode}`;
       const response = await axios.get<NewAPIResponse>(url);
   
       const { companyNames, itemLcaResults } = response.data;
@@ -318,8 +319,8 @@ export function LCI_Com_Data() {
     try {
       // `midItemCode` 파라미터를 조건에 따라 추가
       const url = selectedMidItem 
-        ? `https://lcaapi.acess.co.kr/LcaResults/mid-item/export?midItemCode=${selectedMidItem.midItemCode}&year=${year}`
-        : `https://lcaapi.acess.co.kr/LcaResults/mid-item/export?year=${year}`;
+        ? `${getApiUrl}/LcaResults/mid-item/export?midItemCode=${selectedMidItem.midItemCode}&year=${year}`
+        : `${getApiUrl}/LcaResults/mid-item/export?year=${year}`;
   
       const response = await axios.get(url, {
         responseType: 'blob',

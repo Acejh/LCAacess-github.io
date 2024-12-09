@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import '../../CSS/SCbar.css';
 import { useNavigate } from 'react-router-dom';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -192,7 +193,7 @@ export function DisMapping() {
 
   const fetchItemMappingData = async () => {
     try {
-      const response = await axios.get<Item[]>('https://lcaapi.acess.co.kr/Items');
+      const response = await axios.get<Item[]>(`${getApiUrl}/Items`);
       const mappingData = response.data.reduce((acc: Record<string, string>, item: Item) => {
         acc[item.itemCode] = item.itemName; // itemCode -> itemName 매핑
         return acc;
@@ -209,7 +210,7 @@ export function DisMapping() {
 
   const fetchCars = async (companyCode: string) => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Cars?companyCode=${companyCode}&inOutType=OUT&page=1&pageSize=1000`);
+      const response = await axios.get(`${getApiUrl}/Cars?companyCode=${companyCode}&inOutType=OUT&page=1&pageSize=1000`);
       const carsData = Array.isArray(response.data.list) ? response.data.list.map((car: Car) => ({
         id: car.id,
         carId: car.id,
@@ -231,7 +232,7 @@ export function DisMapping() {
 
   const fetchClients = async (companyCode: string) => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Clients?companyCode=${companyCode}&inOutType=OUT&type=WS&withPagination=false`);
+      const response = await axios.get(`${getApiUrl}/Clients?companyCode=${companyCode}&inOutType=OUT&type=WS&withPagination=false`);
       const fetchedClients = Array.isArray(response.data.list) ? response.data.list.map((client: Client) => ({
         id: client.id,
         clientId: client.id,
@@ -262,7 +263,7 @@ export function DisMapping() {
   const fetchWasteItems = async (year: string, companyCode: string) => {
     try {
       const response = await axios.get(
-        `https://lcaapi.acess.co.kr/WasteMaps/?year=${year}&companyCode=${companyCode}`
+        `${getApiUrl}/WasteMaps/?year=${year}&companyCode=${companyCode}`
       );
   
       // 필요한 데이터로 변환
@@ -288,7 +289,7 @@ export function DisMapping() {
   const fetchData = useCallback(async (pageIndex: number, pageSize: number, searchQuery = '') => {
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/ReccWasteMapping?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `${getApiUrl}/ReccWasteMapping?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) {
         url += `&reccNo=${searchQuery}`;
       }
@@ -373,7 +374,7 @@ export function DisMapping() {
       
   
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/ReccWasteMapping/Client', postData);
+        const response = await axios.post(`${getApiUrl}/ReccWasteMapping/Client`, postData);
 
         if (response.status === 204) {
           setData((prevData) =>
@@ -402,7 +403,7 @@ export function DisMapping() {
       
   
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/ReccWasteMapping/Car', postData);
+        const response = await axios.post(`${getApiUrl}/ReccWasteMapping/Car`, postData);
   
         if (response.status === 204) {
           setData((prevData) =>
@@ -432,7 +433,7 @@ export function DisMapping() {
       };
   
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/ReccWasteMapping/Item', postData);
+        const response = await axios.post(`${getApiUrl}/ReccWasteMapping/Item`, postData);
   
         if (response.status === 204 && selectedWasteItem) {
           setData((prevData) =>

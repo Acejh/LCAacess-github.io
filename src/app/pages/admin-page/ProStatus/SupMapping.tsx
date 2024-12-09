@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
+import { getApiUrl } from '../../../../main';
 import '../../CSS/SCbar.css';
 import {
   useReactTable,
@@ -150,7 +151,7 @@ export function SupMapping() {
 
   const fetchLciItems = async (year: string) => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/ValuableMaps/LciItems?Year=${year}`);
+      const response = await axios.get(`${getApiUrl}/ValuableMaps/LciItems?Year=${year}`);
       setLciItems(response.data.lciItems || []);
     } catch (error) {
       console.error('LCI 항목 데이터를 가져오는 중 에러 발생:', error);
@@ -173,7 +174,7 @@ export function SupMapping() {
 
   const fetchCars = async (companyCode: string) => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Cars?companyCode=${companyCode}&inOutType=OUT&page=1&pageSize=1000`);
+      const response = await axios.get(`${getApiUrl}/Cars?companyCode=${companyCode}&inOutType=OUT&page=1&pageSize=1000`);
       const carsData = Array.isArray(response.data.list) ? response.data.list.map((car: Car) => ({
         id: car.id,
         carId: car.id,
@@ -195,7 +196,7 @@ export function SupMapping() {
 
   const fetchClients = async (companyCode: string) => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Clients?companyCode=${companyCode}&inOutType=OUT&type=VP&withPagination=false`);
+      const response = await axios.get(`${getApiUrl}/Clients?companyCode=${companyCode}&inOutType=OUT&type=VP&withPagination=false`);
       const clientsData = Array.isArray(response.data.list) ? response.data.list.map((client: Client) => ({
         id: client.id,
         clientId: client.id,
@@ -218,7 +219,7 @@ export function SupMapping() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const fetchClients2nd = async (companyCode: string) => {
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/ExtraClientMaps/clients');
+      const response = await axios.get(`${getApiUrl}/ExtraClientMaps/clients`);
   
       // 응답 데이터에서 리스트 추출
       const clients = Array.isArray(response.data.list)
@@ -252,7 +253,7 @@ export function SupMapping() {
   const fetchData = useCallback(async (pageIndex: number, pageSize: number, searchQuery = '') => {
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/ReccValuableMapping?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `${getApiUrl}/ReccValuableMapping?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) {
         url += `&reccNo=${searchQuery}`;
       }
@@ -345,7 +346,7 @@ export function SupMapping() {
   
       try {
         const response = await axios.post(
-          'https://lcaapi.acess.co.kr/ReccValuableMapping/Client',
+          `${getApiUrl}/ReccValuableMapping/Client`,
           postData
         );
   
@@ -371,7 +372,7 @@ export function SupMapping() {
   
       try {
         const response = await axios.post(
-          'https://lcaapi.acess.co.kr/ReccValuableMapping/Car',
+          `${getApiUrl}/ReccValuableMapping/Car`,
           postData
         );
   
@@ -398,7 +399,7 @@ export function SupMapping() {
   
       try {
         const response = await axios.post(
-          'https://lcaapi.acess.co.kr/ReccValuableMapping/Item',
+          `${getApiUrl}/ReccValuableMapping/Item`,
           postData
         );
   
@@ -439,7 +440,7 @@ export function SupMapping() {
   
       try {
         const response = await axios.post(
-          'https://lcaapi.acess.co.kr/ReccValuableMapping/Client2nd',
+          `${getApiUrl}/ReccValuableMapping/Client2nd`,
           postData
         );
   

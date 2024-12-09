@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import numeral from 'numeral';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -98,7 +99,7 @@ export function ValuableDeduction() {
   // 회사 데이터 가져오기
   const fetchCompanyData = useCallback(async () => {
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/Companies');
+      const response = await axios.get(`${getApiUrl}/Companies`);
       const companies = response.data.list;
       const map: Record<string, string> = {};
       companies.forEach((company: { code: string; name: string }) => {
@@ -113,7 +114,7 @@ export function ValuableDeduction() {
   // 컴포넌트 데이터 가져오기
   const fetchComponentData = useCallback(async () => {
     try {
-      const response = await axios.get<{ components: ComponentData[] }>('https://lcaapi.acess.co.kr/Components');
+      const response = await axios.get<{ components: ComponentData[] }>(`${getApiUrl}/Components`);
       setComponents(response.data.components);
     } catch (error) {
       console.error('컴포넌트 데이터를 가져오는 중 오류 발생:', error);
@@ -183,7 +184,7 @@ export function ValuableDeduction() {
 
     setLoading(true);
     try {
-      const url = `https://lcaapi.acess.co.kr/ValuableDeductions?companyCode=${selectedCompany.code}&year=${year}`;
+      const url = `${getApiUrl}/ValuableDeductions?companyCode=${selectedCompany.code}&year=${year}`;
       const response = await axios.get<ValuableDeductionData[]>(url);
       
       setData(response.data);
@@ -200,7 +201,7 @@ export function ValuableDeduction() {
       // 차감량 포맷 적용: 콤마 제거 후 소수점 다섯 자리까지 맞춤
       const formattedAmount = parseFloat(deductionAmount.replace(/,/g, '')).toFixed(5);
 
-      await axios.post('https://lcaapi.acess.co.kr/ValuableDeductions', {
+      await axios.post(`${getApiUrl}/ValuableDeductions`, {
         companyCode: selectedCompany?.code,
         year: parseInt(year),
         lciItemId: parseInt(selectedComponent),
@@ -221,7 +222,7 @@ export function ValuableDeduction() {
     try {
       const formattedAmount = parseFloat(deductionAmount.replace(/,/g, '')).toFixed(5);
 
-      await axios.put(`https://lcaapi.acess.co.kr/ValuableDeductions/${currentRow.id}`, {
+      await axios.put(`${getApiUrl}/ValuableDeductions/${currentRow.id}`, {
         amount: formattedAmount,
       });
 
@@ -237,7 +238,7 @@ export function ValuableDeduction() {
     if (!currentRow) return;
 
     try {
-      await axios.delete(`https://lcaapi.acess.co.kr/ValuableDeductions/${currentRow.id}`);
+      await axios.delete(`${getApiUrl}/ValuableDeductions/${currentRow.id}`);
 
       handleDeleteClose();
       fetchData(); // 데이터 새로고침

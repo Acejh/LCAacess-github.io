@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import numeral from 'numeral';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -220,7 +221,7 @@ export function LCI_Data() {
 
     setLoading(true);
     try {
-      const url = `https://lcaapi.acess.co.kr/LcaResults?companyCode=${selectedCompany.code}&year=${year}`;
+      const url = `${getApiUrl}/LcaResults?companyCode=${selectedCompany.code}&year=${year}`;
       const response = await axios.get<APIResponse>(url);  
       
       const { midItems, lcaResults } = response.data;
@@ -268,7 +269,7 @@ export function LCI_Data() {
     setDownloading(true); // 다운로드 시작
   
     try {
-      const url = `https://lcaapi.acess.co.kr/LcaResults/export?companyCode=${selectedCompany.code}&year=${year}`;
+      const url = `${getApiUrl}/LcaResults/export?companyCode=${selectedCompany.code}&year=${year}`;
   
       const response = await axios.get(url, {
         responseType: 'blob',

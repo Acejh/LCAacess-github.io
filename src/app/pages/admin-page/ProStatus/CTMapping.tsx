@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import { useNavigate } from 'react-router-dom'; 
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -98,7 +99,7 @@ export function CTMapping() {
 
   const fetchClientTypes = async () => {
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/Clients/types');
+      const response = await axios.get(`${getApiUrl}/Clients/types`);
       setClientTypes(response.data);
     } catch (error) {
       console.error('Error fetching client types:', error);
@@ -112,7 +113,7 @@ export function CTMapping() {
   const fetchData = useCallback(async (pageIndex: number, pageSize: number, searchQuery = '') => {
     setLoading(true);
     try {
-      let url = `https://lcaapi.acess.co.kr/TransMapping?page=${pageIndex + 1}&pageSize=${pageSize}`;
+      let url = `${getApiUrl}/TransMapping?page=${pageIndex + 1}&pageSize=${pageSize}`;
       if (searchQuery) {
         url += `&transNo=${searchQuery}`;
       }
@@ -193,7 +194,7 @@ export function CTMapping() {
   const handleConfirmClientMapping = async () => {
     if (selectedClient && selectedRowId !== null) {
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/TransMapping/client', {
+        const response = await axios.post(`${getApiUrl}/TransMapping/client`, {
           transOriginId: selectedRowId,
           clientId: selectedClient.clientId,
         });
@@ -216,7 +217,7 @@ export function CTMapping() {
   const handleConfirmCarMapping = async () => {
     if (selectedCar && selectedRowId !== null) {
       try {
-        const response = await axios.post('https://lcaapi.acess.co.kr/TransMapping/car', {
+        const response = await axios.post(`${getApiUrl}/TransMapping/car`, {
           transOriginId: selectedRowId,
           carId: selectedCar.carId,
         });

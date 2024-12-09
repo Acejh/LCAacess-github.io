@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import {
   useReactTable,
   getCoreRowModel,
@@ -77,7 +78,7 @@ export function ClientMap() {
   // 업체 데이터를 가져와 매핑 생성
   const fetchCompanies = useCallback(async () => {
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/Companies');
+      const response = await axios.get(`${getApiUrl}/Companies`);
       const { list } = response.data;
 
       // 업체 코드 -> 이름 매핑 생성
@@ -107,7 +108,7 @@ export function ClientMap() {
     setLoading(true);
 
     try {
-      const url = `https://lcaapi.acess.co.kr/ExtraClientMaps?companyCode=${selectedCompany.code}`;
+      const url = `${getApiUrl}/ExtraClientMaps?companyCode=${selectedCompany.code}`;
       const response = await axios.get(url);
       const { list } = response.data;
 
@@ -129,7 +130,7 @@ export function ClientMap() {
 
   const fetchClients = useCallback(async () => {
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/ExtraClientMaps/clients');
+      const response = await axios.get(`${getApiUrl}/ExtraClientMaps/clients`);
       setClientList(response.data.list);
     } catch (error) {
       console.error('Error fetching clients:', error);
@@ -138,7 +139,7 @@ export function ClientMap() {
 
   const fetchLciItems = useCallback(async () => {
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/ExtraClientMaps/lci-items');
+      const response = await axios.get(`${getApiUrl}/ExtraClientMaps/lci-items`);
       setLciItems(response.data.list);
     } catch (error) {
       console.error('Error fetching LCI items:', error);
@@ -173,7 +174,7 @@ export function ClientMap() {
         clientId: selectedClientId,
       };
 
-      await axios.post('https://lcaapi.acess.co.kr/ExtraClientMaps', payload);
+      await axios.post(`${getApiUrl}/ExtraClientMaps`, payload);
       alert('매핑이 성공적으로 등록되었습니다.');
       handleCloseMappingModal();
       fetchData(); // 데이터 갱신
@@ -205,7 +206,7 @@ export function ClientMap() {
         clientId: editData.clientId,
       };
   
-      await axios.put(`https://lcaapi.acess.co.kr/ExtraClientMaps/${editData.id}`, payload);
+      await axios.put(`${getApiUrl}/ExtraClientMaps/${editData.id}`, payload);
       alert('수정이 완료되었습니다.');
       handleCloseEditModal();
       fetchData(); // 데이터 갱신
@@ -229,7 +230,7 @@ export function ClientMap() {
     if (!deleteTargetId) return;
   
     try {
-      await axios.delete(`https://lcaapi.acess.co.kr/ExtraClientMaps/${deleteTargetId}`);
+      await axios.delete(`${getApiUrl}/ExtraClientMaps/${deleteTargetId}`);
       alert('삭제가 완료되었습니다.');
       handleCloseDeleteModal();
       fetchData(); // 데이터 갱신

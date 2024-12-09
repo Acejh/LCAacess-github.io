@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -105,7 +106,7 @@ export function ValuableMapping() {
     setLoading(true);
   
     try {
-      const url = `https://lcaapi.acess.co.kr/ValuableMaps?CompanyCode=${searchParams.company?.code}&Year=${searchParams.year}`;
+      const url = `${getApiUrl}/ValuableMaps?CompanyCode=${searchParams.company?.code}&Year=${searchParams.year}`;
       const response = await axios.get(url);
       const { valuableMaps } = response.data;
   
@@ -133,7 +134,7 @@ export function ValuableMapping() {
   const fetchMappings = useCallback(async () => {
     try {
       // 유형 매핑 데이터 가져오기
-      const typeResponse = await axios.get('https://lcaapi.acess.co.kr/LciItems/LciTypes');
+      const typeResponse = await axios.get(`${getApiUrl}/LciItems/LciTypes`);
       const typeMap: Record<string, string> = {};
       typeResponse.data.forEach((item: { key: string; value: string }) => {
         typeMap[item.key] = item.value;
@@ -141,7 +142,7 @@ export function ValuableMapping() {
       setTypeMapping(typeMap);
   
       // 카테고리 매핑 데이터 가져오기
-      const categoryResponse = await axios.get('https://lcaapi.acess.co.kr/LciItems/LciCategories');
+      const categoryResponse = await axios.get(`${getApiUrl}/LciItems/LciCategories`);
       const categoryMap: Record<string, Record<string, string>> = {};
   
       // lciCategories가 있는지 확인
@@ -170,7 +171,7 @@ export function ValuableMapping() {
   // LCI 품목 데이터 가져오기
   const fetchLCIItems = async (year: string) => {
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/ValuableMaps/LciItems?Year=${year}`);
+      const response = await axios.get(`${getApiUrl}/ValuableMaps/LciItems?Year=${year}`);
       setMappingItems(response.data.lciItems); // Autocomplete 데이터 설정
     } catch (error) {
       console.error('Error fetching LCI items:', error);
@@ -259,7 +260,7 @@ export function ValuableMapping() {
     if (currentRowId && selectedMappingItem) {
       try {
         const payload = { id: currentRowId, lciItemId: selectedMappingItem };
-        await axios.post('https://lcaapi.acess.co.kr/ValuableMaps', payload);
+        await axios.post(`${getApiUrl}/ValuableMaps`, payload);
         setMappingModalOpen(false);
         alert('매핑이 완료되었습니다.');
         fetchData();  

@@ -3,6 +3,7 @@ import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import numeral from 'numeral';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
 import {
@@ -109,7 +110,7 @@ export function GTG_Data() {
 
   const fetchLciTypes = async () => {
     try {
-      const response = await axios.get('https://lcaapi.acess.co.kr/LciItems/LciTypes');
+      const response = await axios.get(`${getApiUrl}/LciItems/LciTypes`);
       const lciTypes = response.data.reduce((acc: { [key: string]: string }, item: { key: string; value: string }) => {
         acc[item.key] = item.value;
         return acc;
@@ -135,7 +136,7 @@ export function GTG_Data() {
     setLoading(true); 
   
     try {
-      const url = `https://lcaapi.acess.co.kr/GToGResults?CompanyCode=${searchParams.company?.code}&Year=${searchParams.year}`;
+      const url = `${getApiUrl}/GToGResults?CompanyCode=${searchParams.company?.code}&Year=${searchParams.year}`;
       const response = await axios.get(url);
       console.log(response.data);  
   
@@ -199,7 +200,7 @@ export function GTG_Data() {
     setDownloading(true); // 다운로드 시작
   
     try {
-      const url = `https://lcaapi.acess.co.kr/GtoGResults/Export?CompanyCode=${selectedCompany.code}&Year=${year}`;
+      const url = `${getApiUrl}/GtoGResults/Export?CompanyCode=${selectedCompany.code}&Year=${year}`;
       
       const response = await axios.get(url, {
         responseType: 'blob',

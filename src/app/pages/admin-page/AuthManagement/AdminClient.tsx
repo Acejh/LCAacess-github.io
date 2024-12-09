@@ -385,19 +385,19 @@ export function AdminClient() {
   const handleSubmit = () => {
     const newMemberData = {
       ...newMember,
-      bizNo: newMember.bizNo.replace(/\D/g, ''), 
+      bizNo: newMember.bizNo.replace(/\D/g, ''), // 사업자번호 포맷 정리
     };
   
     axios
-      .post(`${getApiUrl}/Clients`, newMemberData)
+      .post(`${getApiUrl}/Clients`, newMemberData) // 여기에서 API로 데이터 전송
       .then(() => {
-        fetchData(pageIndex, pageSize);
+        fetchData(pageIndex, pageSize); // 데이터를 새로고침
       })
       .catch((error) => {
         console.error('Error posting data:', error.response ? error.response.data : error.message);
       });
   
-    handleClose();
+    handleClose(); // 모달 닫기
   };
 
   useEffect(() => {

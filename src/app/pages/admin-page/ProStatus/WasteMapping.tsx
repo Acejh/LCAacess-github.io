@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../ComponentBox/UseCompany';
 import '../../CSS/SCbar.css';
+import { getApiUrl } from '../../../../main';
 import UseProduct from '../../ComponentBox/ProductMap';
 import { CellContext } from '@tanstack/react-table';
 import { SelectChangeEvent } from '@mui/material';
@@ -156,7 +157,7 @@ export function WasteMapping() {
     setLoading(true);
   
     try {
-      const url = `https://lcaapi.acess.co.kr/WasteMaps?CompanyCode=${searchParams.company?.code}&Year=${searchParams.year}`;
+      const url = `${getApiUrl}/WasteMaps?CompanyCode=${searchParams.company?.code}&Year=${searchParams.year}`;
       const response = await axios.get(url);
       const { wasteMaps } = response.data;
 
@@ -186,14 +187,14 @@ export function WasteMapping() {
   // 유형 및 카테고리 매핑 데이터 가져오기
   const fetchMappings = useCallback(async () => {
     try {
-      const typeResponse = await axios.get('https://lcaapi.acess.co.kr/LciItems/LciTypes');
+      const typeResponse = await axios.get(`${getApiUrl}/LciItems/LciTypes`);
       const typeMap: Record<string, string> = {};
       typeResponse.data.forEach((item: { key: string; value: string }) => {
         typeMap[item.key] = item.value;
       });
       setTypeMapping(typeMap);
 
-      const categoryResponse = await axios.get('https://lcaapi.acess.co.kr/LciItems/LciCategories');
+      const categoryResponse = await axios.get(`${getApiUrl}/LciItems/LciCategories`);
       const categoryMap: Record<string, Record<string, string>> = {};
 
       if (categoryResponse.data && categoryResponse.data.lciCategories) {
@@ -237,7 +238,7 @@ export function WasteMapping() {
   const handleWasteMethodClick = async (row: WasteMappingData) => {
     setCurrentRowId(row.id);
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/WasteMaps/Methods`);
+      const response = await axios.get(`${getApiUrl}/WasteMaps/Methods`);
       setWasteMethods(response.data.wasteMethods);
       setWasteMethodModalOpen(true);
     } catch (error) {
@@ -256,7 +257,7 @@ export function WasteMapping() {
     setCurrentRowId(row.id);
     
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/WasteMaps/LciItems?year=${searchParams.year}`);
+      const response = await axios.get(`${getApiUrl}/WasteMaps/LciItems?year=${searchParams.year}`);
       setMappingItems(response.data.lciItems);
       setMappingModalOpen(true);  // 모달 열기
     } catch (error) {
@@ -299,7 +300,7 @@ export function WasteMapping() {
     setLciModalOpen(true);
   
     try {
-      const response = await axios.get(`https://lcaapi.acess.co.kr/WasteMaps/LciItems?year=${lciItem.year}`);
+      const response = await axios.get(`${getApiUrl}/WasteMaps/LciItems?year=${lciItem.year}`);
       setMappingItems(response.data.lciItems);
     } catch (error) {
       console.error('Error fetching LCI items:', error);
@@ -313,7 +314,7 @@ export function WasteMapping() {
 
     setTimeout(async () => {
       try {
-        const response = await axios.get(`https://lcaapi.acess.co.kr/WasteMaps/LciItems?year=${searchParams.year}`);
+        const response = await axios.get(`${getApiUrl}/WasteMaps/LciItems?year=${searchParams.year}`);
         setMappingItems(response.data.lciItems);
 
       
@@ -347,7 +348,7 @@ export function WasteMapping() {
     if (currentRowId && selectedWasteMethod) {
       try {
         const payload = { id: currentRowId, wasteMethod: selectedWasteMethod };
-        await axios.post('https://lcaapi.acess.co.kr/WasteMaps/Method', payload);
+        await axios.post(`${getApiUrl}/WasteMaps/Method`, payload);
         setWasteMethodModalOpen(false);
         fetchData();
       } catch (error) {
@@ -361,7 +362,7 @@ export function WasteMapping() {
     if (currentRowId && selectedMappingItem) {
       try {
         const payload = { id: currentRowId, lciItemId: selectedMappingItem.id };
-        await axios.post('https://lcaapi.acess.co.kr/WasteMaps', payload);
+        await axios.post(`${getApiUrl}/WasteMaps`, payload);
         setMappingModalOpen(false);
         fetchData();
       } catch (error) {
@@ -378,7 +379,7 @@ export function WasteMapping() {
           id: currentRowId,
           itemCodes: selectedItemCodes, 
         };
-        await axios.post('https://lcaapi.acess.co.kr/WasteMaps/ItemCodes', payload); 
+        await axios.post(`${getApiUrl}/WasteMaps/ItemCodes`, payload); 
         setProductModalOpen(false);
         fetchData();  
       } catch (error) {
