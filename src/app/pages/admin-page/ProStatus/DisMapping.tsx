@@ -925,7 +925,7 @@ export function DisMapping() {
               color="primary"
               variant="contained"
             >
-              수정
+              매핑
             </Button>
             <Button onClick={handleCloseClientModal} color="secondary" variant="outlined">
               닫기
@@ -987,7 +987,7 @@ export function DisMapping() {
               color="primary"
               variant="contained"
             >
-              수정
+              매핑
             </Button>
             <Button onClick={closeCarModals} color="secondary" variant="outlined">
               닫기
@@ -1083,7 +1083,7 @@ export function DisMapping() {
             color="primary"
             variant="contained"
           >
-            수정
+            매핑
           </Button>
           <Button onClick={handleCloseItemModal} color="secondary" variant="outlined">닫기</Button>
         </DialogActions>

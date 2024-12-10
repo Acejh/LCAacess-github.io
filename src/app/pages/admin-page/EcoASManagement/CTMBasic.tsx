@@ -319,7 +319,7 @@ export function CTMBasic() {
           <Button
             variant="contained"
             color="primary"
-            style={{ height: '35px', marginTop:'5px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
+            style={{ height: '35px', marginLeft: '10px', marginRight:'10px', marginTop:'5px',padding: '0 10px', fontSize: '14px' }}
             onClick={handleSearch}
           >
             조회

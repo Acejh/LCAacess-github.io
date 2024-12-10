@@ -263,7 +263,7 @@ export function ValuableMapping() {
         await axios.post(`${getApiUrl}/ValuableMaps`, payload);
         setMappingModalOpen(false);
         alert('매핑이 완료되었습니다.');
-        fetchData();  
+        fetchData();
       } catch (error) {
         console.error('Error saving mapping:', error);
         alert('매핑 저장에 실패했습니다.');
@@ -407,7 +407,7 @@ export function ValuableMapping() {
                 {table.getHeaderGroups().map(headerGroup => (
                   <TableRow key={headerGroup.id}>
                     {headerGroup.headers.map(header => (
-                      <TableCell 
+                      <TableCell
                         key={header.id} 
                         style={{ 
                           whiteSpace: 'nowrap', 

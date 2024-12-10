@@ -1006,7 +1006,7 @@ export function SupMapping() {
               color="primary"
               variant="contained"
             >
-              수정
+              매핑
             </Button>
             <Button onClick={handleCloseClientModal} color="secondary" variant="outlined">
               닫기
@@ -1073,7 +1073,7 @@ export function SupMapping() {
               color="primary"
               variant="contained"
             >
-              수정
+              매핑
             </Button>
             <Button onClick={handleCloseCarModal} color="secondary" variant="outlined">
               닫기
@@ -1148,7 +1148,7 @@ export function SupMapping() {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleEditMapping} color="primary" variant="contained">
-            수정
+            매핑
           </Button>
           <Button onClick={handleCloseItemModal} color="secondary" variant="outlined">
             닫기
@@ -1250,7 +1250,7 @@ export function SupMapping() {
               color="primary"
               variant="contained"
             >
-              수정
+              매핑
             </Button>
             <Button onClick={handleCloseClient2ndModal} color="secondary" variant="outlined">
               닫기

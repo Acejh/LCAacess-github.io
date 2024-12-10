@@ -105,7 +105,7 @@ export function RefrigerantGWP() {
 
   const fetchMidItems = useCallback(async () => {
     try {
-      const response = await axios.get('${getApiUrl}/RefCoefficients/midItems');
+      const response = await axios.get(`${getApiUrl}/RefCoefficients/midItems`);
       setMidItems(response.data.midItemCodes || {});
     } catch (error) {
       console.error('Error fetching mid items:', error);

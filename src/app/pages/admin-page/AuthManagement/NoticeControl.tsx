@@ -291,7 +291,7 @@ export function NoticeControl() {
     {
       accessorKey: 'id',
       header: '번호',
-      cell: (info) => info.getValue<number>(),  
+      cell: (info) => info.getValue<number>(),
     },
     {
       accessorKey: 'title',
@@ -314,14 +314,14 @@ export function NoticeControl() {
     },
     { accessorKey: 'readCount', header: '조회수' },
     {
-      accessorKey: 'id',
+      accessorKey: 'actions',
       header: '수정/삭제',
       cell: (info) => (
         <>
           <Button
             variant="outlined"
             color="primary"
-            onClick={() => handleEditNotice(info.getValue<number>())}
+            onClick={() => handleEditNotice(info.row.original.id)}
             style={{ marginRight: '10px' }}
           >
             수정
@@ -329,7 +329,7 @@ export function NoticeControl() {
           <Button
             variant="outlined"
             color="secondary"
-            onClick={() => handleDeleteNotice(info.getValue<number>())}
+            onClick={() => handleDeleteNotice(info.row.original.id)}
           >
             삭제
           </Button>
@@ -452,11 +452,11 @@ export function NoticeControl() {
                     </TableCell>
                   </TableRow>
                 ) : table.getRowModel().rows.length > 0 ? (
-                  table.getRowModel().rows.map((row) => (
-                    <TableRow key={row.id}>
+                  table.getRowModel().rows.map((row, index) => (
+                    <TableRow key={`${row.id}-${index}`}>
                       {row.getVisibleCells().map((cell) => (
                         <TableCell
-                          key={cell.id}
+                          key={`${cell.id}-${index}`}
                           style={{
                             whiteSpace: 'nowrap',
                             overflow: 'hidden',
