@@ -276,33 +276,37 @@ export function DataStatus() {
       alert('모든 필드를 선택해주세요.');
       return;
     }
-
+  
     const urlMap: Record<string, string> = {
       EcoAS: `${getApiUrl}/EcoasData/fetch`,
       AutoMapping: `${getApiUrl}/Mapping`,
       GTG: `${getApiUrl}/Cals/gtog`,
       LCA: `${getApiUrl}/Cals/lca`,
     };
-
+  
     const postData: PostData = {
       companyCode: selectedCompany?.code as string,
       year: year,
-      ...(openModal !== 'LCA' && { month: month }), // LCA가 아닌 경우에만 month 추가
+      ...(openModal !== 'LCA' && { month: month }),
     };
-
-    if (openModal !== 'LCA') {
-      postData.month = month;
-    }
-
+  
     setLoading(true);
-
+  
     try {
       const response = await axios.post(urlMap[openModal!], postData);
-      console.log(`${openModal} 결과:`, response.data);
-      alert('작업이 성공적으로 완료되었습니다.');
-    } catch (error) {
+      const message = response.data?.message || '작업은 완료되었으나 표시오류가 있습니다.';
+      alert(message); 
+    } catch (error: unknown) {
       console.error(`${openModal} 오류:`, error);
-      alert('작업 중 오류가 발생했습니다.');
+    
+      const errorMessage =
+        axios.isAxiosError(error) && error.response?.data?.message 
+          ? error.response.data.message
+          : error instanceof Error 
+          ? error.message
+          : '작업 중 오류가 발생했습니다.'; 
+    
+      alert(errorMessage); 
     } finally {
       setLoading(false);
       handleCloseModal();
@@ -457,38 +461,42 @@ export function DataStatus() {
         >
           조회
         </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
-          onClick={() => handleOpenModal('EcoAS')}
-        >
-          EcoAS관리표 가져오기
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
-          onClick={() => handleOpenModal('AutoMapping')}
-        >
-          자동 매핑
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
-          onClick={() => handleOpenModal('GTG')}
-        >
-          GTG결과 가져오기
-        </Button>
-        <Button
-          variant="contained"
-          color="primary"
-          style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
-          onClick={() => handleOpenModal('LCA')}
-        >
-          LCA결과 가져오기
-        </Button>
+        {role === 'Admin' && (
+          <>
+            <Button
+              variant="contained"
+              color="primary"
+              style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
+              onClick={() => handleOpenModal('EcoAS')}
+            >
+              EcoAS관리표 가져오기
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
+              onClick={() => handleOpenModal('AutoMapping')}
+            >
+              자동 매핑
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
+              onClick={() => handleOpenModal('GTG')}
+            >
+              GTG결과 산출하기
+            </Button>
+            <Button
+              variant="contained"
+              color="primary"
+              style={{ height: '35px', margin: '0 10px', padding: '0 10px', fontSize: '14px' }}
+              onClick={() => handleOpenModal('LCA')}
+            >
+              LCA결과 산출하기
+            </Button>
+          </>
+        )}
       </div>
       <TableContainer
         component={Paper}
@@ -560,19 +568,6 @@ export function DataStatus() {
                   >
                     폐기물 관리표
                   </TableCell>
-                  {role !== 'User' && (
-                    <TableCell
-                      colSpan={1}
-                      style={{
-                        textAlign: 'center',
-                        fontWeight: 'bold',
-                        borderRight: '1px solid #e0e0e0',
-                        backgroundColor: '#d8d8d8',
-                      }}
-                    >
-                      결과
-                    </TableCell>
-                  )}
                 </TableRow>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <TableRow key={headerGroup.id}>
@@ -592,20 +587,6 @@ export function DataStatus() {
                         {flexRender(header.column.columnDef.header, header.getContext())}
                       </TableCell>
                     ))}
-                    {role !== 'User' && (
-                      <TableCell style={{ 
-                        textAlign: 'center', 
-                        backgroundColor: '#cfcfcf',
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        position: 'sticky',
-                        top: 0,
-                        zIndex: 1,
-                      }}>
-                        산출
-                      </TableCell>
-                    )}
                   </TableRow>
                 ))}
               </TableHead>
@@ -639,18 +620,6 @@ export function DataStatus() {
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </TableCell>
                       ))}
-                      {role === 'Admin' && (
-                        <TableCell style={{ textAlign: 'center' }}>
-                          {/* row.original 접근이 제대로 이루어지는지 확인 */}
-                          <Button
-                            variant="contained"
-                            disabled={row.original?.state !== 'Done'} // "Done"인 경우에만 버튼 활성화
-                            onClick={() => console.log(`산출: ${row.original?.companyName}`)}
-                          >
-                            산출
-                          </Button>
-                        </TableCell>
-                      )}
                     </TableRow>
                   ))
                 ) : (
