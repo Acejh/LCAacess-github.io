@@ -135,6 +135,15 @@ const columns: ColumnDef<Status>[] = [
     header: () => <div style={{ textAlign: 'center' }}>폐기물 품목</div>, 
     cell: ({ row }) => `${row.original.wasteItemMappingCount}/${row.original.wasteCount}` 
   },
+  {
+    accessorKey: 'state',
+    header: () => <div style={{ textAlign: 'center' }}>매핑 상태</div>,
+    cell: ({ row }) => (
+      <div style={{ textAlign: 'center' }}>
+        {row.original.state}
+      </div>
+    ),
+  },
 ];
 
 
@@ -209,7 +218,7 @@ export function DataStatus() {
           wasteClientMappingCount: item.wasteClientMappingCount,
           wasteCarMappingCount: item.wasteCarMappingCount,
           wasteItemMappingCount: item.wasteItemMappingCount,
-          state: item.state, // 상태 값 포함
+          state: item.state, 
         };
       });
     },
@@ -567,6 +576,17 @@ export function DataStatus() {
                     }}
                   >
                     폐기물 관리표
+                  </TableCell>
+                  <TableCell
+                    colSpan={1}
+                    style={{
+                      textAlign: 'center',
+                      fontWeight: 'bold',
+                      borderRight: '1px solid #e0e0e0',
+                      backgroundColor: '#d8d8d8',
+                    }}
+                  >
+                    매핑
                   </TableCell>
                 </TableRow>
                 {table.getHeaderGroups().map((headerGroup) => (
