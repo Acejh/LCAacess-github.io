@@ -71,11 +71,11 @@ const SidebarMenuMain = () => {
 
           <SidebarMenuItemWithSub
             to='/admin-page/ProStatus'
-            title='데이터 매핑핑 현황'
+            title='데이터 매핑 현황'
             fontIcon='bi-chat-left'
             icon='technology-4'
           >
-            <SidebarMenuItem to='/DataStatus' title='데이터 매핑핑 현황' hasBullet={true} />
+            <SidebarMenuItem to='/DataStatus' title='데이터 매핑 현황' hasBullet={true} />
             {/* <SidebarMenuItem to='/CTMapping' title='수집운반 매핑' hasBullet={true} /> */}
             {/* <SidebarMenuItem to='/SupMapping' title='공급(유가물) 매핑' hasBullet={true} />
             <SidebarMenuItem to='/DisMapping' title='폐기 매핑' hasBullet={true} /> */}
