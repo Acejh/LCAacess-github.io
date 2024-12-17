@@ -662,14 +662,16 @@ export function CarsControl() {
             차량 등록
           </Typography>
           <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <UseCompany
-                onCompanyChange={(company) => setNewCar(prev => ({ ...prev, companyCode: company ? company.code : '' }))}
-                sx={{ width: '260px', marginRight: '10px' }}
-                selectSx={{ height: '51px', }}
-              />
-            </Grid>
-            <Grid item xs={6}>
+            {userRole === 'Admin' && (
+              <Grid item xs={6}>
+                <UseCompany
+                  onCompanyChange={(company) => setNewCar(prev => ({ ...prev, companyCode: company ? company.code : '' }))}
+                  sx={{ width: '260px', marginRight: '10px' }}
+                  selectSx={{ height: '51px' }}
+                />
+              </Grid>
+            )}
+            <Grid item xs={userRole === 'Admin' ? 6 : 12}>
               <FormControl fullWidth>
                 <InputLabel id="new-inout-type-label">입출고 구분</InputLabel>
                 <Select
