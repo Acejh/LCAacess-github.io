@@ -3,6 +3,7 @@ import * as Yup from 'yup'
 import { useFormik } from 'formik'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { getApiUrl } from '../../../../../../main'
 
 interface IProfileDetails {
   name: string;
@@ -46,7 +47,7 @@ const ProfileDetails: FC = () => {
       }
   
       // 수정된 GET API 엔드포인트
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Users/username/${userName}`)
+      const response = await axios.get(`${getApiUrl}/Users/username/${userName}`)
       const userData = response.data
   
       setUserId(userData.id) // 사용자 ID 설정
@@ -75,7 +76,7 @@ const ProfileDetails: FC = () => {
       setLoading(true)
       try {
         // 수정된 PUT API 엔드포인트
-        await axios.put(`https://lcaapi.acess.co.kr/Users/${userId}`, {
+        await axios.put(`${getApiUrl}/Users/${userId}`, {
           name: values.name,
           phoneNumber: values.contactPhone,
           email: values.communications.email,

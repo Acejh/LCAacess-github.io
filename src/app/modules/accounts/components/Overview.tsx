@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Content } from '../../../../_metronic/layout/components/content'
 import axios from 'axios'
+import { getApiUrl } from '../../../../main'
 
 interface UserProfile {
   name: string;
@@ -28,7 +29,7 @@ export function Overview() {
       }
   
       // 수정된 GET API 호출
-      const response = await axios.get(`https://lcaapi.acess.co.kr/Users/username/${userName}`)
+      const response = await axios.get(`${getApiUrl}/Users/username/${userName}`)
       const userData = response.data
   
       setUserProfile({

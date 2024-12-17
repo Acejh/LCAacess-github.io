@@ -3,6 +3,7 @@ import * as Yup from 'yup'
 import { useFormik } from 'formik'
 import axios from 'axios'
 import { Snackbar, Alert } from '@mui/material'
+import { getApiUrl } from '../../../../../../main'
 
 interface IUpdatePassword {
   currentPassword: string;
@@ -45,7 +46,7 @@ const SignInMethod: FC = () => {
 
         setUserName(userName)
 
-        const response = await axios.get(`https://lcaapi.acess.co.kr/Users/username/${userName}`)
+        const response = await axios.get(`${getApiUrl}/Users/username/${userName}`)
 
         if (response.data && response.data.id) {
           setUserId(response.data.id)
@@ -76,7 +77,7 @@ const SignInMethod: FC = () => {
       setLoading(true)
       setApiError(null)
       try {
-        const response = await axios.put(`https://lcaapi.acess.co.kr/Users/password/${userId}`, {
+        const response = await axios.put(`${getApiUrl}/Users/password/${userId}`, {
           userName: userName,
           password: values.currentPassword,
           newPassword: values.newPassword
