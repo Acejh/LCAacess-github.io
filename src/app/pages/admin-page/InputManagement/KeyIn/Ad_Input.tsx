@@ -105,7 +105,7 @@ export function Ad_Input() {
   const [newInput, setNewInput] = useState({
     companyCode: '',
     lciItemId: '',
-    year: '2023',
+    year: '',
     month: 1,
     amount: '',
   });
@@ -550,7 +550,6 @@ export function Ad_Input() {
               },
             }}
           >
-            <MenuItem value="전체">전체</MenuItem>
             {years.map((year) => (
               <MenuItem key={year} value={year}>
                 {year}
@@ -563,6 +562,7 @@ export function Ad_Input() {
           color="primary"
           style={{ height: '35px', padding: '0 10px', fontSize: '14px', marginRight: '10px' }}
           onClick={handleFetchData}
+          disabled={!tempSelectedYear || tempSelectedYear === ''}
         >
           조회
         </Button>
@@ -747,9 +747,8 @@ export function Ad_Input() {
                 <Select
                   labelId="year-label"
                   id="year-select"
-                  value={tempSelectedYear}
-                  label="연도"
-                  onChange={handleYearChange}
+                  value={newInput.year}
+                  onChange={(e) => handleSelectChange(e as SelectChangeEvent<number>, 'year')}
                   style={{ width: '532px' }}
                   sx={{ height: '45px' }}
                   MenuProps={{
@@ -760,7 +759,6 @@ export function Ad_Input() {
                     },
                   }}
                 >
-                  <MenuItem value="전체">선택안함</MenuItem>
                   {years.map((year) => (
                     <MenuItem key={year} value={year}>
                       {year}
