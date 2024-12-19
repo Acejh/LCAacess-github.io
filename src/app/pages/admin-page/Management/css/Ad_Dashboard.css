@@ -24,7 +24,7 @@
 .user-view .info-section {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
   max-width: 800px; /* 적절한 최대 너비 설정 */
   width: 100%;
 }
