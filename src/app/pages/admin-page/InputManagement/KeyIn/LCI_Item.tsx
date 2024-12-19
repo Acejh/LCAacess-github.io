@@ -690,7 +690,10 @@ export function LCI_Item() {
 
               {/* 유형 선택 드롭다운 */}
               <FormControl fullWidth margin="normal">
+                <InputLabel id="type-select-label">유형</InputLabel>
                 <Select
+                  label="유형"
+                  labelId="type-select-label"
                   value={editItem.type}
                   onChange={(e) => setEditItem({ ...editItem, type: e.target.value })}
                 >
@@ -704,7 +707,10 @@ export function LCI_Item() {
 
               {/* 종류 선택 드롭다운 */}
               <FormControl fullWidth margin="normal" disabled={!editItem.type}>
+                <InputLabel id="category-select-label">종류</InputLabel>
                 <Select
+                  label="종류"
+                  labelId="category-select-label"
                   value={editItem.category}
                   onChange={(e) => setEditItem({ ...editItem, category: e.target.value })}
                 >
