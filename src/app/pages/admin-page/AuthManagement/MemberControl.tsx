@@ -102,7 +102,7 @@ export function MemberControl() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
   const [deleteMemberName, setDeleteMemberName] = useState<string>('');
-  const [newMember, setNewMember] = useState<Omit<Member, 'id' | 'code' >>({
+  const [newMember, setNewMember] = useState<Partial<Omit<Member, 'id'>> & { code?: number }>({
     name: '',
     bizNo: '',
     ecoasCode: '',
@@ -528,6 +528,45 @@ export function MemberControl() {
             사업회원 등록
           </Typography>
           <Grid container spacing={2}>
+          <Grid item xs={8}>
+            <TextField
+              name="code"
+              label="사업회원 코드"
+              variant="outlined"
+              fullWidth
+              value={newMember.code || ''}
+              onChange={handleChange}
+            />
+          </Grid>
+            <Grid item xs={4}>
+              <Button
+                variant="contained"
+                color="primary"
+                style={{ height: '100%' }}
+                onClick={() => {
+                  axios.get(`${getApiUrl}/Companies/pms?companyCode=${newMember.code}`)
+                    .then(response => {
+                      const fetchedData = response.data;
+                      setNewMember(prev => ({
+                        ...prev,
+                        name: fetchedData.companyName,
+                        bizNo: fetchedData.bizNo,
+                        ecoasCode: fetchedData.ecoasCode,
+                        zipCode: fetchedData.zipCode,
+                        address: fetchedData.address,
+                        addressDetail: fetchedData.addressDetail || '',
+                        managerName: fetchedData.managerName,
+                        tel: fetchedData.tel,
+                      }));
+                    })
+                    .catch(error => {
+                      console.error('Error fetching company data:', error);
+                    });
+                }}
+              >
+                가져오기
+              </Button>
+            </Grid>
             <Grid item xs={6}>
               <TextField
                 name="name"

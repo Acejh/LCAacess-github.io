@@ -356,7 +356,7 @@ export function CompositionSet() {
   return (
     <div style={{ margin: '0 30px' }}>
       <Typography variant="h5" gutterBottom style={{ marginBottom: '10px' }}>
-        출고 구성비율 관리
+        제품별 구성비율 관리
       </Typography>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px' }}>
         <FormControl style={{ marginRight: '10px' }}>

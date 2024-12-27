@@ -521,13 +521,46 @@ export function UserControl() {
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12}>
-              <UseCompany 
-                onCompanyChange={(company) => setNewAccount(prev => ({ ...prev, companyCode: company ? company.code : '' }))}
-                sx={{ width: '530px', marginRight: '10px' }}
-                selectSx={{ height: '51px', }}
-                showAllOption={false}
-              />
+            <Select
+              name="role"
+              variant="outlined"
+              fullWidth
+              value={newAccount.role}
+              onChange={(e) => {
+                const role = e.target.value;
+                setNewAccount((prev) => ({
+                  ...prev,
+                  role,
+                  companyCode: role === 'Admin' ? '000' : '',
+                }));
+              }}
+              displayEmpty
+            >
+              <MenuItem value="">
+                <em>역할 선택</em>
+              </MenuItem>
+              <MenuItem value="Admin">관리자</MenuItem>
+              <MenuItem value="User">사용자</MenuItem>
+            </Select>
             </Grid>
+          <Grid item xs={12}>
+          <UseCompany
+            onCompanyChange={(company) =>
+              setNewAccount((prev) => ({
+                ...prev,
+                companyCode: company ? company.code : '',
+              }))
+            }
+            sx={{
+              width: '530px',
+              marginRight: '10px',
+            }}
+            selectSx={{
+              height: '45px',
+            }}
+            disabled={newAccount.role !== 'User'} // 역할에 따라 비활성화
+          />
+          </Grid>
             <Grid item xs={12}>
               <TextField
                 name="userName"
@@ -558,22 +591,6 @@ export function UserControl() {
                 value={newAccount.name}
                 onChange={handleChange}
               />
-            </Grid>
-            <Grid item xs={12}>
-              <Select
-                name="role"
-                variant="outlined"
-                fullWidth
-                value={newAccount.role}
-                onChange={(e) => setNewAccount(prev => ({ ...prev, role: e.target.value }))}
-                displayEmpty
-              >
-                <MenuItem value="">
-                  <em>역할 선택</em>
-                </MenuItem>
-                <MenuItem value="Admin">관리자</MenuItem>
-                <MenuItem value="User">사용자</MenuItem>
-              </Select>
             </Grid>
             <Grid item xs={12}>
               <TextField

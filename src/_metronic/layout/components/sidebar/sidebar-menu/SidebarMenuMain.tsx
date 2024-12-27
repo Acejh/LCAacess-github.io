@@ -170,7 +170,7 @@ const SidebarMenuMain = () => {
             icon='setting-2'
           >
             <SidebarMenuItemWithSub to='/admin-page/Management' title='기준정보 관리' fontIcon='bi-chat-left'>
-              <SidebarMenuItem to='/CompositionSet' title='출고 구성비율 관리' hasBullet={true} />
+              <SidebarMenuItem to='/CompositionSet' title='제품별 구성비율 관리' hasBullet={true} />
               <SidebarMenuItem to='/LCI_Item' title='LCI 항목 및 GWP 관리' hasBullet={true} />
               <SidebarMenuItem to='/RefrigerantGWP' title='냉매 GWP 관리' hasBullet={true} />
             </SidebarMenuItemWithSub>

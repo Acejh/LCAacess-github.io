@@ -25,13 +25,14 @@ export interface Company {
 
 interface UseCompanyProps extends FormControlProps {
   onCompanyChange: (company: Company | null) => void;
-  onCompanyListChange?: (companies: Company[]) => void; 
+  onCompanyListChange?: (companies: Company[]) => void;
   showAllOption?: boolean;
   showGeneralOption?: boolean; // 종합 옵션 추가
   sx?: SxProps<Theme>;
   selectSx?: SxProps<Theme>;
   selectedCompany?: Company | null;
   label?: string; // label prop 추가
+  disabled?: boolean; // 외부에서 비활성화 여부 설정
 }
 
 const UseCompany: React.FC<UseCompanyProps> = ({
@@ -42,6 +43,7 @@ const UseCompany: React.FC<UseCompanyProps> = ({
   sx,
   selectSx,
   label = "업체 선택", // 기본값 설정
+  disabled = false, // 기본값 설정
   ...rest
 }) => {
   const [companies, setCompanies] = useState<Company[]>([]);
@@ -70,11 +72,11 @@ const UseCompany: React.FC<UseCompanyProps> = ({
           createdBy: '',
           createdAt: '',
           updatedBy: null,
-          updatedAt: null
+          updatedAt: null,
         };
         companies.unshift(generalCompany);
-        setSelectedCompany(generalCompany); 
-        onCompanyChange(generalCompany); 
+        setSelectedCompany(generalCompany);
+        onCompanyChange(generalCompany);
       } else if (showAllOption) {
         const allCompany = {
           id: -1,
@@ -92,19 +94,19 @@ const UseCompany: React.FC<UseCompanyProps> = ({
           createdBy: '',
           createdAt: '',
           updatedBy: null,
-          updatedAt: null
+          updatedAt: null,
         };
         companies.unshift(allCompany);
-        setSelectedCompany(allCompany); 
-        onCompanyChange(allCompany); 
+        setSelectedCompany(allCompany);
+        onCompanyChange(allCompany);
       }
-    
+
       setCompanies(companies);
-    
+
       if (onCompanyListChange) {
         onCompanyListChange(companies);
       }
-    
+
       const authString = localStorage.getItem('kt-auth-react-v');
       if (authString) {
         const auth = JSON.parse(authString);
@@ -142,8 +144,20 @@ const UseCompany: React.FC<UseCompanyProps> = ({
     }
   }
 
+  const isDisabled = disabled || isUserRole; // 외부 disabled와 내부 조건 결합
+
   return (
-    <FormControl sx={{ width: '300px', marginRight: '10px', position: isUserRole ? 'absolute' : 'relative', opacity: isUserRole ? 0 : 1, pointerEvents: isUserRole ? 'none' : 'auto', ...sx }} {...rest}>
+    <FormControl
+      sx={{
+        width: '300px',
+        marginRight: '10px',
+        position: isUserRole ? 'absolute' : 'relative',
+        opacity: isDisabled ? 0.5 : 1, // 비활성화 시 투명도 적용
+        pointerEvents: isDisabled ? 'none' : 'auto', // 비활성화 시 클릭 차단
+        ...sx,
+      }}
+      {...rest}
+    >
       <Autocomplete
         id="company-select"
         options={companies}
@@ -153,9 +167,9 @@ const UseCompany: React.FC<UseCompanyProps> = ({
         renderInput={(params) => (
           <TextField
             {...params}
-            label={label} 
+            label={label}
             variant="outlined"
-            sx={{ 
+            sx={{
               '& .MuiInputBase-root': {
                 height: '45px',
               },
@@ -166,25 +180,25 @@ const UseCompany: React.FC<UseCompanyProps> = ({
                 backgroundColor: '#f0f0f0',
                 pointerEvents: 'none',
               },
-              ...selectSx, 
+              ...selectSx,
             }}
             InputProps={{
               ...params.InputProps,
-              readOnly: isUserRole,
+              readOnly: isDisabled,
             }}
           />
         )}
-        sx={{ 
+        sx={{
           '& .MuiAutocomplete-inputRoot': {
             padding: '2px',
             minHeight: '40px',
           },
-          ...selectSx, 
+          ...selectSx,
         }}
         isOptionEqualToValue={(option, value) => option.id === value.id}
         noOptionsText="옵션이 없습니다."
-        disableClearable={isUserRole}
-        disabled={isUserRole}
+        disableClearable={isDisabled}
+        disabled={isDisabled}
       />
     </FormControl>
   );
