@@ -101,6 +101,7 @@ const modalStyle = {
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
+  overflowY: "auto", 
   p: 4,
 };
 
@@ -110,9 +111,11 @@ const modalStyle2 = {
   left: '50%' as const,
   transform: 'translate(-50%, -50%)',
   width: 1400,
+  height: 800,
   bgcolor: 'background.paper',
   border: '2px solid #000',
   boxShadow: 24,
+  overflowY: "auto", 
   p: 4,
 };
 
@@ -648,6 +651,9 @@ export function Ad_Facility() {
               />
             </Grid>
             <Grid item xs={12}>
+            <Typography variant="body2" color="textSecondary" style={{ fontSize: '14px', marginTop: '2px', color: 'black'}}>
+              해당설비로 처리하는 제품을 선택해주세요.
+            </Typography>
               <UseProduct
                 onProductChange={(updatedSelectedProducts) => {
                   setNewFacility(prev => ({ ...prev, items: updatedSelectedProducts }));
@@ -716,6 +722,9 @@ export function Ad_Facility() {
               />
             </Grid>
             <Grid item xs={12}>
+            <Typography variant="body2" color="textSecondary" style={{ fontSize: '14px', marginTop: '2px', color: 'black'}}>
+              해당설비로 처리하는 제품을 선택해주세요.
+            </Typography>
               <UseProduct
                 onProductChange={(updatedSelectedProducts) => {
                   setEditFacility(prev => ({ ...prev, items: updatedSelectedProducts }));

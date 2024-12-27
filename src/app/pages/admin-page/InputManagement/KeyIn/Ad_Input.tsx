@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, } from 'react';
+import React, { useState, useRef, useEffect, useCallback, } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
 import numeral from 'numeral';
@@ -91,10 +91,15 @@ export function Ad_Input() {
   const currentYear = new Date().getFullYear();
   const [amountLabel, setAmountLabel] = useState('투입량');
   const [guideMessage, setGuideMessage] = useState('');
+  const [editingMode, setEditingMode] = useState(false); // 전체 수정 모드
+  const [editedCells, setEditedCells] = useState<
+    { rowId: string; columnId: string; value: number | string }[]
+  >([]); // 수정된 셀 저장
+  const [editingCell, setEditingCell] = useState<{ rowId: string; columnId: string } | null>(null);
   const years = Array.from(new Array(6), (val, index) => currentYear - index);
   const [items, setItems] = useState<Item[]>([]);
-  const [editingCell, setEditingCell] = useState<{ rowId: string; columnId: string } | null>(null);
-  const [editValue, setEditValue] = useState<number | string | null>(null);
+  // const [editingCell, setEditingCell] = useState<{ rowId: string; columnId: string } | null>(null);
+  // const [editValue, setEditValue] = useState<number | string | null>(null);
   const [tempSelectedCompany, setTempSelectedCompany] = useState<Company | null>(null); 
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [tempSelectedYear, setTempSelectedYear] = useState<string>('');
@@ -109,6 +114,51 @@ export function Ad_Input() {
     month: 1,
     amount: '',
   });
+  
+  const CellEditor = ({
+    cellValue,
+    rowId,
+    columnId,
+    onValueChange,
+    editingCell,
+    setEditingCell,
+  }: {
+    cellValue: string | number;
+    rowId: string;
+    columnId: string;
+    onValueChange: (rowId: string, columnId: string, value: string | number) => void;
+    editingCell: { rowId: string; columnId: string } | null;
+    setEditingCell: React.Dispatch<
+      React.SetStateAction<{ rowId: string; columnId: string } | null>
+    >;
+  }) => {
+    const inputRef = useRef<HTMLInputElement | null>(null);
+  
+    // 포커스 설정
+    useEffect(() => {
+      if (editingCell?.rowId === rowId && editingCell?.columnId === columnId) {
+        inputRef.current?.focus();
+      }
+    }, [editingCell, rowId, columnId]);
+  
+    return (
+      <TextField
+        value={cellValue}
+        onChange={(e) => onValueChange(rowId, columnId, e.target.value)}
+        inputRef={inputRef}
+        sx={{ width: '100px' }}
+        onFocus={() => {
+          // 이미 포커스된 상태라면 상태 업데이트 방지
+          if (
+            editingCell?.rowId !== rowId ||
+            editingCell?.columnId !== columnId
+          ) {
+            setEditingCell({ rowId, columnId });
+          }
+        }}
+      />
+    );
+  };
 
   const fetchItems = useCallback(async () => {
     try {
@@ -253,57 +303,91 @@ export function Ad_Input() {
     fetchItems();
   }, [fetchItems]);
 
-  const handleSaveEdit = async (rowId: string, columnId: string) => {
-    if (!editingCell || editValue === null) {
-      setEditingCell(null);
-      return;
-    }
+  // const handleSaveEdit = async (rowId: string, columnId: string) => {
+  //   if (!editingCell || editValue === null) {
+  //     setEditingCell(null);
+  //     return;
+  //   }
   
-    const row = table.getRowModel().rows.find((row) => row.id === rowId);
-    if (!row) {
-      console.error(`Row not found for editing: Row ID = ${rowId}, Column ID = ${columnId}`);
-      setEditingCell(null);
-      return;
-    }
+  //   const row = table.getRowModel().rows.find((row) => row.id === rowId);
+  //   if (!row) {
+  //     console.error(`Row not found for editing: Row ID = ${rowId}, Column ID = ${columnId}`);
+  //     setEditingCell(null);
+  //     return;
+  //   }
   
-    const monthIndex = parseInt(columnId.replace('월', ''), 10) - 1;
-    const ids = row.original.ids;
+  //   const monthIndex = parseInt(columnId.replace('월', ''), 10) - 1;
+  //   const ids = row.original.ids;
   
-    // 해당 월의 id 가져오기
-    const id = Array.isArray(ids) ? ids[monthIndex] : 0;
+  //   // 해당 월의 id 가져오기
+  //   const id = Array.isArray(ids) ? ids[monthIndex] : 0;
   
-    if (id && !isNaN(monthIndex)) {
-      try {
+  //   if (id && !isNaN(monthIndex)) {
+  //     try {
   
-        await axios.put(`${getApiUrl}/Inputs/${id}`, {
-          month: monthIndex + 1, 
-          amount: Number(editValue),
-        });
+  //       await axios.put(`${getApiUrl}/Inputs/${id}`, {
+  //         month: monthIndex + 1, 
+  //         amount: Number(editValue),
+  //       });
   
-        setEditValue(null);
-        setEditingCell(null);
+  //       setEditValue(null);
+  //       setEditingCell(null);
   
-        if (selectedCompany && selectedYear) {
-          fetchData(selectedCompany, selectedYear);
+  //       if (selectedCompany && selectedYear) {
+  //         fetchData(selectedCompany, selectedYear);
+  //       }
+  //     } catch (error) {
+  //       console.error('Error saving data:', error);
+  //     }
+  //   } else {
+  //     console.error(`Invalid ID or month index: ${id}, Month: ${columnId}`);
+  //   }
+  // };
+  
+  // const handleCancelEdit = () => {
+  //   setEditValue(null);
+  //   setEditingCell(null);
+  // };
+  
+  // const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>, rowId: string, columnId: string) => {
+  //   if (event.key === 'Enter') {
+  //     handleSaveEdit(rowId, columnId);
+  //   } else if (event.key === 'Escape') {
+  //     handleCancelEdit();
+  //   }
+  // };
+
+  const handleSaveChanges = async () => {
+    try {
+      // 수정된 데이터를 그룹화하여 API 호출
+      for (const editedCell of editedCells) {
+        const { rowId, columnId, value } = editedCell;
+  
+        const row = table.getRowModel().rows.find((r) => r.id === rowId);
+        if (!row) continue;
+  
+        const monthIndex = parseInt(columnId.replace('월', ''), 10) - 1;
+        const ids = row.original.ids;
+        const id = Array.isArray(ids) ? ids[monthIndex] : 0;
+  
+        if (id) {
+          await axios.put(`${getApiUrl}/Inputs/${id}`, {
+            month: monthIndex + 1,
+            amount: Number(value),
+          });
         }
-      } catch (error) {
-        console.error('Error saving data:', error);
       }
-    } else {
-      console.error(`Invalid ID or month index: ${id}, Month: ${columnId}`);
-    }
-  };
   
-  const handleCancelEdit = () => {
-    setEditValue(null);
-    setEditingCell(null);
-  };
+      // 수정 후 상태 초기화
+      setEditedCells([]);
+      setEditingMode(false);
   
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>, rowId: string, columnId: string) => {
-    if (event.key === 'Enter') {
-      handleSaveEdit(rowId, columnId);
-    } else if (event.key === 'Escape') {
-      handleCancelEdit();
+      // 테이블 데이터 다시 불러오기
+      if (selectedCompany && selectedYear) {
+        fetchData(selectedCompany, selectedYear);
+      }
+    } catch (error) {
+      console.error('Error saving changes:', error);
     }
   };
 
@@ -311,31 +395,42 @@ export function Ad_Input() {
     const { id: columnId } = cell.column;
     const { id: rowId } = cell.row;
   
-    if (editingCell?.rowId === rowId && editingCell?.columnId === columnId) {
+    const cellValue =
+      editedCells.find((c) => c.rowId === rowId && c.columnId === columnId)?.value ??
+      cell.getValue() ??
+      '';
+  
+    if (editingMode) {
       return (
-        <TextField
-          value={editValue || ''}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleCancelEdit} 
-          onKeyDown={(e) => handleKeyPress(e, rowId, columnId)} 
-          autoFocus
-          fullWidth
+        <CellEditor
+          cellValue={cellValue}
+          rowId={rowId}
+          columnId={columnId}
+          onValueChange={(rowId, columnId, value) => {
+            setEditedCells((prev) => {
+              const existing = prev.find(
+                (c) => c.rowId === rowId && c.columnId === columnId
+              );
+              if (existing) {
+                return prev.map((c) =>
+                  c.rowId === rowId && c.columnId === columnId
+                    ? { ...c, value }
+                    : c
+                );
+              } else {
+                return [...prev, { rowId, columnId, value }];
+              }
+            });
+          }}
+          editingCell={editingCell}
+          setEditingCell={setEditingCell} // 상태 업데이트 전달
         />
       );
     }
   
-    return (
-      <div
-        onDoubleClick={() => {
-          setEditingCell({ rowId, columnId });
-          setEditValue(cell.getValue() ?? '');
-        }}
-        style={{ cursor: 'pointer' }}
-      >
-        {numeral(cell.getValue()).format('0,0') ?? ''}
-      </div>
-    );
+    return <div>{numeral(cell.getValue()).format('0,0')}</div>;
   };
+  
 
   const handleFetchData = () => {
     setData([]);
@@ -686,6 +781,40 @@ export function Ad_Input() {
             </TableBody>
           )}
         </Table>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0' }}>
+          {editingMode ? (
+            <>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => {
+                  setEditedCells([]); // 수정된 데이터 초기화
+                  setEditingMode(false); // 수정 모드 비활성화
+                }}
+                style={{ marginRight: '10px' }}
+              >
+                취소
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={handleSaveChanges} // 저장 버튼 핸들러
+                sx={{ marginRight: "20px" }}
+              >
+                저장
+              </Button>
+            </>
+          ) : (
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setEditingMode(true)} // 수정 모드 활성화
+              sx={{ marginRight: "20px" }}
+            >
+              수정
+            </Button>
+          )}
+        </div>
       </TableContainer>
       <Modal
         open={open}

@@ -524,7 +524,7 @@ export function NonTargetWeights() {
           }}
         >
           <Typography variant="h6" gutterBottom>
-            {modalType === 'register' ? '등록' : '수정'} 모달
+            {modalType === 'register' ? '등록' : '수정'} 
           </Typography>
 
           <UseCompany

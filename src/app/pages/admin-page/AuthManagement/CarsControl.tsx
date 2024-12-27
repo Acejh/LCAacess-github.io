@@ -705,7 +705,7 @@ export function CarsControl() {
             <Grid item xs={12}>
               <TextField
                 name="carNo"
-                label="차량번호"
+                label="OO가OOOO"
                 variant="outlined"
                 fullWidth
                 value={newCar.carNo}
@@ -715,7 +715,7 @@ export function CarsControl() {
             <Grid item xs={12}>
               <TextField
                 name="spec"
-                label="차량규격"
+                label="차량규격(ton)"
                 variant="outlined"
                 fullWidth
                 value={newCar.spec}
