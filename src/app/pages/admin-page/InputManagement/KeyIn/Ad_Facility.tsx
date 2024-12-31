@@ -505,12 +505,12 @@ export function Ad_Facility() {
           {/* 두 번째 헤더 줄: 품목군, 제품명, 설비명 */}
           <TableRow>
             <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'center', left: 0, zIndex: 3 }}>제품군</TableCell>
-            <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'center', left: '130px', zIndex: 3 }}>제품명</TableCell>
+            <TableCell style={{ ...stickyHeaderStyle(), textAlign: 'center', left: '147px', zIndex: 3 }}>제품명</TableCell>
             {facilities.map(facility => (
               <TableCell
                 key={facility.id}
-                style={{ ...stickyHeaderStyle(), textAlign: 'center', cursor: 'pointer' }}  // 클릭 가능한 스타일 추가
-                onClick={() => handleEditModalOpen(facility)} // 클릭 이벤트 추가
+                style={{ ...stickyHeaderStyle(), textAlign: 'center', cursor: 'pointer' }} 
+                onClick={() => handleEditModalOpen(facility)}
               >
                 {`${facility.id}_${facility.name}`}
               </TableCell>
@@ -546,9 +546,9 @@ export function Ad_Facility() {
                               whiteSpace: 'nowrap',
                               overflow: 'hidden',
                               textOverflow: 'ellipsis',
-                              textAlign: isCategoryOrProduct ? 'center' : 'center',  // 품목군, 제품명은 왼쪽 정렬, 나머지는 중앙 정렬
+                              textAlign: isCategoryOrProduct ? 'center' : 'center',
                               position: isCategoryOrProduct ? 'sticky' : 'static',
-                              left: cell.column.id === 'categoryName' ? 0 : cell.column.id === 'itemName' ? '130px' : undefined,
+                              left: cell.column.id === 'categoryName' ? 0 : cell.column.id === 'itemName' ? '147px' : undefined,
                               zIndex: isCategoryOrProduct ? 2 : 1,
                               backgroundColor: isCategoryOrProduct ? '#ffffff' : undefined,
                             }}
