@@ -47,6 +47,7 @@ type Facility = {
   id: number;
   name: string;
   capacity: number;
+  isUse: boolean;
 };
 
 type Input = {
@@ -586,11 +587,13 @@ export function Ad_UseFacility() {
                 onChange={(e) => handleSelectChange(e as SelectChangeEvent<number>, 'facilityId')}
                 label="설비"
               >
-                {facilities.map((facility) => (
-                  <MenuItem key={facility.id} value={facility.id}>
-                    {`${facility.id}_${facility.name}`}
-                  </MenuItem>
-                ))}
+                {facilities
+                  .filter((facility) => facility.isUse) 
+                  .map((facility) => (
+                    <MenuItem key={facility.id} value={facility.id}>
+                      {`${facility.id}_${facility.name}`}
+                    </MenuItem>
+                  ))}
               </Select>
             </FormControl>
           </Grid>

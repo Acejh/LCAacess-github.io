@@ -152,7 +152,7 @@ const UseCompany: React.FC<UseCompanyProps> = ({
         width: '300px',
         marginRight: '10px',
         position: isUserRole ? 'absolute' : 'relative',
-        opacity: isDisabled ? 0.5 : 1, // 비활성화 시 투명도 적용
+        opacity: isDisabled ? 0 : 1, // 비활성화 시 투명도 적용
         pointerEvents: isDisabled ? 'none' : 'auto', // 비활성화 시 클릭 차단
         ...sx,
       }}

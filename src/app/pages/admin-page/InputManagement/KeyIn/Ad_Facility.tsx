@@ -31,6 +31,7 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
+  Switch,
 } from '@mui/material';
 import { Edit, Delete } from '@mui/icons-material';
 import * as XLSX from 'xlsx';
@@ -39,6 +40,7 @@ type Facl = {
   id: number;
   name: string;
   capacity: number;
+  isUse: boolean; 
 };
 
 type ItemFacility = {
@@ -87,7 +89,7 @@ const stickyHeaderStyle3 = () => ({
   overflow: 'hidden' as const,
   textOverflow: 'ellipsis' as const,
   position: 'sticky' as const,
-  top: 0,
+  top: -1,
   backgroundColor: '#cfcfcf',
   zIndex: 1,
 });
@@ -134,7 +136,7 @@ export function Ad_Facility() {
   const [deleteFacilityId, setDeleteFacilityId] = useState<number | null>(null);
   const [categoryFilters, setCategoryFilters] = useState<Record<string, boolean>>({});
   const [newFacility, setNewFacility] = useState({ name: '', capacity: '', companyCode: '', items: [] as string[] });
-  const [editFacility, setEditFacility] = useState({ id: '', name: '', capacity: '', companyCode: '', items: [] as string[] });
+  const [editFacility, setEditFacility] = useState({ id: '', name: '', capacity: '', companyCode: '', items: [] as string[], isUse: false,  });
   const [userRole, setUserRole] = useState<string | null>(null);
 
   const fetchData = useCallback(async (companyCode: string) => {
@@ -281,16 +283,26 @@ export function Ad_Facility() {
     try {
       const response = await axios.get(`${getApiUrl}/Facilities/${facility.id}`);
       const facilityData = response.data;
+  
+      // 필드 검증 및 기본값 설정
+      if (!facilityData.name || !facilityData.capacity) {
+        throw new Error('필수 데이터 누락: name 또는 capacity가 없습니다.');
+      }
+  
       setEditFacility({
         id: facility.id.toString(),
         name: facilityData.name,
         capacity: facilityData.capacity.toString(),
         companyCode: selectedCompany?.code || '',
-        items: facilityData.items || []
+        items: facilityData.items || [],
+        isUse: facilityData.isUse ?? false, // isUse 필드 추가 및 기본값 false 설정
       });
       setEditModalOpen(true);
     } catch (error) {
       console.error('설비 데이터를 불러오는데 실패했습니다:', error);
+  
+      // 사용자에게 에러 메시지 표시
+      alert('설비 데이터를 불러오는데 실패했습니다. 다시 시도해주세요.');
     }
   };
 
@@ -342,7 +354,8 @@ export function Ad_Facility() {
       const payload = {
         name: editFacility.name,
         capacity: parseFloat(editFacility.capacity),
-        items: editFacility.items.map(itemCode => itemCode)
+        isUse: editFacility.isUse, 
+        items: editFacility.items.map((itemCode) => itemCode),
       };
       await axios.put(`${getApiUrl}/Facilities/${editFacility.id}`, payload);
       setEditModalOpen(false);
@@ -569,16 +582,18 @@ export function Ad_Facility() {
                 <TableRow>
                   <TableCell style={stickyHeaderStyle3()}>설비명</TableCell>
                   <TableCell style={stickyHeaderStyle3()}>용량(KW)</TableCell>
+                  <TableCell style={stickyHeaderStyle3()}>사용 여부</TableCell> {/* 새 열 추가 */}
                   <TableCell style={stickyHeaderStyle3()}>수정/삭제</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {facilities.map(facility => {
+                {facilities.map((facility) => {
                   const uniqueKey = `facility-${facility.id}-${facility.name}`;
                   return (
-                    <TableRow key={uniqueKey}> 
+                    <TableRow key={uniqueKey}>
                       <TableCell>{`${facility.id}_${facility.name}`}</TableCell>
                       <TableCell>{numeral(facility.capacity).format('0.0')}</TableCell>
+                      <TableCell>{facility.isUse ? '사용 중' : '사용 안 함'}</TableCell> {/* isUse 표시 */}
                       <TableCell>
                         <IconButton onClick={() => handleEditModalOpen(facility)}>
                           <Edit />
@@ -720,6 +735,26 @@ export function Ad_Facility() {
                 value={editFacility.capacity}
                 onChange={handleEditChange}
               />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="body2" color="textSecondary" style={{ fontSize: '14px', marginTop: '10px', color: 'black' }}>
+                해당 설비 사용 여부
+              </Typography>
+              <FormGroup>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={editFacility.isUse}
+                      onChange={(e) =>
+                        setEditFacility((prev) => ({ ...prev, isUse: e.target.checked }))
+                      }
+                      name="isUse"
+                      color="primary" // 색상 설정 (기본: 파란색)
+                    />
+                  }
+                  label={editFacility.isUse ? '사용 중' : '사용 안 함'}
+                />
+              </FormGroup>
             </Grid>
             <Grid item xs={12}>
             <Typography variant="body2" color="textSecondary" style={{ fontSize: '14px', marginTop: '2px', color: 'black'}}>
