@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import axios from 'axios';
 import UseCompany, { Company } from '../../../ComponentBox/UseCompany';
 // import numeral from 'numeral';
@@ -91,8 +91,11 @@ export function Ad_UseFacility() {
   const [tempSelectedYear, setTempSelectedYear] = useState<string>('');
   const [selectedYear, setSelectedYear] = useState<string>('');
   const [tempSelectedCompany, setTempSelectedCompany] = useState<Company | null>(null);
+  const [editingMode, setEditingMode] = useState(false); // 전체 수정 모드 상태
+  const [editedCells, setEditedCells] = useState<
+    { rowId: string; columnId: string; value: number | string }[]
+  >([]); // 수정된 셀 저장
   const [editingCell, setEditingCell] = useState<{ rowId: string; columnId: string } | null>(null);
-  const [editValue, setEditValue] = useState<number | string | null>(null);
   const [facilities, setFacilities] = useState<Facility[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -103,7 +106,51 @@ export function Ad_UseFacility() {
     opTime: '',
   });
 
-  
+  const CellEditor = ({
+      cellValue,
+      rowId,
+      columnId,
+      onValueChange,
+      editingCell,
+      setEditingCell,
+    }: {
+      cellValue: string | number;
+      rowId: string;
+      columnId: string;
+      onValueChange: (rowId: string, columnId: string, value: string | number) => void;
+      editingCell: { rowId: string; columnId: string } | null;
+      setEditingCell: React.Dispatch<
+        React.SetStateAction<{ rowId: string; columnId: string } | null>
+      >;
+    }) => {
+      const inputRef = useRef<HTMLInputElement | null>(null);
+    
+      // 포커스 설정
+      useEffect(() => {
+        if (editingCell?.rowId === rowId && editingCell?.columnId === columnId) {
+          inputRef.current?.focus();
+        }
+      }, [editingCell, rowId, columnId]);
+    
+      return (
+        <TextField
+          value={cellValue}
+          onChange={(e) => onValueChange(rowId, columnId, e.target.value)}
+          inputRef={inputRef}
+          sx={{ width: '100px' }}
+          onFocus={() => {
+            // 이미 포커스된 상태라면 상태 업데이트 방지
+            if (
+              editingCell?.rowId !== rowId ||
+              editingCell?.columnId !== columnId
+            ) {
+              setEditingCell({ rowId, columnId });
+            }
+          }}
+        />
+      );
+    };
+
   useEffect(() => {
     const fetchOpTime = async () => {
       if (newInput.facilityId && newInput.year && newInput.month) {
@@ -211,58 +258,33 @@ export function Ad_UseFacility() {
     }
   }, [selectedCompany, selectedYear, fetchData]);
 
-  const handleSaveEdit = async (rowId: string, columnId: string) => {
-    if (!editingCell || editValue === null) {
-      setEditingCell(null);
-      return; // Early exit if there's nothing to save
-    }
-  
-    const row = table.getRowModel().rows.find((row) => row.id === rowId);
-    if (!row) {
-      console.error("Row not found for editing:", { rowId, columnId });
-      setEditingCell(null);
-      return; // Early exit if row is not found
-    }
-  
-    const ids = row.original.ids; // Get ids from the row
-    if (!ids || ids.length === 0) {
-      console.error("No valid ids found for this row:", { rowId, columnId, ids });
-      setEditingCell(null);
-      return; // Early exit if no valid IDs
-    }
-  
+  const handleSaveChanges = async () => {
     try {
-      await axios.put(`${getApiUrl}/FacilityOpTimes/${ids[0]}`, {
-        opTime: Number(editValue), // Only sending opTime as required
-      });
-      setEditValue(null);
-      setEditingCell(null);
+      for (const editedCell of editedCells) {
+        const { rowId, columnId, value } = editedCell;
   
-      // Refresh data after successful save
+        const row = table.getRowModel().rows.find((r) => r.id === rowId);
+        if (!row) continue;
+  
+        const monthIndex = parseInt(columnId.replace('월', ''), 10) - 1;
+        const ids = row.original.ids;
+        const id = Array.isArray(ids) ? ids[monthIndex] : 0;
+  
+        if (id) {
+          await axios.put(`${getApiUrl}/FacilityOpTimes/${id}`, {
+            opTime: Number(value),
+          });
+        }
+      }
+  
+      setEditedCells([]);
+      setEditingMode(false);
+  
       if (selectedCompany && selectedYear) {
         fetchData(selectedCompany, selectedYear);
       }
     } catch (error) {
-      console.error("Error saving data:", {
-        ids,
-        columnId,
-        opTime: Number(editValue),
-        error: error instanceof Error ? error.message : error,
-      });
-    }
-  };
-  
-  const handleCancelEdit = () => {
-    // Clear editing state without saving
-    setEditValue(null);
-    setEditingCell(null);
-  };
-  
-  const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>, rowId: string, columnId: string) => {
-    if (event.key === 'Enter') {
-      handleSaveEdit(rowId, columnId); // Save on Enter
-    } else if (event.key === 'Escape') {
-      handleCancelEdit(); // Cancel on ESC
+      console.error('Error saving changes:', error);
     }
   };
   
@@ -270,30 +292,45 @@ export function Ad_UseFacility() {
     const { id: columnId } = cell.column;
     const { id: rowId } = cell.row;
   
-    if (editingCell?.rowId === rowId && editingCell?.columnId === columnId) {
+    const cellValue =
+      editedCells.find((c) => c.rowId === rowId && c.columnId === columnId)?.value ??
+      cell.getValue() ??
+      '';
+  
+    if (editingMode) {
       return (
-        <TextField
-          value={editValue || ''}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleCancelEdit} // Cancel on blur
-          onKeyDown={(e) => handleKeyPress(e, rowId, columnId)} // Save or cancel on keypress
-          autoFocus
-          fullWidth
+        <CellEditor
+          cellValue={cellValue}
+          rowId={rowId}
+          columnId={columnId}
+          onValueChange={(rowId, columnId, value) => {
+            setEditedCells((prev) => {
+              const existing = prev.find(
+                (c) => c.rowId === rowId && c.columnId === columnId
+              );
+              if (existing) {
+                return prev.map((c) =>
+                  c.rowId === rowId && c.columnId === columnId
+                    ? { ...c, value }
+                    : c
+                );
+              } else {
+                return [...prev, { rowId, columnId, value }];
+              }
+            });
+          }}
+          editingCell={editingCell}
+          setEditingCell={setEditingCell}
         />
       );
     }
   
-    return (
-      <div
-        onDoubleClick={() => {
-          setEditingCell({ rowId, columnId });
-          setEditValue(cell.getValue() ?? '');
-        }}
-        style={{ cursor: 'pointer' }}
-      >
-        {cell.getValue() ?? ''}
-      </div>
-    );
+    return <div>{cellValue}</div>;
+  };
+
+  const handleCancelChanges = () => {
+    setEditedCells([]);
+    setEditingMode(false);
   };
 
   const handleFetchData = () => {
@@ -568,6 +605,35 @@ export function Ad_UseFacility() {
           )}
         </Table>
       </TableContainer>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', margin: '10px 0' }}>
+      {editingMode ? (
+        <>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={handleCancelChanges}
+            style={{ marginRight: '10px' }}
+          >
+            취소
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSaveChanges}
+          >
+            저장
+          </Button>
+        </>
+      ) : (
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => setEditingMode(true)}
+        >
+          수정
+        </Button>
+      )}
+    </div>
       <Modal
         open={open}
         onClose={handleClose}

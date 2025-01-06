@@ -303,60 +303,6 @@ export function Ad_Input() {
     fetchItems();
   }, [fetchItems]);
 
-  // const handleSaveEdit = async (rowId: string, columnId: string) => {
-  //   if (!editingCell || editValue === null) {
-  //     setEditingCell(null);
-  //     return;
-  //   }
-  
-  //   const row = table.getRowModel().rows.find((row) => row.id === rowId);
-  //   if (!row) {
-  //     console.error(`Row not found for editing: Row ID = ${rowId}, Column ID = ${columnId}`);
-  //     setEditingCell(null);
-  //     return;
-  //   }
-  
-  //   const monthIndex = parseInt(columnId.replace('월', ''), 10) - 1;
-  //   const ids = row.original.ids;
-  
-  //   // 해당 월의 id 가져오기
-  //   const id = Array.isArray(ids) ? ids[monthIndex] : 0;
-  
-  //   if (id && !isNaN(monthIndex)) {
-  //     try {
-  
-  //       await axios.put(`${getApiUrl}/Inputs/${id}`, {
-  //         month: monthIndex + 1, 
-  //         amount: Number(editValue),
-  //       });
-  
-  //       setEditValue(null);
-  //       setEditingCell(null);
-  
-  //       if (selectedCompany && selectedYear) {
-  //         fetchData(selectedCompany, selectedYear);
-  //       }
-  //     } catch (error) {
-  //       console.error('Error saving data:', error);
-  //     }
-  //   } else {
-  //     console.error(`Invalid ID or month index: ${id}, Month: ${columnId}`);
-  //   }
-  // };
-  
-  // const handleCancelEdit = () => {
-  //   setEditValue(null);
-  //   setEditingCell(null);
-  // };
-  
-  // const handleKeyPress = (event: React.KeyboardEvent<HTMLDivElement>, rowId: string, columnId: string) => {
-  //   if (event.key === 'Enter') {
-  //     handleSaveEdit(rowId, columnId);
-  //   } else if (event.key === 'Escape') {
-  //     handleCancelEdit();
-  //   }
-  // };
-
   const handleSaveChanges = async () => {
     try {
       // 수정된 데이터를 그룹화하여 API 호출
