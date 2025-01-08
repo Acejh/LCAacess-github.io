@@ -159,23 +159,24 @@ export function WasteMapping() {
     try {
       const url = `${getApiUrl}/WasteMaps?CompanyCode=${searchParams.company?.code}&Year=${searchParams.year}`;
       const response = await axios.get(url);
+  
       const { wasteMaps } = response.data;
-
-      // 데이터 변환 및 상태 업데이트
+  
+      // 데이터 변환 시 null 값 처리
       const transformedData = wasteMaps.map((item: WasteMapItem) => ({
         id: item.id,
         companyCode: item.companyCode,
         client: item.client,
-        item1: item.item1,
-        item2: item.item2,
-        item3: item.item3,
-        wasteMethod: item.wasteMethod, 
-        lciItem: item.lciItem,         
-        itemCodes: item.itemCodes,       
+        item1: item.item1 || 'N/A',
+        item2: item.item2 || 'N/A',
+        item3: item.item3 || 'N/A',
+        wasteMethod: item.wasteMethod || null,
+        lciItem: item.lciItem || { name: null },
+        itemCodes: item.itemCodes || [],
         onItemClick: handleLciItemClick,
         onClientClick: handleClientClick,
       }));
-
+  
       setData(transformedData);
       setLoading(false);
     } catch (error) {
@@ -412,18 +413,19 @@ export function WasteMapping() {
       accessorKey: 'wasteMethod',
       header: '처리방법',
       cell: (info: CellContext<WasteMappingData, unknown>) => {
-        const lciItem = info.row.original.lciItem;
         const wasteMethod = info.row.original.wasteMethod;
-        
-        if (lciItem.name === '폐기물(제외)') {
-          return (
-            <Typography style={{ color: 'gray' }}>매핑 불필요</Typography>
-          );
+        const lciItem = info.row.original.lciItem;
+  
+        if (!lciItem || lciItem.name === '폐기물(제외)') {
+          return <Typography style={{ color: 'gray' }}>매핑 불필요</Typography>;
         }
-        
+  
         return (
           <Typography
-            style={{ color: wasteMethod ? 'blue' : 'red', cursor: 'pointer' }}
+            style={{
+              color: wasteMethod ? 'blue' : 'red',
+              cursor: 'pointer',
+            }}
             onClick={() => handleWasteMethodClick(info.row.original)}
           >
             {wasteMethod || '매핑필요'}
@@ -436,59 +438,57 @@ export function WasteMapping() {
       header: 'LCI 품목매핑',
       cell: (info: CellContext<WasteMappingData, unknown>) => {
         const lciItem = info.row.original.lciItem;
-        if (lciItem) {
+  
+        if (!lciItem || !lciItem.name) {
           return (
             <Typography
               style={{
-                color: userRole === 'User' ? 'black' : 'blue',
-                cursor: userRole === 'User' ? 'default' : 'pointer',
+                color: 'red',
+                cursor: 'pointer',
               }}
-              onClick={() => {
-                if (userRole !== 'User') {
-                  // 두 인수를 전달: lciItem, rowId
-                  info.row.original.onItemClick(lciItem, info.row.original.id);
-                }
-              }}
-            >
-              {lciItem.name}
-            </Typography>
-          );
-        } else {
-          return (
-            <Typography
-              style={{
-                color: userRole === 'User' ? 'black' : 'red',
-                cursor: userRole === 'User' ? 'default' : 'pointer',
-              }}
-              onClick={() => {
-                if (userRole !== 'User') {
-                  handleMappingClick(info.row.original);
-                }
-              }}
+              onClick={() => handleMappingClick(info.row.original)}
             >
               매핑필요
             </Typography>
           );
         }
+  
+        return (
+          <Typography
+            style={{
+              color: userRole === 'User' ? 'black' : 'blue',
+              cursor: userRole === 'User' ? 'default' : 'pointer',
+            }}
+            onClick={() => {
+              if (userRole !== 'User') {
+                info.row.original.onItemClick(lciItem, info.row.original.id);
+              }
+            }}
+          >
+            {lciItem.name}
+          </Typography>
+        );
       },
     },
     {
       accessorKey: 'itemCodes',
       header: '처리제품',
       cell: (info: CellContext<WasteMappingData, unknown>) => {
-        const lciItem = info.row.original.lciItem;
         const itemCodes = info.row.original.itemCodes || [];
-        const displayText = itemCodes.length > 0 ? '매핑완료' : '매핑필요';
-    
-        if (lciItem.name === '폐기물(제외)') {
-          return (
-            <Typography style={{ color: 'gray' }}>매핑 불필요</Typography>
-          );
+        const lciItem = info.row.original.lciItem;
+  
+        if (!lciItem || lciItem.name === '폐기물(제외)') {
+          return <Typography style={{ color: 'gray' }}>매핑 불필요</Typography>;
         }
-        
+  
+        const displayText = itemCodes.length > 0 ? '매핑완료' : '매핑필요';
+  
         return (
           <Typography
-            style={{ color: itemCodes.length > 0 ? 'blue' : 'red', cursor: 'pointer' }}
+            style={{
+              color: itemCodes.length > 0 ? 'blue' : 'red',
+              cursor: 'pointer',
+            }}
             onClick={() => handleProductModalOpen(itemCodes, info.row.original.id)}
           >
             {displayText}
@@ -603,30 +603,19 @@ export function WasteMapping() {
                   </TableRow>
                 ) : table.getRowModel().rows.length > 0 ? (
                   table.getRowModel().rows.map((row) => {
-                
-                    const isMappingIncomplete = 
-                      row.original.lciItem?.name !== '폐기물(제외)' && ( 
-                        !row.original.wasteMethod || 
-                        !row.original.lciItem ||    
-                        !(row.original.itemCodes && row.original.itemCodes.length > 0) 
-                      );
+                    const isMappingIncomplete =
+                      (!row.original.wasteMethod || !row.original.lciItem || !(row.original.itemCodes?.length > 0)) &&
+                      row.original.lciItem?.name !== '폐기물(제외)';
               
                     return (
                       <TableRow
                         key={row.id}
                         style={{
-                          backgroundColor: isMappingIncomplete ? '#f5c6cb' : 'white', 
+                          backgroundColor: isMappingIncomplete ? '#f5c6cb' : 'white',
                         }}
                       >
                         {row.getVisibleCells().map((cell) => (
-                          <TableCell
-                            key={cell.id}
-                            style={{
-                              whiteSpace: 'nowrap',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                            }}
-                          >
+                          <TableCell key={cell.id}>
                             {flexRender(cell.column.columnDef.cell, cell.getContext())}
                           </TableCell>
                         ))}
