@@ -161,27 +161,25 @@ export function NoticeControl() {
   };
 
   const handleCreateNotice = async () => {
+    // 공지사항 등록 데이터
     const newNotice = {
       title: newTitle,
       content: editorContent,
-      readCount: 0,
-      createdBy: 'admin',
-      createdAt: new Date().toISOString(),
-      updatedBy: null,
-      updatedAt: null,
-      boardFileIds: uploadedFiles.map((file) => file.id),
+      boardFileIds: uploadedFiles.map((file) => file.id), // 파일 ID만 포함
     };
-
+  
     try {
+      // 수정 모드인지 확인
       if (editMode && currentNoticeId) {
-        await axios.put(`${getApiUrl}/Boards/${currentNoticeId}`, newNotice);
+        await axios.put(`${getApiUrl}/Boards/${currentNoticeId}`, newNotice); // 수정 요청
       } else {
-        await axios.post(`${getApiUrl}/Boards`, newNotice);
+        await axios.post(`${getApiUrl}/Boards`, newNotice); // 등록 요청
       }
+      // 공지사항 목록 새로고침
       fetchNotices();
-      handleClose();
+      handleClose(); // 다이얼로그 닫기
     } catch (error) {
-      console.error('공지사항을 등록하는데 실패했습니다:', error);
+      console.error('공지사항 등록에 실패했습니다:', error);
       alert('공지사항 등록에 실패했습니다. 다시 시도해 주세요.');
     }
   };
