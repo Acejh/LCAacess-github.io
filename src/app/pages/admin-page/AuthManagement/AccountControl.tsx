@@ -245,14 +245,29 @@ export function UserControl() {
       handleClose(); // 모달 닫기
     } catch (err) {
       if (axios.isAxiosError(err)) {
-        // AxiosError에서 응답 메시지 추출
+  
+        const apiError = err.response?.data;
+        let errorMessage = '계정 등록 중 오류가 발생했습니다.';
+  
+        // `errors` 필드가 있는 경우 처리
+        if (apiError?.errors) {
+          const errorMessages = Object.values(apiError.errors) // 모든 오류 메시지 배열로 변환
+            .flat() // 중첩 배열을 단일 배열로 변환
+            .join('\n'); // 메시지들을 합침
+          errorMessage = errorMessages || errorMessage;
+        } 
+        // `errors`가 없는 경우 `title` 필드 사용
+        else if (apiError?.title) {
+          errorMessage = apiError.title;
+        }
+  
         setSnackbar({
           open: true,
-          message: err.response?.data?.message || '계정 등록 중 오류가 발생했습니다.',
+          message: errorMessage,
           severity: 'error',
         });
       } else {
-        // 알 수 없는 오류 처리
+  
         setSnackbar({
           open: true,
           message: '알 수 없는 오류가 발생했습니다.',
