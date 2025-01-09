@@ -614,16 +614,51 @@ export function NoticeControl() {
       <Dialog open={viewOpen} onClose={handleViewClose} maxWidth="md" fullWidth>
         <DialogTitle>{selectedNotice?.title}</DialogTitle>
         <DialogContent>
+          {/* 작성자, 작성일, 조회수 등 기본 정보 */}
           <Typography variant="body1" gutterBottom>
             작성자: {selectedNotice?.createdBy}
           </Typography>
           <Typography variant="body1" gutterBottom>
-            작성일: {selectedNotice?.createdAt}
+            작성일: {new Date(selectedNotice?.createdAt || '').toLocaleString()}
           </Typography>
           <Typography variant="body1" gutterBottom>
             조회수: {selectedNotice?.readCount}
           </Typography>
-          <div dangerouslySetInnerHTML={{ __html: selectedNotice?.content || '' }} />
+
+          {/* 공지사항 내용 */}
+          <div
+            style={{ marginTop: '20px', marginBottom: '20px' }}
+            dangerouslySetInnerHTML={{ __html: selectedNotice?.content || '' }}
+          />
+
+          {/* 첨부 파일 목록 */}
+          {selectedNotice?.boardFiles && selectedNotice.boardFiles.length > 0 && (
+            <div style={{ marginTop: '20px' }}>
+              <Typography variant="h6">첨부 파일:</Typography>
+              <ul style={{ listStyle: 'none', padding: 0 }}>
+                {selectedNotice.boardFiles.map((file) => (
+                  <li
+                    key={file.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '10px',
+                    }}
+                  >
+                    <Typography variant="body2">{file.fileName}</Typography>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      onClick={() => handleDownloadFile(file.id)}
+                    >
+                      다운로드
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleViewClose} color="primary">
