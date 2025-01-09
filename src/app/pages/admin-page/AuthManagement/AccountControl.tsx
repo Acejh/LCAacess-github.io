@@ -29,6 +29,9 @@ import {
   Box,
   Grid,
   CircularProgress,
+  Snackbar,
+  Alert,
+  AlertColor,
 } from '@mui/material';
 
 type User = {
@@ -85,6 +88,18 @@ export function UserControl() {
   const [totalCount, setTotalCount] = useState(0);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [companies, setCompanies] = useState<Company[]>([]);
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: AlertColor; 
+  }>({
+    open: false,
+    message: '',
+    severity: 'success', // 초기값
+  });
+  const handleSnackbarClose = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
   const [searchParams, setSearchParams] = useState<{
     company: Company | null;
   }>({
@@ -123,8 +138,30 @@ export function UserControl() {
   
   const [editIndex, setEditIndex] = useState<number | null>(null);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = () => {
+    setNewAccount({
+      companyCode: '',
+      userName: '',
+      password: '',
+      name: '',
+      role: '',
+      phoneNumber: '',
+      email: '',
+    });
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setNewAccount({
+      companyCode: '',
+      userName: '',
+      password: '',
+      name: '',
+      role: '',
+      phoneNumber: '',
+      email: '',
+    });
+    setOpen(false);
+  };
 
   const fetchData = useCallback(async (pageIndex: number, pageSize: number) => {
     setLoading(true);
@@ -193,21 +230,36 @@ export function UserControl() {
     }));
   };
 
-  const handleSubmit = () => {
-    const newAccountData = {
-      ...newAccount,
-    };  
+  const handleSubmit = async () => {
+    try {
+      const newAccountData = { ...newAccount };
+      await axios.post(`${getApiUrl}/Users`, newAccountData);
   
-  
-    axios.post(`${getApiUrl}/Users`, newAccountData)
-      .then(() => {
-        fetchData(pageIndex, pageSize);
-      })
-      .catch(error => {
-        console.error('Error posting data:', error.response ? error.response.data : error.message);
+      setSnackbar({
+        open: true,
+        message: '계정이 성공적으로 등록되었습니다.',
+        severity: 'success',
       });
   
-    handleClose();
+      fetchData(pageIndex, pageSize); // 새로고침
+      handleClose(); // 모달 닫기
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        // AxiosError에서 응답 메시지 추출
+        setSnackbar({
+          open: true,
+          message: err.response?.data?.message || '계정 등록 중 오류가 발생했습니다.',
+          severity: 'error',
+        });
+      } else {
+        // 알 수 없는 오류 처리
+        setSnackbar({
+          open: true,
+          message: '알 수 없는 오류가 발생했습니다.',
+          severity: 'error',
+        });
+      }
+    }
   };
 
   //데이터 검사
@@ -302,19 +354,34 @@ export function UserControl() {
   
   const handleDeleteClose = () => setDeleteOpen(false);
   
-  const handleDeleteSubmit = () => {                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+  const handleDeleteSubmit = async () => {
     if (deleteIndex !== null) {
-      const url = `${getApiUrl}/Users/${deleteIndex}`;
+      try {
+        await axios.delete(`${getApiUrl}/Users/${deleteIndex}`);
   
-      axios.delete(url)
-        .then(() => {
-          fetchData(pageIndex, pageSize); 
-        })
-        .catch(error => {
-          console.error('Error deleting data:', error);
+        setSnackbar({
+          open: true,
+          message: '계정이 성공적으로 삭제되었습니다.',
+          severity: 'success',
         });
   
-      handleDeleteClose();
+        fetchData(pageIndex, pageSize); 
+        handleDeleteClose(); 
+      } catch (err) {
+        if (axios.isAxiosError(err)) {
+          setSnackbar({
+            open: true,
+            message: err.response?.data?.message || '계정 삭제 중 오류가 발생했습니다.',
+            severity: 'error',
+          });
+        } else {
+          setSnackbar({
+            open: true,
+            message: '알 수 없는 오류가 발생했습니다.',
+            severity: 'error',
+          });
+        }
+      }
     }
   };
 
@@ -379,6 +446,16 @@ export function UserControl() {
 
   return (
     <div style={{ margin: '0 30px' }}>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
       <Typography variant="h5" gutterBottom style={{marginBottom: '20px'}}>
         계정 관리
       </Typography>
