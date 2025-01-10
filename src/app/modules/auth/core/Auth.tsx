@@ -22,6 +22,8 @@ const initAuthContextPropsState = {
   logout: () => {},
 };
 
+const AUTH_LOCAL_STORAGE_KEY = 'kt-auth-react-v';
+
 const AuthContext = createContext<AuthContextProps>(initAuthContextPropsState);
 
 const useAuth = () => {
@@ -37,12 +39,12 @@ const AuthProvider: FC<WithChildren> = ({ children }) => {
     const storedAuth = getAuth();
     if (storedAuth) {
       setAuthState(storedAuth);
-      setCurrentUser(storedAuth.userInfo);  // 로컬 스토리지에서 가져온 인증 정보로 currentUser 설정
+      setCurrentUser(storedAuth.userInfo);
     }
 
-    // 다른 탭에서 로컬 스토리지의 변경 사항 감지
+    // 다른 탭에서 로컬 스토리지 변경 사항 감지
     const handleStorageChange = (event: StorageEvent) => {
-      if (event.key === 'kt-auth-react-v') {
+      if (event.key === AUTH_LOCAL_STORAGE_KEY) {
         const updatedAuth = getAuth();
         if (!updatedAuth) {
           // 다른 탭에서 로그아웃된 경우
@@ -56,26 +58,30 @@ const AuthProvider: FC<WithChildren> = ({ children }) => {
       }
     };
 
-    // 탭 닫을 때 로그아웃 처리
-    const handleUnload = () => {
+    // 페이지 닫기 시에만 로그아웃 처리
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      const target = event.currentTarget as Window; // 타입 단언
+      if (!target.location.href.includes('/logout')) {
+        return;
+      }
       removeAuth();
       setCurrentUser(undefined);
     };
 
     window.addEventListener('storage', handleStorageChange);
-    window.addEventListener('beforeunload', handleUnload);
+    window.addEventListener('beforeunload', handleBeforeUnload);
 
     return () => {
       window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('beforeunload', handleUnload);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
 
   const saveAuth = (auth: AuthModel | undefined) => {
     setAuthState(auth);
     if (auth) {
-      setAuth(auth);  // localStorage에 저장
-      setCurrentUser(auth.userInfo);  // currentUser 정보 설정
+      setAuth(auth);
+      setCurrentUser(auth.userInfo);
     } else {
       removeAuth();
       setCurrentUser(undefined);
@@ -84,8 +90,8 @@ const AuthProvider: FC<WithChildren> = ({ children }) => {
 
   const logout = () => {
     saveAuth(undefined);
-    setCurrentUser(undefined);
     removeAuth();
+    setCurrentUser(undefined);
   };
 
   return (
@@ -93,7 +99,7 @@ const AuthProvider: FC<WithChildren> = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
-};
+}
 
 const AuthInit: FC<WithChildren> = ({ children }) => {
   const { auth, logout, setCurrentUser } = useAuth();
