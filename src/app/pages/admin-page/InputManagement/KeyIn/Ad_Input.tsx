@@ -161,13 +161,20 @@ export function Ad_Input() {
   };
 
   const fetchItems = useCallback(async () => {
+    if (!newInput.year) {
+      console.warn('Year is not selected, items cannot be fetched.');
+      setItems([]); // 연도가 선택되지 않은 경우 항목 초기화
+      return;
+    }
+  
     try {
-      const response = await axios.get(`${getApiUrl}/Inputs/items`);
+      const response = await axios.get(`${getApiUrl}/Inputs/items?year=${newInput.year}`);
       setItems(response.data);
     } catch (error) {
       console.error('Error fetching items:', error);
+      setItems([]); // 오류 발생 시 항목 초기화
     }
-  }, []);
+  }, [newInput.year]);
 
   const fetchData = useCallback(async (company: Company | null, year: string) => {
     if (!company) {
@@ -437,36 +444,50 @@ export function Ad_Input() {
   };
 
   const handleSelectChange = (e: SelectChangeEvent<number>, key: string) => {
-    setNewInput(prevState => ({
+    setNewInput((prevState) => ({
       ...prevState,
       [key]: e.target.value as number,
     }));
   
-    // lciItemId가 변경될 때 해당 항목의 category 값을 찾아서 가이드 메시지 업데이트
+    if (key === 'year') {
+      const selectedYear = e.target.value;
+      // 연도 선택 시 항목 데이터 가져오기
+      axios
+        .get(`${getApiUrl}/Inputs/items?year=${selectedYear}`)
+        .then((response) => {
+          setItems(response.data);
+        })
+        .catch((error) => {
+          console.error('Error fetching items for selected year:', error);
+          setItems([]); // 실패 시 항목 초기화
+        });
+    }
+  
     if (key === 'lciItemId') {
-      const selectedItem = items.find(item => item.id === Number(e.target.value));
+      const selectedItem = items.find((item) => item.id === Number(e.target.value));
       if (selectedItem) {
         setAmountLabel(`투입량 (${selectedItem.unit})`);
-        
+  
         // 카테고리에 따른 가이드 메시지 설정
         switch (selectedItem.category) {
           case 'Electricity':
-            setGuideMessage('한전 고지서에 기입된 [kWh] 단위의 사용량을 기재해 주세요.<br />' +
-            '재활용 공장동과 사무동이 별도로 관리되고 있다면 공장동만 입력해주세요.'
+            setGuideMessage(
+              '한전 고지서에 기입된 [kWh] 단위의 사용량을 기재해 주세요.<br />' +
+                '재활용 공장동과 사무동이 별도로 관리되고 있다면 공장동만 입력해주세요.'
             );
             break;
           case 'Fuel':
             setGuideMessage(
-              '재활용 공정 내 사용되는 연료에 대해 [L] 단위의 사용량을 기재해 주세요.<br />' + 
-              '<span style="color: red;">지게차 경유 사용량은 제외해주세요.</span>'
+              '재활용 공정 내 사용되는 연료에 대해 [L] 단위의 사용량을 기재해 주세요.<br />' +
+                '<span style="color: red;">지게차 경유 사용량은 제외해주세요.</span>'
             );
             break;
           case 'Water':
             setGuideMessage(
               '외부에서 투입되는 상수, 공업용수에 대해 [㎥] 단위의 사용량을 기재해 주세요.<br />' +
-              '재활용 공정에 사용하는 양만 기입해주세요..<br />' + 
-              '따로 외부에서 투입하지 않고 내부에서 순환하여 사용하는 경우에는 기재하지 마세요.<br />' +
-              '(예시 : 세탁기 평형수 등)'
+                '재활용 공정에 사용하는 양만 기입해주세요..<br />' +
+                '따로 외부에서 투입하지 않고 내부에서 순환하여 사용하는 경우에는 기재하지 마세요.<br />' +
+                '(예시 : 세탁기 평형수 등)'
             );
             break;
           default:
@@ -796,36 +817,14 @@ export function Ad_Input() {
               />
             </Grid>
             <Grid item xs={12}>
-              <FormControl fullWidth variant="outlined" margin="normal">
-                <InputLabel>항목</InputLabel>
-                <Select
-                  value={newInput.lciItemId}
-                  onChange={(e) => handleSelectChange(e as SelectChangeEvent<number>, 'lciItemId')}
-                  label="항목"
-                >
-                  {items.map((item) => (
-                    <MenuItem key={item.id} value={item.id}>{item.name}</MenuItem>
-                  ))}
-                </Select>
-                {/* 가이드 메시지 추가 */}
-                <Typography
-                  variant="body2"
-                  color="textSecondary"
-                  style={{ marginTop: '10px', marginLeft: '5px', color: 'black'}}
-                  dangerouslySetInnerHTML={{ __html: guideMessage }}
-                />
-              </FormControl>
-            </Grid>
-            <Grid item xs={12}>
               <FormControl style={{ marginRight: '10px' }}>
                 <InputLabel id="year-label">연도</InputLabel>
                 <Select
-                  labelId="year-label"
+                  label="연도"
                   id="year-select"
                   value={newInput.year}
                   onChange={(e) => handleSelectChange(e as SelectChangeEvent<number>, 'year')}
                   style={{ width: '532px' }}
-                  sx={{ height: '45px' }}
                   MenuProps={{
                     PaperProps: {
                       style: {
@@ -856,6 +855,29 @@ export function Ad_Input() {
                   ))}
                 </Select>
               </FormControl>
+            </Grid>
+            <Grid item xs={12}>
+            <FormControl fullWidth variant="outlined" margin="normal">
+              <InputLabel>항목</InputLabel>
+              <Select
+                value={newInput.lciItemId}
+                onChange={(e) => handleSelectChange(e as SelectChangeEvent<number>, 'lciItemId')}
+                label="항목"
+                disabled={!newInput.year} // 연도가 선택되지 않으면 비활성화
+              >
+                {items.map((item) => (
+                  <MenuItem key={item.id} value={item.id}>
+                    {item.name}
+                  </MenuItem>
+                ))}
+              </Select>
+              <Typography
+                variant="body2"
+                color="textSecondary"
+                style={{ marginLeft: '5px', color: 'black' }}
+                dangerouslySetInnerHTML={{ __html: guideMessage }}
+              />
+            </FormControl>
             </Grid>
             <Grid item xs={12}>
               <TextField
